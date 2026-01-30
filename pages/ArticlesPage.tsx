@@ -32,12 +32,6 @@ const ArticlesPage: React.FC = () => {
     return matchesPillar && matchesSearch;
   });
 
-  const categories = Array.from(new Set(articles.map(a => a.category)));
-
-  const handleArticleClick = (id: string) => {
-    window.location.hash = `#/artigo/${id}`;
-  };
-
   return (
     <main className="pt-24 min-h-screen bg-white">
       <div className="max-w-6xl mx-auto px-6 pb-20">
@@ -49,7 +43,6 @@ const ArticlesPage: React.FC = () => {
         </header>
 
         <div className="flex flex-col md:flex-row gap-12 mb-12">
-          {/* Sidebar de Filtros */}
           <div className="w-full md:w-64 space-y-10">
             <div className="relative group">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500 transition-colors" size={18} />
@@ -65,89 +58,46 @@ const ArticlesPage: React.FC = () => {
             <div>
               <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-6">Filtrar por Pilar</h4>
               <div className="space-y-1">
-                <button 
-                  onClick={() => setSelectedPillar('all')}
-                  className={`w-full text-left px-4 py-2.5 rounded-xl text-sm transition-all flex items-center justify-between group ${selectedPillar === 'all' ? 'bg-blue-600 text-white font-bold shadow-lg shadow-blue-500/20' : 'text-gray-500 hover:bg-gray-100'}`}
-                >
+                <button onClick={() => setSelectedPillar('all')} className={`w-full text-left px-4 py-2.5 rounded-xl text-sm transition-all flex items-center justify-between group ${selectedPillar === 'all' ? 'bg-blue-600 text-white font-bold shadow-lg shadow-blue-500/20' : 'text-gray-500 hover:bg-gray-100'}`}>
                   Todos os Pilares {selectedPillar === 'all' && <ArrowRight size={14} />}
                 </button>
                 {pillars.map(p => (
-                  <button 
-                    key={p.id}
-                    onClick={() => setSelectedPillar(p.id)}
-                    className={`w-full text-left px-4 py-2.5 rounded-xl text-sm transition-all flex items-center justify-between group ${selectedPillar === p.id ? 'bg-blue-600 text-white font-bold shadow-lg shadow-blue-500/20' : 'text-gray-500 hover:bg-gray-100'}`}
-                  >
+                  <button key={p.id} onClick={() => setSelectedPillar(p.id)} className={`w-full text-left px-4 py-2.5 rounded-xl text-sm transition-all flex items-center justify-between group ${selectedPillar === p.id ? 'bg-blue-600 text-white font-bold shadow-lg shadow-blue-500/20' : 'text-gray-500 hover:bg-gray-100'}`}>
                     {p.title} {selectedPillar === p.id && <ArrowRight size={14} />}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-6">Categorias Populares</h4>
-              <div className="flex flex-wrap gap-2">
-                {categories.map(cat => (
-                  <button key={cat} onClick={() => setSearch(cat)} className="px-3 py-1.5 bg-gray-50 border border-gray-100 rounded-full text-[10px] font-bold text-gray-500 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-100 transition-all uppercase tracking-wider">
-                    {cat}
                   </button>
                 ))}
               </div>
             </div>
           </div>
 
-          {/* Galeria Principal */}
           <div className="flex-1">
             {loading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {[...Array(4)].map((_, i) => (
-                  <div key={i} className="aspect-video rounded-3xl bg-gray-50 animate-pulse"></div>
-                ))}
+                {[...Array(4)].map((_, i) => <div key={i} className="aspect-video rounded-3xl bg-gray-50 animate-pulse"></div>)}
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-16">
                 {filteredArticles.map(article => (
-                  <article 
+                  <a 
                     key={article.id} 
-                    onClick={() => handleArticleClick(article.id)}
+                    href={`#/artigo/${article.id}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="group cursor-pointer flex flex-col"
                   >
                     <div className="aspect-[16/10] rounded-[32px] overflow-hidden mb-6 bg-gray-100 shadow-sm border border-gray-100">
-                      <img 
-                        src={article.imageUrl} 
-                        alt={article.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                      />
+                      <img src={article.imageUrl} alt={article.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
                     </div>
                     <div className="flex items-center gap-3 mb-4">
                       <span className="px-3 py-1 bg-blue-50 text-blue-600 text-[9px] font-bold uppercase tracking-widest rounded-full">{article.category}</span>
-                      <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
-                        {new Date(article.date).toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' })}
-                      </span>
                     </div>
-                    <h3 className="text-2xl font-bold mb-4 leading-tight group-hover:text-blue-600 transition-colors line-clamp-2">
-                      {article.title}
-                    </h3>
-                    <p className="text-gray-500 leading-relaxed mb-6 line-clamp-3 text-sm font-medium">
-                      {article.excerpt}
-                    </p>
+                    <h3 className="text-2xl font-bold mb-4 leading-tight group-hover:text-blue-600 transition-colors line-clamp-2">{article.title}</h3>
+                    <p className="text-gray-500 leading-relaxed mb-6 line-clamp-3 text-sm font-medium">{article.excerpt}</p>
                     <div className="mt-auto">
-                      <span className="text-blue-600 font-bold text-sm inline-flex items-center gap-1 group-hover:gap-3 transition-all">
-                        Ler artigo completo <ArrowRight size={16} />
-                      </span>
+                      <span className="text-blue-600 font-bold text-sm inline-flex items-center gap-1">Ler artigo completo <ArrowRight size={16} /></span>
                     </div>
-                  </article>
+                  </a>
                 ))}
-                
-                {filteredArticles.length === 0 && (
-                  <div className="col-span-full py-24 text-center bg-gray-50 rounded-[40px] border-2 border-dashed border-gray-200">
-                    <div className="max-w-xs mx-auto">
-                      <Search size={40} className="mx-auto text-gray-300 mb-6" />
-                      <p className="text-gray-500 font-bold text-xl mb-2">Sem resultados</p>
-                      <p className="text-gray-400 text-sm">Tente ajustar sua busca ou mudar o filtro de pilar.</p>
-                      <button onClick={() => {setSearch(''); setSelectedPillar('all')}} className="mt-6 text-blue-600 font-bold hover:underline">Limpar filtros</button>
-                    </div>
-                  </div>
-                )}
               </div>
             )}
           </div>

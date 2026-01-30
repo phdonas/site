@@ -16,7 +16,6 @@ const ArticleGallery: React.FC<Props> = ({ limit = 12 }) => {
   useEffect(() => {
     const loadContent = async () => {
       setLoading(true);
-      // Busca artigos reais do WordPress filtrando conteúdo puramente de vídeo
       const [artData, pilData] = await Promise.all([
         DataService.getArticles(limit),
         DataService.getPillars()
@@ -31,10 +30,6 @@ const ArticleGallery: React.FC<Props> = ({ limit = 12 }) => {
   const filteredArticles = selectedPillar === 'all' 
     ? articles 
     : articles.filter(a => a.pillarId === selectedPillar);
-
-  const handleArticleClick = (id: string) => {
-    window.location.hash = `#/artigo/${id}`;
-  };
 
   return (
     <section className="py-24 px-6 bg-white">
@@ -72,9 +67,11 @@ const ArticleGallery: React.FC<Props> = ({ limit = 12 }) => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
             {filteredArticles.map(article => (
-              <div 
+              <a 
                 key={article.id} 
-                onClick={() => handleArticleClick(article.id)}
+                href={`#/artigo/${article.id}`}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="group cursor-pointer flex flex-col"
               >
                 <div className="aspect-[16/10] rounded-[32px] overflow-hidden mb-6 bg-gray-100 shadow-sm border border-gray-100">
@@ -94,14 +91,8 @@ const ArticleGallery: React.FC<Props> = ({ limit = 12 }) => {
                 <div className="mt-auto">
                   <span className="text-[#0066cc] font-bold text-sm hover:underline">Ler artigo completo ›</span>
                 </div>
-              </div>
+              </a>
             ))}
-          </div>
-        )}
-        
-        {limit < 10 && (
-          <div className="mt-20 text-center">
-            <a href="#/artigos" className="bg-[#f5f5f7] px-10 py-4 rounded-full font-bold hover:bg-black hover:text-white transition-all shadow-sm">Ver Biblioteca Completa</a>
           </div>
         )}
       </div>

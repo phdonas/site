@@ -14,7 +14,7 @@ const ServicesSection: React.FC = () => {
               </div>
               <h3 className="text-5xl font-bold tracking-tight mb-4">Consultoria<br />Estratégica</h3>
               <p className="text-xl text-gray-500 font-medium max-w-sm">
-                Soluções sob medida para o mercado imobiliário e setor de energia.
+                Soluções sob medida para melhorar o desempenho e os resultados.
               </p>
             </div>
             <a 
@@ -33,7 +33,7 @@ const ServicesSection: React.FC = () => {
               </div>
               <h3 className="text-5xl font-bold tracking-tight mb-4">Mentoria<br />Individual</h3>
               <p className="text-xl text-gray-300 font-medium max-w-sm">
-                Acelere sua carreira e projetos com orientação direta do Prof. Paulo.
+                Acelere sua carreira e seus projetos com orientação direta do Prof. Paulo.
               </p>
             </div>
             <a 

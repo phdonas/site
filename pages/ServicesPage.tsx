@@ -20,13 +20,13 @@ const ServicesPage: React.FC = () => {
             <div className="mb-8">
               <span className="bg-blue-50 text-blue-600 px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest">Empresas</span>
             </div>
-            <h2 className="text-4xl font-bold mb-6">Consultoria para o Mercado Imobiliário & Energia</h2>
+            <h2 className="text-4xl font-bold mb-6">Consultoria de Gestão e Formação de Pessoas e Negócios </h2>
             <p className="text-lg text-gray-500 mb-8 leading-relaxed">
-              Análise de viabilidade, estruturação de revendas de gás e curadoria estratégica de ativos imobiliários.
+              Análise equipes, gestão e viabilidade de negócios.
             </p>
             <ul className="space-y-4 mb-10 text-gray-600 font-medium">
-              <li className="flex items-center gap-3"><CheckCircle2 className="text-blue-500" size={20} /> Análise de Ciclo de Mercado</li>
-              <li className="flex items-center gap-3"><CheckCircle2 className="text-blue-500" size={20} /> Estruturação de Operações de Energia</li>
+              <li className="flex items-center gap-3"><CheckCircle2 className="text-blue-500" size={20} /> Análise de Vendas e Gestão</li>
+              <li className="flex items-center gap-3"><CheckCircle2 className="text-blue-500" size={20} /> Estruturação de Processos e Equipes</li>
               <li className="flex items-center gap-3"><CheckCircle2 className="text-blue-500" size={20} /> Treinamento de Equipes de Vendas</li>
             </ul>
             <a href="#/contato" className="bg-black text-white w-full py-4 rounded-2xl font-bold text-center flex items-center justify-center gap-2 hover:bg-gray-800 transition-all">
@@ -39,7 +39,7 @@ const ServicesPage: React.FC = () => {
             <div className="mb-8">
               <span className="bg-white/10 text-white px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest">Profissionais</span>
             </div>
-            <h2 className="text-4xl font-bold mb-6">Mentoria PH (Prof. Paulo)</h2>
+            <h2 className="text-4xl font-bold mb-6">Mentoria PHD (Prof. Paulo)</h2>
             <p className="text-lg text-gray-300 mb-8 leading-relaxed">
               Desenvolvimento de carreira, longevidade produtiva (4050oumais) e alta performance acadêmica.
             </p>
