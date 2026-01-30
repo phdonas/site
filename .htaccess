@@ -1,33 +1,33 @@
-# BEGIN PH HUB
+# BEGIN PH HUB - CONFIGURAÇÃO DE AMBIENTE REACT SEM BUILD
 <IfModule mod_rewrite.c>
   RewriteEngine On
   RewriteBase /
-  # teste
-  # Permitir acesso direto ao WordPress
-  RewriteRule ^wordpress($|/) - [L]
   
-  # Redirecionar rotas do React para o index.html (SPA mode)
-  RewriteRule ^index\.html$ - [L]
-  RewriteCond %{REQUEST_FILENAME} !-f
-  RewriteCond %{REQUEST_FILENAME} !-d
-  RewriteCond %{REQUEST_URI} !^/wordpress [NC]
+  # 1. Ignorar o diretório do WordPress (preserva o Admin e API)
+  RewriteCond %{REQUEST_URI} ^/wordpress [NC]
+  RewriteRule . - [L]
+  
+  # 2. Se o arquivo ou pasta física existir, serve ele diretamente (imagens, pdfs, etc)
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+  
+  # 3. Tudo o mais vai para o index.html (Roteamento React)
   RewriteRule . /index.html [L]
 </IfModule>
 
 <IfModule mod_mime.c>
-  # Força o navegador a tratar arquivos de código como scripts
+  # Garante que o servidor informe ao navegador que arquivos de código são Scripts
   AddType application/javascript .tsx
   AddType application/javascript .ts
   AddType application/javascript .jsx
 </IfModule>
 
 <IfModule mod_headers.c>
-    # Permite que o React busque os dados no subdiretório /wordpress sem bloqueio de CORS
+    # Permite que o frontend busque dados no subdiretório /wordpress sem erro de CORS
     Header set Access-Control-Allow-Origin "*"
-    Header set Access-Control-Allow-Methods "GET, POST, OPTIONS"
-    Header set Access-Control-Allow-Headers "Origin, Content-Type, Accept, Authorization"
     
-    # Previne cache de arquivos de sistema para que o deploy apareça na hora
+    # FORÇA LIMPEZA DE CACHE NO DEPLOY
     <FilesMatch "\.(html|tsx|ts|yml)$">
         Header set Cache-Control "max-age=0, no-cache, no-store, must-revalidate"
         Header set Pragma "no-cache"
