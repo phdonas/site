@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from 'react';
 import { DataService } from '../services/dataService';
 import { SITE_CONFIG } from '../config/site-config';
-// Fix: Corrected 'clock' to 'Clock' as it is the proper exported member from lucide-react
 import { 
   Settings, Activity, CheckCircle, XCircle, 
   Database, ExternalLink, LogOut, Save, RefreshCw, AlertTriangle, Info, HardDrive, Trash2, Cpu, Clock
@@ -30,9 +29,10 @@ const AdminPage: React.FC = () => {
     try {
       const status = await DataService.testConnection();
       setIsWpConnected(status);
+      if (!status) setLastError("Servidor não respondeu. Tentando via túnel...");
     } catch (e: any) {
       setIsWpConnected(false);
-      setLastError(e.message);
+      setLastError(e.message || "Erro desconhecido na API");
     }
   };
 
@@ -53,121 +53,134 @@ const AdminPage: React.FC = () => {
 
   return (
     <main className="min-h-screen pt-24 bg-[#f5f5f7]">
-      <div className="max-w-6xl mx-auto px-6 pb-20">
-        <div className="flex flex-col md:flex-row md:items-center justify-between mb-12 gap-6">
+      <div className="max-w-6xl mx-auto px-4 md:px-6 pb-20">
+        <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-6">
           <div>
-            <h1 className="text-4xl font-bold tracking-tight">Painel de Controle</h1>
-            <p className="text-gray-500 font-medium">Gestão técnica do ecossistema PH Donassolo.</p>
+            <h1 className="text-3xl md:text-4xl font-bold tracking-tight">Painel de Controle</h1>
+            <p className="text-gray-500 font-medium text-sm">Gestão técnica do ecossistema PH Donassolo.</p>
           </div>
-          <div className="flex items-center gap-4">
-            <div className="flex bg-gray-200/50 p-1 rounded-2xl border border-gray-200 shadow-sm overflow-x-auto">
-              <button onClick={() => setActiveTab('status')} className={`flex items-center gap-2 px-6 py-2 rounded-xl text-sm font-semibold transition-all whitespace-nowrap ${activeTab === 'status' ? 'bg-white shadow-sm text-black' : 'text-gray-500 hover:text-gray-700'}`}>
-                <Activity size={18} /> API Status
-              </button>
-              <button onClick={() => setActiveTab('db_health')} className={`flex items-center gap-2 px-6 py-2 rounded-xl text-sm font-semibold transition-all whitespace-nowrap ${activeTab === 'db_health' ? 'bg-white shadow-sm text-black' : 'text-gray-500 hover:text-gray-700'}`}>
-                <HardDrive size={18} /> Banco
-              </button>
-              <button onClick={() => setActiveTab('server')} className={`flex items-center gap-2 px-6 py-2 rounded-xl text-sm font-semibold transition-all whitespace-nowrap ${activeTab === 'server' ? 'bg-white shadow-sm text-black' : 'text-gray-500 hover:text-gray-700'}`}>
-                <Cpu size={18} /> Servidor
-              </button>
-              <button onClick={() => setActiveTab('editor')} className={`flex items-center gap-2 px-6 py-2 rounded-xl text-sm font-semibold transition-all whitespace-nowrap ${activeTab === 'editor' ? 'bg-white shadow-sm text-black' : 'text-gray-500 hover:text-gray-700'}`}>
-                <Settings size={18} /> Textos
-              </button>
-            </div>
-            <button onClick={handleLogout} className="p-3 bg-white border border-gray-200 text-red-500 rounded-2xl hover:bg-red-50 transition-colors shadow-sm">
+          <div className="flex items-center gap-3">
+             <button onClick={handleLogout} className="p-3 bg-white border border-gray-200 text-red-500 rounded-2xl hover:bg-red-50 transition-colors shadow-sm">
               <LogOut size={20} />
             </button>
           </div>
         </div>
 
+        <div className="flex bg-gray-200/50 p-1 rounded-2xl border border-gray-200 shadow-sm overflow-x-auto mb-8 no-scrollbar">
+          <button onClick={() => setActiveTab('status')} className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${activeTab === 'status' ? 'bg-white shadow-sm text-black' : 'text-gray-500'}`}>
+            <Activity size={16} /> Status API
+          </button>
+          <button onClick={() => setActiveTab('db_health')} className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${activeTab === 'db_health' ? 'bg-white shadow-sm text-black' : 'text-gray-500'}`}>
+            <HardDrive size={16} /> Banco
+          </button>
+          <button onClick={() => setActiveTab('server')} className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${activeTab === 'server' ? 'bg-white shadow-sm text-black' : 'text-gray-500'}`}>
+            <Cpu size={16} /> Servidor
+          </button>
+          <button onClick={() => setActiveTab('editor')} className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${activeTab === 'editor' ? 'bg-white shadow-sm text-black' : 'text-gray-500'}`}>
+            <Settings size={16} /> Textos
+          </button>
+        </div>
+
         {activeTab === 'status' && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-in fade-in duration-500">
-            <div className="bg-white p-8 rounded-[32px] card-shadow border border-gray-100">
+            <div className="bg-white p-8 rounded-[32px] card-shadow border border-gray-100 relative overflow-hidden">
               <div className="flex items-center justify-between mb-6">
                 <div className="p-3 bg-gray-50 rounded-2xl"><Database className="text-blue-600" /></div>
-                <div>{isWpConnected === null ? <RefreshCw className="animate-spin text-gray-300" /> : isWpConnected ? <CheckCircle className="text-green-500" /> : <XCircle className="text-red-500" />}</div>
+                <div>
+                  {isWpConnected === null ? (
+                    <RefreshCw className="animate-spin text-gray-300" />
+                  ) : isWpConnected ? (
+                    <CheckCircle className="text-green-500" />
+                  ) : (
+                    <div className="flex items-center gap-2 text-red-500 font-bold text-xs">
+                      <XCircle /> Falha
+                    </div>
+                  )}
+                </div>
               </div>
-              <h3 className="text-2xl font-bold mb-2">Status da API</h3>
-              <p className="text-sm text-gray-500">Conexão atual com phdonassolo.com</p>
+              <h3 className="text-2xl font-bold mb-2">Conexão WordPress</h3>
+              <p className="text-sm text-gray-500 mb-6">Testando comunicação com phdonassolo.com</p>
+              
+              {lastError && (
+                <div className="p-4 bg-red-50 rounded-2xl border border-red-100 text-red-600 text-xs font-medium mb-4">
+                  <strong>Erro:</strong> {lastError}
+                </div>
+              )}
+              
+              <button onClick={checkConn} className="text-blue-600 font-bold text-xs flex items-center gap-1 hover:underline">
+                <RefreshCw size={14} /> Tentar Reconectar
+              </button>
             </div>
-            <div className="bg-black text-white p-8 rounded-[32px] card-shadow border border-gray-100 flex flex-col justify-between">
-              <h3 className="text-2xl font-bold mb-4">WordPress Admin</h3>
-              <a href="https://phdonassolo.com/wp-admin" target="_blank" className="bg-white text-black px-6 py-3 rounded-full font-bold text-sm text-center flex items-center justify-center gap-2">Acessar WP <ExternalLink size={18} /></a>
+            
+            <div className="bg-black text-white p-8 rounded-[32px] card-shadow border border-gray-100 flex flex-col justify-between min-h-[220px]">
+              <div>
+                <h3 className="text-2xl font-bold mb-2">WordPress Admin</h3>
+                <p className="text-gray-400 text-sm">Gerencie seus posts e vídeos diretamente.</p>
+              </div>
+              <a href="https://phdonassolo.com/wp-admin" target="_blank" className="bg-white text-black px-6 py-4 rounded-2xl font-bold text-sm text-center flex items-center justify-center gap-2 mt-6">
+                Acessar Painel WP <ExternalLink size={18} />
+              </a>
             </div>
           </div>
         )}
 
         {activeTab === 'db_health' && (
-          <div className="bg-white rounded-[40px] p-10 border border-gray-100 shadow-sm animate-in slide-in-from-right-4 duration-500">
+          <div className="bg-white rounded-[40px] p-8 md:p-10 border border-gray-100 shadow-sm animate-in slide-in-from-right-4 duration-500">
             <div className="flex items-center gap-4 mb-8">
               <div className="p-3 bg-red-50 text-red-500 rounded-2xl"><Trash2 size={24} /></div>
               <h2 className="text-2xl font-bold">Limpeza de Tabelas</h2>
             </div>
-            <div className="space-y-6 max-w-2xl">
-              <p className="text-gray-600">Seu banco de dados tem 8.2MB em 561 linhas. Rode estes comandos no <strong>phpMyAdmin</strong>:</p>
-              <div className="p-4 bg-gray-900 rounded-xl">
-                <code className="text-green-400 text-xs block mb-2">-- Remover lixo de transientes</code>
-                <code className="text-white text-xs block">DELETE FROM wp_options WHERE option_name LIKE ('%\_transient\_%');</code>
+            <div className="space-y-6">
+              <p className="text-gray-600 text-sm">Seu banco de dados tem acúmulo de dados temporários. No <strong>phpMyAdmin</strong> da Hostgator, rode:</p>
+              <div className="p-4 bg-gray-900 rounded-xl overflow-x-auto">
+                <code className="text-white text-xs whitespace-nowrap">DELETE FROM wp_options WHERE option_name LIKE ('%\_transient\_%');</code>
               </div>
             </div>
           </div>
         )}
 
         {activeTab === 'server' && (
-          <div className="bg-white rounded-[40px] p-10 border border-gray-100 shadow-sm animate-in slide-in-from-right-4 duration-500">
+          <div className="bg-white rounded-[40px] p-8 md:p-10 border border-gray-100 shadow-sm animate-in slide-in-from-right-4 duration-500">
             <div className="flex items-center gap-4 mb-8">
               <div className="p-3 bg-blue-50 text-blue-500 rounded-2xl"><Cpu size={24} /></div>
               <div>
-                <h2 className="text-2xl font-bold">Otimização de Performance (Hostgator)</h2>
-                <p className="text-gray-500 text-sm">Ajustes para acelerar a API em até 3x.</p>
+                <h2 className="text-2xl font-bold">Configuração de Performance</h2>
+                <p className="text-gray-500 text-sm">Otimize a velocidade de resposta da Hostgator.</p>
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
               <div className="space-y-8">
                 <div>
-                  <h3 className="font-bold flex items-center gap-2 mb-4"><AlertTriangle size={18} className="text-orange-500" /> 1. Desative o Cron Interno</h3>
-                  <p className="text-sm text-gray-600 mb-4">Na imagem que você enviou da Hostgator, o "Cron do WordPress" está como <strong>Habilitado</strong>. Mude para <strong>Desativado</strong>.</p>
-                  <p className="text-xs text-gray-400">Por que? Isso evita que o WP tente processar tarefas lentas durante cada acesso à API do nosso app.</p>
+                  <h3 className="font-bold flex items-center gap-2 mb-3 text-sm uppercase tracking-wider text-gray-400">1. Cron do WordPress</h3>
+                  <p className="text-sm text-gray-600">Desative o cron interno no Softaculous para que ele não "trave" a API durante cada carregamento.</p>
                 </div>
                 <div>
-                  <h3 className="font-bold flex items-center gap-2 mb-4"><CheckCircle size={18} className="text-green-500" /> 2. Crie um "Cron Real" no cPanel</h3>
-                  <p className="text-sm text-gray-600 mb-4">No painel principal da Hostgator (cPanel), procure por <strong>"Tarefas Cron"</strong> e adicione uma tarefa para rodar a cada 30 minutos:</p>
-                  <code className="block bg-gray-100 p-4 rounded-xl text-[10px] text-blue-700 overflow-x-auto">
-                    wget -q -O - https://phdonassolo.com/wp-cron.php?doing_wp_cron >/dev/null 2>&1
-                  </code>
+                  <h3 className="font-bold flex items-center gap-2 mb-3 text-sm uppercase tracking-wider text-gray-400">2. Versão do PHP</h3>
+                  <p className="text-sm text-gray-600">No MultiPHP Manager do cPanel, mude para <strong>PHP 8.2</strong>. Versões antigas são 50% mais lentas.</p>
                 </div>
-              </div>
-              
-              <div className="bg-gray-50 p-8 rounded-[32px] border border-gray-100">
-                <h4 className="font-bold mb-4 text-sm uppercase tracking-widest text-gray-400">Próximos Passos</h4>
-                <ul className="space-y-4 text-sm text-gray-600">
-                  <li className="flex gap-3"><span className="font-bold text-blue-600">1.</span> Atualize o WP para a versão 6.7+ via Softaculous.</li>
-                  <li className="flex gap-3"><span className="font-bold text-blue-600">2.</span> No cPanel, mude a versão do PHP para 8.2.</li>
-                  <li className="flex gap-3"><span className="font-bold text-blue-600">3.</span> Instale o plugin "Perfmatters" ou "Autoptimize" para remover scripts desnecessários.</li>
-                </ul>
               </div>
             </div>
           </div>
         )}
 
         {activeTab === 'editor' && (
-          <div className="bg-white rounded-[32px] p-10 card-shadow border border-gray-100 animate-in fade-in duration-500">
-            <h2 className="text-2xl font-bold mb-8">Configurações do Site</h2>
+          <div className="bg-white rounded-[32px] p-8 md:p-10 card-shadow border border-gray-100 animate-in fade-in duration-500">
+            <h2 className="text-2xl font-bold mb-8">Textos do Site</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                <div className="space-y-6">
                  <div>
-                   <label className="block text-xs font-bold mb-2 uppercase text-gray-400">Nome do Site</label>
+                   <label className="block text-xs font-bold mb-2 uppercase text-gray-400">Nome Público</label>
                    <input type="text" value={config.name} onChange={(e) => setConfig({...config, name: e.target.value})} className="w-full p-4 bg-gray-50 rounded-xl border border-gray-100" />
                  </div>
                  <div>
-                   <label className="block text-xs font-bold mb-2 uppercase text-gray-400">WhatsApp</label>
+                   <label className="block text-xs font-bold mb-2 uppercase text-gray-400">WhatsApp Oficial</label>
                    <input type="text" value={config.whatsapp} onChange={(e) => setConfig({...config, whatsapp: e.target.value})} className="w-full p-4 bg-gray-50 rounded-xl border border-gray-100" />
                  </div>
                </div>
                <div>
                  <label className="block text-xs font-bold mb-2 uppercase text-gray-400">Instruções da IA</label>
-                 <textarea value={config.assistant.instructions} onChange={(e) => setConfig({...config, assistant: {...config.assistant, instructions: e.target.value}})} rows={5} className="w-full p-4 bg-gray-50 rounded-xl border border-gray-100 resize-none text-xs"></textarea>
+                 <textarea value={config.assistant.instructions} onChange={(e) => setConfig({...config, assistant: {...config.assistant, instructions: e.target.value}})} rows={5} className="w-full p-4 bg-gray-50 rounded-xl border border-gray-100 resize-none text-xs leading-relaxed"></textarea>
                </div>
             </div>
             <div className="mt-10 flex justify-end">

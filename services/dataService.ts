@@ -2,8 +2,8 @@
 import { MOCK_ARTICLES, MOCK_COURSES, MOCK_RESOURCES, PILLARS } from '../constants';
 import { Article, Course, Resource, Pillar, PillarId } from '../types';
 
-const CACHE_KEY_ARTICLES = 'phd_articles_v9';
-const CACHE_KEY_VIDEOS = 'phd_videos_v9';
+const CACHE_KEY_ARTICLES = 'phd_articles_v10';
+const CACHE_KEY_VIDEOS = 'phd_videos_v10';
 
 let memoryArticles: Article[] = JSON.parse(localStorage.getItem(CACHE_KEY_ARTICLES) || '[]');
 let memoryVideos: any[] = JSON.parse(localStorage.getItem(CACHE_KEY_VIDEOS) || '[]');
@@ -38,20 +38,37 @@ const mapWPPostToArticle = (post: any): Article => {
 };
 
 const secureFetch = async (endpoint: string) => {
-  const targetUrl = `https://phdonassolo.com/wp-json/wp/v2${endpoint}${endpoint.includes('?') ? '&' : '?'}doing_wp_cron=1`;
-  try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 12000);
-    const res = await fetch(targetUrl, { signal: controller.signal });
-    clearTimeout(timeout);
-    if (res.ok) return await res.json();
-  } catch (e) {
-    const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}&t=${Date.now()}`;
+  // Tentamos primeiro com WWW que é o padrão do seu site
+  const urlsToTry = [
+    `https://www.phdonassolo.com/wp-json/wp/v2${endpoint}`,
+    `https://phdonassolo.com/wp-json/wp/v2${endpoint}`
+  ];
+
+  for (const baseUrl of urlsToTry) {
+    const targetUrl = `${baseUrl}${baseUrl.includes('?') ? '&' : '?'}doing_wp_cron=1&nocache=${Date.now()}`;
+    
     try {
-      const res = await fetch(proxyUrl);
-      const wrapper = await res.json();
-      return typeof wrapper.contents === 'string' ? JSON.parse(wrapper.contents) : wrapper.contents;
-    } catch (err) { return null; }
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 8000);
+      const res = await fetch(targetUrl, { signal: controller.signal });
+      clearTimeout(timeout);
+      
+      if (res.ok) return await res.json();
+      
+      // Se retornou erro (ex: 403), tentamos o proxy imediatamente
+      throw new Error(`HTTP ${res.status}`);
+    } catch (e) {
+      console.warn(`Tentando proxy para: ${targetUrl}`);
+      const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}&t=${Date.now()}`;
+      try {
+        const res = await fetch(proxyUrl);
+        const wrapper = await res.json();
+        const data = typeof wrapper.contents === 'string' ? JSON.parse(wrapper.contents) : wrapper.contents;
+        if (data) return data;
+      } catch (err) { 
+        continue; // Tenta a próxima URL da lista
+      }
+    }
   }
   return null;
 };
@@ -59,16 +76,15 @@ const secureFetch = async (endpoint: string) => {
 export const DataService = {
   async testConnection(): Promise<boolean> {
     const data = await secureFetch('/posts?per_page=1');
-    return !!data;
+    return !!data && Array.isArray(data);
   },
 
   async getArticles(limit = 12): Promise<Article[]> {
     const syncBackground = async () => {
       const posts = await secureFetch(`/posts?_embed&per_page=40`);
       if (Array.isArray(posts)) {
-        // Filtrar posts que NÃO são vídeos (que não tem iframe no conteúdo)
         const mapped = posts
-          .filter(p => !p.content.rendered.includes('<iframe'))
+          .filter(p => !p.content.rendered.includes('<iframe') && !p.content.rendered.includes('video-container'))
           .map(mapWPPostToArticle);
         memoryArticles = mapped;
         localStorage.setItem(CACHE_KEY_ARTICLES, JSON.stringify(mapped));
@@ -85,10 +101,10 @@ export const DataService = {
 
   async getVideos(limit = 4): Promise<any[]> {
     const syncVideos = async () => {
-      const posts = await secureFetch(`/posts?_embed&per_page=20`);
+      const posts = await secureFetch(`/posts?_embed&per_page=30`);
       if (Array.isArray(posts)) {
         const mapped = posts
-          .filter(p => p.content.rendered.includes('<iframe'))
+          .filter(p => p.content.rendered.includes('<iframe') || p.content.rendered.includes('youtube.com') || p.content.rendered.includes('vimeo.com'))
           .map(p => ({
             id: p.id.toString(),
             title: p.title.rendered,
