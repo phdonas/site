@@ -3,7 +3,7 @@
  * Configurações de conexão com o WordPress Headless
  */
 export const WP_CONFIG = {
-  // Agora apontando para a subpasta onde o WordPress foi movido
+  // Garantir que a URL termina sem barra para facilitar concatenação
   BASE_URL: 'https://www.phdonassolo.com/wordpress',
   
   ENDPOINTS: {

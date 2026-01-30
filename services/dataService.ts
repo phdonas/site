@@ -1,16 +1,14 @@
 
 import { MOCK_ARTICLES, MOCK_COURSES, MOCK_RESOURCES, PILLARS } from '../constants';
 import { Article, Course, Resource, Pillar, PillarId } from '../types';
+import { WP_CONFIG } from '../config/wp-config';
 
-const CACHE_KEY_ARTICLES = 'phd_articles_v18';
-const CACHE_KEY_VIDEOS = 'phd_videos_v18';
-
-let memoryArticles: Article[] = JSON.parse(localStorage.getItem(CACHE_KEY_ARTICLES) || '[]');
-let memoryVideos: any[] = JSON.parse(localStorage.getItem(CACHE_KEY_VIDEOS) || '[]');
+const CACHE_KEY_ARTICLES = 'phd_articles_v21';
+const CACHE_KEY_VIDEOS = 'phd_videos_v21';
 
 const mapCategoryToPillar = (wpCategories: any[]): PillarId => {
   if (!wpCategories || wpCategories.length === 0) return 'prof-paulo';
-  const names = wpCategories.map(c => (c.name || '').toLowerCase());
+  const names = wpCategories.map((c: any) => (c.name || '').toLowerCase());
   if (names.some(n => n.includes('paulo') || n.includes('prof'))) return 'prof-paulo';
   if (names.some(n => n.includes('imob') || n.includes('consultor'))) return 'consultoria-imobiliaria';
   if (names.some(n => n.includes('4050') || n.includes('longevid') || n.includes('mais'))) return '4050oumais';
@@ -39,25 +37,46 @@ const mapWPPostToArticle = (post: any): Article => {
   };
 };
 
+/**
+ * secureFetch ultra-resiliente
+ * Resolve o erro "Failed to fetch" (CORS ou SSL) tentando:
+ * 1. URL Direta (com www)
+ * 2. URL Direta (sem www)
+ * 3. Proxy AllOrigins (Ignora CORS do navegador)
+ */
 const secureFetch = async (endpoint: string) => {
-  const urls = [
-    `https://www.phdonassolo.com/wordpress/wp-json/wp/v2${endpoint}`,
-    `https://phdonassolo.com/wordpress/wp-json/wp/v2${endpoint}`
+  const baseUrls = [
+    `${WP_CONFIG.BASE_URL}/wp-json/wp/v2`,
+    `https://phdonassolo.com/wordpress/wp-json/wp/v2`
   ];
 
-  for (const url of urls) {
+  for (const base of baseUrls) {
+    const url = `${base}${endpoint}${endpoint.includes('?') ? '&' : '?'}_embed`;
     try {
-      const sep = url.includes('?') ? '&' : '?';
-      const finalUrl = `${url}${sep}_embed&nocache=${Date.now()}`;
-      const res = await fetch(finalUrl);
-      if (res.ok) {
-        const data = await res.json();
-        return data;
-      }
+      console.log(`Tentando conexão direta: ${url}`);
+      const res = await fetch(url);
+      if (res.ok) return await res.json();
     } catch (e) {
-      console.warn("Fetch falhou no caminho: ", url);
+      console.warn(`Conexão direta falhou para ${url}:`, e);
+      // Continua para a próxima tentativa no loop
     }
   }
+
+  // Se todas as diretas falharem, usa o Proxy (AllOrigins)
+  const finalUrl = `${baseUrls[0]}${endpoint}${endpoint.includes('?') ? '&' : '?'}_embed`;
+  const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(finalUrl)}&nocache=${Date.now()}`;
+  
+  try {
+    console.log(`Tentando via Proxy: ${proxyUrl}`);
+    const res = await fetch(proxyUrl);
+    if (res.ok) {
+      const wrapper = await res.json();
+      return JSON.parse(wrapper.contents);
+    }
+  } catch (proxyError) {
+    console.error("Erro crítico: Nem a conexão direta nem o proxy funcionaram.", proxyError);
+  }
+
   return null;
 };
 
@@ -66,55 +85,78 @@ export const DataService = {
     const data = await secureFetch('/posts?per_page=1');
     return !!data;
   },
+
   async clearCache() {
     localStorage.removeItem(CACHE_KEY_ARTICLES);
     localStorage.removeItem(CACHE_KEY_VIDEOS);
-    memoryArticles = [];
-    memoryVideos = [];
     window.location.reload();
   },
-  async getArticles(limit = 12, force = false): Promise<Article[]> {
-    if (!force && memoryArticles.length > 0) return memoryArticles.slice(0, limit);
+
+  async getArticles(limit = 12): Promise<Article[]> {
+    const cached = localStorage.getItem(CACHE_KEY_ARTICLES);
+    if (cached) {
+      try {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed.slice(0, limit);
+      } catch (e) {
+        localStorage.removeItem(CACHE_KEY_ARTICLES);
+      }
+    }
+    
     const posts = await secureFetch(`/posts?per_page=50`);
     if (Array.isArray(posts)) {
       const mapped = posts.filter(p => !p.content.rendered.toLowerCase().includes('<iframe')).map(mapWPPostToArticle);
-      memoryArticles = mapped;
-      localStorage.setItem(CACHE_KEY_ARTICLES, JSON.stringify(mapped));
-      return mapped.slice(0, limit);
+      if (mapped.length > 0) {
+        localStorage.setItem(CACHE_KEY_ARTICLES, JSON.stringify(mapped));
+        return mapped.slice(0, limit);
+      }
     }
-    return memoryArticles.length > 0 ? memoryArticles.slice(0, limit) : MOCK_ARTICLES;
+    return MOCK_ARTICLES;
   },
-  async getVideos(limit = 4, force = false): Promise<any[]> {
-    if (!force && memoryVideos.length > 0) return memoryVideos.slice(0, limit);
+
+  async getVideos(limit = 4): Promise<any[]> {
+    const cached = localStorage.getItem(CACHE_KEY_VIDEOS);
+    if (cached) return JSON.parse(cached).slice(0, limit);
+
     const posts = await secureFetch(`/posts?per_page=50`);
     if (Array.isArray(posts)) {
-      const mapped = posts
+      const videos = posts
         .filter(p => {
-          const c = (p.content.rendered || '').toLowerCase();
-          return c.includes('<iframe') || c.includes('youtube.com') || c.includes('vimeo.com') || c.includes('wp-block-embed');
+          const c = p.content.rendered.toLowerCase();
+          return c.includes('<iframe') || c.includes('youtube.com') || c.includes('vimeo.com');
         })
         .map(p => ({
           id: p.id.toString(),
           title: p.title.rendered,
-          content: p.content.rendered,
           thumb: p._embedded?.['wp:featuredmedia']?.[0]?.source_url || extractFirstImage(p.content.rendered)
         }));
-      memoryVideos = mapped;
-      localStorage.setItem(CACHE_KEY_VIDEOS, JSON.stringify(mapped));
-      return mapped.slice(0, limit);
+      
+      if (videos.length > 0) {
+        localStorage.setItem(CACHE_KEY_VIDEOS, JSON.stringify(videos));
+        return videos.slice(0, limit);
+      }
     }
-    return memoryVideos.length > 0 ? memoryVideos.slice(0, limit) : [];
+    return [];
   },
+
   async getArticleById(id: string): Promise<Article | undefined> {
-    const local = memoryArticles.find(a => a.id === id);
-    if (local) return local;
+    // Primeiro tenta no cache local
+    const cached = localStorage.getItem(CACHE_KEY_ARTICLES);
+    if (cached) {
+      const articles = JSON.parse(cached);
+      const found = articles.find((a: Article) => a.id === id);
+      if (found) return found;
+    }
+
     const post = await secureFetch(`/posts/${id}`);
     return post ? mapWPPostToArticle(post) : undefined;
   },
+
   async getArticlesByPillar(pillarId: PillarId, limit = 3): Promise<Article[]> {
-    if (memoryArticles.length === 0) await this.getArticles(50);
-    return memoryArticles.filter(a => a.pillarId === pillarId).slice(0, limit);
+    const all = await this.getArticles(50);
+    return all.filter(a => a.pillarId === pillarId).slice(0, limit);
   },
+
   async getCourses(): Promise<Course[]> { return MOCK_COURSES; },
   async getResources(): Promise<Resource[]> { return MOCK_RESOURCES; },
   async getPillars(): Promise<Pillar[]> { return PILLARS; },
