@@ -1,12 +1,17 @@
 
 import React, { useState, useEffect } from 'react';
 import { DataService } from '../services/dataService';
+import { SITE_CONFIG } from '../config/site-config';
 
 const Navbar: React.FC = () => {
-  const [isConnected, setIsConnected] = useState(false);
+  const [isConnected, setIsConnected] = useState<boolean | null>(null);
 
   useEffect(() => {
-    DataService.testConnection().then(setIsConnected);
+    const check = async () => {
+      const status = await DataService.testConnection();
+      setIsConnected(status);
+    };
+    check();
   }, []);
 
   return (
@@ -14,9 +19,12 @@ const Navbar: React.FC = () => {
       <div className="max-w-6xl mx-auto px-6 h-12 flex items-center justify-between text-xs font-medium tracking-tight text-gray-800">
         <div className="flex items-center gap-8">
           <a href="#/" className="flex items-center gap-2 group">
-            <span className="text-lg font-bold tracking-tighter group-hover:opacity-70 transition-opacity">PH DONASSOLO</span>
+            <span className="text-lg font-bold tracking-tighter group-hover:opacity-70 transition-opacity uppercase">{SITE_CONFIG.name}</span>
             {isConnected && (
-              <span className="flex h-1.5 w-1.5 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]" title="WordPress Conectado"></span>
+              <span className="flex h-2 w-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)] animate-pulse" title="WordPress Conectado"></span>
+            )}
+            {isConnected === false && (
+              <span className="flex h-2 w-2 rounded-full bg-red-400" title="Offline - Usando Cache"></span>
             )}
           </a>
           <div className="hidden md:flex items-center gap-6">
