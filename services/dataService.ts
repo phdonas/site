@@ -35,15 +35,19 @@ export const DataService = {
   async getArticles(): Promise<Article[]> {
     if (!WP_CONFIG.USE_LIVE_DATA) return MOCK_ARTICLES;
     try {
-      const response = await fetch(`${WP_CONFIG.BASE_URL}${WP_CONFIG.ENDPOINTS.POSTS}?_embed&per_page=12`);
-      if (!response.ok) throw new Error('CORS ou Erro de Conexão');
+      const response = await fetch(`${WP_CONFIG.BASE_URL}${WP_CONFIG.ENDPOINTS.POSTS}?_embed&per_page=20`);
+      if (!response.ok) throw new Error(`Erro API: ${response.status}`);
       const posts = await response.json();
-      // Filtra posts que NÃO são da categoria de vídeos para a galeria de artigos
+      
+      // Filtra posts que NÃO pertencem à categoria 'videos'
       return posts
-        .filter((p: any) => !p._embedded?.['wp:term']?.[0]?.some((cat: any) => cat.slug === 'videos'))
+        .filter((p: any) => {
+          const terms = p._embedded?.['wp:term']?.[0] || [];
+          return !terms.some((term: any) => term.slug === 'videos');
+        })
         .map(mapWPPostToArticle);
     } catch (error) {
-      console.warn('Usando dados simulados para artigos:', error);
+      console.warn('DataService: Usando mocks para artigos devido a erro:', error);
       return MOCK_ARTICLES;
     }
   },
@@ -52,16 +56,31 @@ export const DataService = {
     if (!WP_CONFIG.USE_LIVE_DATA) return [1, 2, 3, 4].map(i => ({ id: i, title: `Aula Exemplo ${i}`, thumb: `https://picsum.photos/400/700?random=${i}` }));
     
     try {
-      // Busca posts da categoria 'videos'
-      const response = await fetch(`${WP_CONFIG.BASE_URL}${WP_CONFIG.ENDPOINTS.POSTS}?_embed&category_slug=videos&per_page=4`);
-      if (!response.ok) return [];
+      // Buscamos os posts mais recentes. 
+      // Em vez de confiar no filtro de URL que pode variar por servidor, buscamos e filtramos no cliente.
+      const response = await fetch(`${WP_CONFIG.BASE_URL}${WP_CONFIG.ENDPOINTS.POSTS}?_embed&per_page=50`);
+      if (!response.ok) throw new Error(`Erro API Vídeos: ${response.status}`);
+      
       const posts = await response.json();
-      return posts.map((p: any) => ({
+      
+      // Filtra posts que POSSUEM a categoria 'videos' nos termos embedados
+      const videoPosts = posts.filter((p: any) => {
+        const terms = p._embedded?.['wp:term']?.[0] || [];
+        return terms.some((term: any) => term.slug === 'videos');
+      });
+
+      if (videoPosts.length === 0) {
+        console.info('DataService: Nenhum post "Publicado" com categoria "videos" foi encontrado. Verifique se o post no WP não está como "Agendado" para o futuro.');
+      }
+
+      return videoPosts.map((p: any) => ({
         id: p.id,
         title: p.title.rendered,
-        thumb: p._embedded?.['wp:featuredmedia']?.[0]?.source_url || `https://picsum.photos/400/700?random=${p.id}`
+        // Se não tiver imagem destacada, usa uma temporária para não ficar preto
+        thumb: p._embedded?.['wp:featuredmedia']?.[0]?.source_url || `https://images.unsplash.com/photo-1492619334760-22c0217e33ff?auto=format&fit=crop&q=80&w=400`
       }));
     } catch (error) {
+      console.error('DataService Error (Videos):', error);
       return [];
     }
   },
@@ -82,7 +101,6 @@ export const DataService = {
     return MOCK_COURSES;
   },
 
-  // Fix: Added getCourseById to resolve missing property error in CourseDetailPage.tsx
   async getCourseById(id: string): Promise<Course | undefined> {
     return MOCK_COURSES.find(c => c.id === id);
   },
