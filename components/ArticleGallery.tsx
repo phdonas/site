@@ -16,6 +16,7 @@ const ArticleGallery: React.FC<Props> = ({ limit = 12 }) => {
   useEffect(() => {
     const loadContent = async () => {
       setLoading(true);
+      // Busca artigos reais do WordPress filtrando conteúdo puramente de vídeo
       const [artData, pilData] = await Promise.all([
         DataService.getArticles(limit),
         DataService.getPillars()
@@ -31,18 +32,22 @@ const ArticleGallery: React.FC<Props> = ({ limit = 12 }) => {
     ? articles 
     : articles.filter(a => a.pillarId === selectedPillar);
 
+  const handleArticleClick = (id: string) => {
+    window.location.hash = `#/artigo/${id}`;
+  };
+
   return (
     <section className="py-24 px-6 bg-white">
       <div className="max-w-6xl mx-auto">
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-8">
           <div>
-            <h2 className="text-4xl font-bold tracking-tight mb-4">Insights & Pensamento</h2>
+            <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">Insights & Pensamento</h2>
             <p className="text-xl text-gray-500 font-medium">Os últimos artigos divididos por pilares de conhecimento.</p>
           </div>
           <div className="flex flex-wrap gap-2">
             <button 
               onClick={() => setSelectedPillar('all')}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${selectedPillar === 'all' ? 'bg-black text-white shadow-lg' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+              className={`px-5 py-2.5 rounded-full text-xs font-bold transition-all uppercase tracking-widest ${selectedPillar === 'all' ? 'bg-black text-white shadow-xl scale-105' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}
             >
               Todos
             </button>
@@ -50,7 +55,7 @@ const ArticleGallery: React.FC<Props> = ({ limit = 12 }) => {
               <button 
                 key={p.id}
                 onClick={() => setSelectedPillar(p.id)}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${selectedPillar === p.id ? 'bg-black text-white shadow-lg' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+                className={`px-5 py-2.5 rounded-full text-xs font-bold transition-all uppercase tracking-widest ${selectedPillar === p.id ? 'bg-black text-white shadow-xl scale-105' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}
               >
                 {p.title}
               </button>
@@ -59,40 +64,44 @@ const ArticleGallery: React.FC<Props> = ({ limit = 12 }) => {
         </div>
 
         {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
             {[...Array(3)].map((_, i) => (
-              <div key={i} className="aspect-[16/10] rounded-3xl bg-gray-50 animate-pulse"></div>
+              <div key={i} className="aspect-[16/10] rounded-[32px] bg-gray-50 animate-pulse"></div>
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
             {filteredArticles.map(article => (
-              <div key={article.id} className="group cursor-pointer">
-                <a href={`#/artigo/${article.id}`}>
-                  <div className="aspect-[16/10] rounded-3xl overflow-hidden mb-6 bg-gray-100 shadow-sm">
-                    <img 
-                      src={article.imageUrl} 
-                      alt={article.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                  </div>
-                  <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">
-                    {pillars.find(p => p.id === article.pillarId)?.title}
-                  </p>
-                  <h3 className="text-2xl font-bold mb-3 group-hover:text-blue-600 transition-colors line-clamp-2">{article.title}</h3>
-                  <p className="text-gray-500 leading-relaxed mb-4 line-clamp-2">
-                    {article.excerpt}
-                  </p>
-                  <span className="apple-link font-semibold">Ler artigo completo</span>
-                </a>
+              <div 
+                key={article.id} 
+                onClick={() => handleArticleClick(article.id)}
+                className="group cursor-pointer flex flex-col"
+              >
+                <div className="aspect-[16/10] rounded-[32px] overflow-hidden mb-6 bg-gray-100 shadow-sm border border-gray-100">
+                  <img 
+                    src={article.imageUrl} 
+                    alt={article.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                  />
+                </div>
+                <p className="text-[10px] font-bold text-blue-600 uppercase tracking-[0.2em] mb-3">
+                  {pillars.find(p => p.id === article.pillarId)?.title}
+                </p>
+                <h3 className="text-2xl font-bold mb-4 group-hover:text-blue-600 transition-colors line-clamp-2 leading-tight">{article.title}</h3>
+                <p className="text-gray-500 leading-relaxed mb-6 line-clamp-2 text-sm font-medium">
+                  {article.excerpt}
+                </p>
+                <div className="mt-auto">
+                  <span className="text-[#0066cc] font-bold text-sm hover:underline">Ler artigo completo ›</span>
+                </div>
               </div>
             ))}
           </div>
         )}
         
         {limit < 10 && (
-          <div className="mt-16 text-center">
-            <a href="#/artigos" className="bg-[#f5f5f7] px-8 py-4 rounded-full font-bold hover:bg-gray-200 transition-colors">Ver Biblioteca Completa</a>
+          <div className="mt-20 text-center">
+            <a href="#/artigos" className="bg-[#f5f5f7] px-10 py-4 rounded-full font-bold hover:bg-black hover:text-white transition-all shadow-sm">Ver Biblioteca Completa</a>
           </div>
         )}
       </div>

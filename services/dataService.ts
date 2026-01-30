@@ -2,18 +2,22 @@
 import { MOCK_ARTICLES, MOCK_COURSES, MOCK_RESOURCES, PILLARS } from '../constants';
 import { Article, Course, Resource, Pillar, PillarId } from '../types';
 
-const CACHE_KEY_ARTICLES = 'phd_articles_v8';
-const CACHE_KEY_VIDEOS = 'phd_videos_v8';
+const CACHE_KEY_ARTICLES = 'phd_articles_v9';
+const CACHE_KEY_VIDEOS = 'phd_videos_v9';
 
 let memoryArticles: Article[] = JSON.parse(localStorage.getItem(CACHE_KEY_ARTICLES) || '[]');
 let memoryVideos: any[] = JSON.parse(localStorage.getItem(CACHE_KEY_VIDEOS) || '[]');
 
-const saveToLocalStorage = (key: string, data: any) => {
-  try {
-    localStorage.setItem(key, JSON.stringify(data));
-  } catch (e) {
-    localStorage.clear();
-  }
+const mapCategoryToPillar = (wpCategories: any[]): PillarId => {
+  if (!wpCategories || wpCategories.length === 0) return 'prof-paulo';
+  const names = wpCategories.map(c => c.name.toLowerCase());
+  
+  if (names.some(n => n.includes('paulo') || n.includes('prof'))) return 'prof-paulo';
+  if (names.some(n => n.includes('imob') || n.includes('consultor'))) return 'consultoria-imobiliaria';
+  if (names.some(n => n.includes('4050') || n.includes('longevid') || n.includes('mais'))) return '4050oumais';
+  if (names.some(n => n.includes('gas') || n.includes('academia'))) return 'academia-do-gas';
+  
+  return 'prof-paulo';
 };
 
 const mapWPPostToArticle = (post: any): Article => {
@@ -24,7 +28,7 @@ const mapWPPostToArticle = (post: any): Article => {
   return {
     id: post.id.toString(),
     title: post.title.rendered,
-    pillarId: 'prof-paulo', // Simplificado para performance
+    pillarId: mapCategoryToPillar(wpCategories),
     category: wpCategories[0]?.name || 'Geral', 
     excerpt: post.excerpt?.rendered?.replace(/<[^>]*>?/gm, '').substring(0, 160) + '...',
     content: post.content?.rendered || '',
@@ -35,25 +39,19 @@ const mapWPPostToArticle = (post: any): Article => {
 
 const secureFetch = async (endpoint: string) => {
   const targetUrl = `https://phdonassolo.com/wp-json/wp/v2${endpoint}${endpoint.includes('?') ? '&' : '?'}doing_wp_cron=1`;
-  
   try {
     const controller = new AbortController();
-    // Aumentamos o timeout para 12s devido à lentidão confirmada no DB do usuário
     const timeout = setTimeout(() => controller.abort(), 12000);
     const res = await fetch(targetUrl, { signal: controller.signal });
     clearTimeout(timeout);
-    
     if (res.ok) return await res.json();
   } catch (e) {
-    // Fallback silencioso via proxy se falhar
     const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}&t=${Date.now()}`;
     try {
       const res = await fetch(proxyUrl);
       const wrapper = await res.json();
       return typeof wrapper.contents === 'string' ? JSON.parse(wrapper.contents) : wrapper.contents;
-    } catch (err) {
-      return null;
-    }
+    } catch (err) { return null; }
   }
   return null;
 };
@@ -66,11 +64,14 @@ export const DataService = {
 
   async getArticles(limit = 12): Promise<Article[]> {
     const syncBackground = async () => {
-      const posts = await secureFetch(`/posts?_embed&per_page=30`); // Reduzido de 50 para 30 para aliviar o banco
+      const posts = await secureFetch(`/posts?_embed&per_page=40`);
       if (Array.isArray(posts)) {
-        const mapped = posts.map(mapWPPostToArticle);
+        // Filtrar posts que NÃO são vídeos (que não tem iframe no conteúdo)
+        const mapped = posts
+          .filter(p => !p.content.rendered.includes('<iframe'))
+          .map(mapWPPostToArticle);
         memoryArticles = mapped;
-        saveToLocalStorage(CACHE_KEY_ARTICLES, mapped);
+        localStorage.setItem(CACHE_KEY_ARTICLES, JSON.stringify(mapped));
       }
     };
 
@@ -78,25 +79,24 @@ export const DataService = {
       syncBackground();
       return memoryArticles.slice(0, limit);
     }
-
     await syncBackground();
     return memoryArticles.length > 0 ? memoryArticles.slice(0, limit) : MOCK_ARTICLES;
   },
 
   async getVideos(limit = 4): Promise<any[]> {
     const syncVideos = async () => {
-      const posts = await secureFetch(`/posts?_embed&per_page=10`);
+      const posts = await secureFetch(`/posts?_embed&per_page=20`);
       if (Array.isArray(posts)) {
         const mapped = posts
           .filter(p => p.content.rendered.includes('<iframe'))
           .map(p => ({
-            id: p.id,
+            id: p.id.toString(),
             title: p.title.rendered,
             content: p.content.rendered,
             thumb: p._embedded?.['wp:featuredmedia']?.[0]?.source_url || 'https://images.unsplash.com/photo-1492619334760-22c0217e33ff?auto=format&fit=crop&q=80&w=400'
           }));
         memoryVideos = mapped;
-        saveToLocalStorage(CACHE_KEY_VIDEOS, mapped);
+        localStorage.setItem(CACHE_KEY_VIDEOS, JSON.stringify(mapped));
       }
     };
 
@@ -104,7 +104,6 @@ export const DataService = {
       syncVideos();
       return memoryVideos.slice(0, limit);
     }
-
     await syncVideos();
     return memoryVideos.slice(0, limit);
   },
