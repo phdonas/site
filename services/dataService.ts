@@ -1,8 +1,8 @@
 import { MOCK_ARTICLES, MOCK_COURSES, MOCK_RESOURCES, PILLARS } from '../constants.tsx';
 import { Article, Course, Resource, Pillar, PillarId } from '../types.ts';
 
-const CACHE_KEY_ARTICLES = 'phd_articles_v30';
-const CACHE_KEY_VIDEOS = 'phd_videos_v30';
+const CACHE_KEY_ARTICLES = 'phd_articles_v32';
+const CACHE_KEY_VIDEOS = 'phd_videos_v32';
 
 const mapCategoryToPillar = (wpCategories: any[]): PillarId => {
   if (!wpCategories || wpCategories.length === 0) return 'prof-paulo';
@@ -37,28 +37,31 @@ const mapWPPostToArticle = (post: any): Article => {
 };
 
 const secureFetch = async (endpoint: string) => {
-  // Na Hostgator, se os links permanentes não forem "Nome do Post", a API só funciona via rest_route
-  const targets = [
-    `/wordpress/wp-json/wp/v2${endpoint}`, // Tentativa 1: URL Padrão
-    `/wordpress/index.php?rest_route=/wp/v2${endpoint}`, // Tentativa 2: Fallback rest_route
-    `https://phdonassolo.com/wordpress/wp-json/wp/v2${endpoint}` // Tentativa 3: Absoluta
-  ];
+  const cb = Date.now();
+  const directUrl = `https://phdonassolo.com/wordpress/index.php?rest_route=/wp/v2${endpoint}&_embed&cb=${cb}`;
+  const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(directUrl)}`;
 
-  for (const url of targets) {
-    try {
-      const finalUrl = `${url}${url.includes('?') ? '&' : '?'}_embed&cb=${Date.now()}`;
-      const res = await fetch(finalUrl, { 
-        method: 'GET',
-        headers: { 'Accept': 'application/json' }
-      });
-      
-      if (res.ok) {
-        const data = await res.json();
-        if (data && !data.code) return data;
-      }
-    } catch (e) {
-      console.warn(`Falha na tentativa de conexão: ${url}`);
+  try {
+    // Tentativa 1: Direta
+    const res = await fetch(directUrl);
+    if (res.ok) {
+      const data = await res.json();
+      if (data && !data.code) return data;
     }
+  } catch (e) {
+    console.warn("Conexão direta falhou, tentando via Proxy...");
+  }
+
+  try {
+    // Tentativa 2: Via Proxy (Túnel para evitar bloqueios de servidor)
+    const res = await fetch(proxyUrl);
+    if (res.ok) {
+      const wrapper = await res.json();
+      const data = JSON.parse(wrapper.contents);
+      if (data && !data.code) return data;
+    }
+  } catch (e) {
+    console.error("Todas as tentativas de sincronização falharam.");
   }
   return null;
 };
