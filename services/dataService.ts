@@ -1,10 +1,9 @@
+import { MOCK_ARTICLES, MOCK_COURSES, MOCK_RESOURCES, PILLARS } from '../constants.tsx';
+import { Article, Course, Resource, Pillar, PillarId } from '../types.ts';
+import { WP_CONFIG } from '../config/wp-config.ts';
 
-import { MOCK_ARTICLES, MOCK_COURSES, MOCK_RESOURCES, PILLARS } from '../constants';
-import { Article, Course, Resource, Pillar, PillarId } from '../types';
-import { WP_CONFIG } from '../config/wp-config';
-
-const CACHE_KEY_ARTICLES = 'phd_articles_v26';
-const CACHE_KEY_VIDEOS = 'phd_videos_v26';
+const CACHE_KEY_ARTICLES = 'phd_articles_v27';
+const CACHE_KEY_VIDEOS = 'phd_videos_v27';
 
 const mapCategoryToPillar = (wpCategories: any[]): PillarId => {
   if (!wpCategories || wpCategories.length === 0) return 'prof-paulo';
@@ -50,8 +49,6 @@ const tryParseJson = async (response: Response) => {
 
 const secureFetch = async (endpoint: string) => {
   const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
-  
-  // Estratégia de caminhos: Relativo -> Domínio Atual -> URL Direta
   const targets = [
     `/wordpress/wp-json/wp/v2${cleanEndpoint}`,
     `${window.location.origin}/wordpress/wp-json/wp/v2${cleanEndpoint}`,
@@ -66,10 +63,9 @@ const secureFetch = async (endpoint: string) => {
         const data = await tryParseJson(res);
         if (data && !data.code) return data;
       }
-    } catch (e) { /* Silencioso */ }
+    } catch (e) {}
   }
 
-  // Fallback via Proxy apenas para emergência (CORS ou SSL)
   const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targets[2])}&nocache=${Date.now()}`;
   try {
     const res = await fetch(proxyUrl);
@@ -78,7 +74,7 @@ const secureFetch = async (endpoint: string) => {
       const json = JSON.parse(wrapper.contents);
       if (json && !json.code) return json;
     }
-  } catch (e) { /* Fallback final para dados estáticos */ }
+  } catch (e) {}
 
   return null;
 };

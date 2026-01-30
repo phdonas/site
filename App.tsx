@@ -1,23 +1,22 @@
-
 import React, { useState, useEffect } from 'react';
-import Navbar from './components/Navbar';
-import HomePage from './pages/HomePage';
-import LoginPage from './pages/LoginPage';
-import AdminPage from './pages/AdminPage';
-import ArticlesPage from './pages/ArticlesPage';
-import ArticleDetailPage from './pages/ArticleDetailPage';
-import CourseDetailPage from './pages/CourseDetailPage';
-import ServicesPage from './pages/ServicesPage';
-import DownloadsPage from './pages/DownloadsPage';
-import ContactPage from './pages/ContactPage';
-import PillarsPage from './pages/PillarsPage';
-import CoursesBooksPage from './pages/CoursesBooksPage';
-import PrivacyPage from './pages/PrivacyPage';
-import NotFoundPage from './pages/NotFoundPage';
-import AIChat from './components/AIChat';
-import WhatsAppButton from './components/WhatsAppButton';
-import { SITE_CONFIG } from './config/site-config';
-import { DataService } from './services/dataService';
+import Navbar from './components/Navbar.tsx';
+import HomePage from './pages/HomePage.tsx';
+import LoginPage from './pages/LoginPage.tsx';
+import AdminPage from './pages/AdminPage.tsx';
+import ArticlesPage from './pages/ArticlesPage.tsx';
+import ArticleDetailPage from './pages/ArticleDetailPage.tsx';
+import CourseDetailPage from './pages/CourseDetailPage.tsx';
+import ServicesPage from './pages/ServicesPage.tsx';
+import DownloadsPage from './pages/DownloadsPage.tsx';
+import ContactPage from './pages/ContactPage.tsx';
+import PillarsPage from './pages/PillarsPage.tsx';
+import CoursesBooksPage from './pages/CoursesBooksPage.tsx';
+import PrivacyPage from './pages/PrivacyPage.tsx';
+import NotFoundPage from './pages/NotFoundPage.tsx';
+import AIChat from './components/AIChat.tsx';
+import WhatsAppButton from './components/WhatsAppButton.tsx';
+import { SITE_CONFIG } from './config/site-config.ts';
+import { DataService } from './services/dataService.ts';
 
 const App: React.FC = () => {
   const [currentHash, setCurrentHash] = useState(window.location.hash || '#/');
@@ -29,7 +28,6 @@ const App: React.FC = () => {
 
     const handleHashChange = () => {
       setCurrentHash(window.location.hash || '#/');
-      // Scroll to top on route change, unless it's a pillar anchor
       if (!window.location.hash.includes('#/pilares#')) {
         window.scrollTo({ top: 0, behavior: 'instant' });
       }
@@ -39,19 +37,16 @@ const App: React.FC = () => {
   }, []);
 
   const renderContent = () => {
-    // Rotas Dinâmicas de Artigos
     if (currentHash.startsWith('#/artigo/')) {
       const articleId = currentHash.split('/artigo/')[1];
       if (articleId) return <ArticleDetailPage articleId={articleId} />;
     }
     
-    // Rotas Dinâmicas de Cursos
     if (currentHash.startsWith('#/curso/')) {
       const courseId = currentHash.split('/curso/')[1];
       if (courseId) return <CourseDetailPage courseId={courseId} />;
     }
 
-    // Rotas Estáticas
     switch (currentHash) {
       case '#/': 
       case '#': 
