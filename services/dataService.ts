@@ -1,3 +1,4 @@
+
 import { MOCK_ARTICLES, MOCK_COURSES, MOCK_BOOKS, MOCK_RESOURCES, PILLARS } from '../constants';
 import { Article, Course, Book, Resource, Pillar, PillarId } from '../types';
 import { WP_CONFIG } from '../config/wp-config';
@@ -30,16 +31,16 @@ const mapWPPostToArticle = (post: any): Article => {
   };
 };
 
-/**
- * Utilitário de fetch resiliente.
- * Removendo headers manuais para tornar a requisição "Simple", 
- * o que reduz problemas de CORS em servidores legados.
- */
 const secureFetch = async (endpoint: string) => {
-  const url = `${WP_CONFIG.CORS_PROXY}${WP_CONFIG.BASE_URL}${endpoint}`;
+  const baseUrl = `${WP_CONFIG.BASE_URL}${endpoint}`;
+  // Se houver proxy, a URL do WP precisa ser codificada
+  const finalUrl = WP_CONFIG.CORS_PROXY 
+    ? `${WP_CONFIG.CORS_PROXY}${encodeURIComponent(baseUrl)}`
+    : baseUrl;
+
   try {
-    const response = await fetch(url);
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const response = await fetch(finalUrl);
+    if (!response.ok) throw new Error(`Erro HTTP: ${response.status}`);
     return await response.json();
   } catch (error) {
     throw error;
@@ -55,13 +56,15 @@ export const DataService = {
       const articles = posts
         .filter((p: any) => {
           const terms = p._embedded?.['wp:term']?.[0] || [];
-          return !terms.some((term: any) => term.slug === 'videos');
+          return !terms.some((term: any) => 
+            ['video', 'videos', 'vídeo', 'video1'].includes(term.slug.toLowerCase())
+          );
         })
         .map(mapWPPostToArticle);
         
       return articles.length > 0 ? articles : MOCK_ARTICLES;
     } catch (error) {
-      console.warn('DataService: Conexão com WordPress falhou. Ativando Fallback para dados locais.');
+      console.warn('DataService: Usando artigos locais.');
       return MOCK_ARTICLES;
     }
   },
@@ -72,22 +75,32 @@ export const DataService = {
     if (!WP_CONFIG.USE_LIVE_DATA) return mockVideos;
     
     try {
-      const posts = await secureFetch(`${WP_CONFIG.ENDPOINTS.POSTS}?_embed&per_page=50`);
+      // Buscamos os posts mais recentes que possuam categorias
+      const posts = await secureFetch(`${WP_CONFIG.ENDPOINTS.POSTS}?_embed&per_page=100`);
       
       const videoPosts = posts.filter((p: any) => {
         const terms = p._embedded?.['wp:term']?.[0] || [];
-        return terms.some((term: any) => term.slug === 'videos');
+        return terms.some((term: any) => {
+          const slug = term.slug.toLowerCase();
+          // Filtra pelo slug 'videos' que você mostrou no print
+          return slug === 'videos' || slug === 'video' || slug === 'video1';
+        });
       });
 
-      if (videoPosts.length === 0) return mockVideos;
+      if (videoPosts.length === 0) {
+        console.warn('DataService: Conectado, mas nenhum post tem o slug "videos".');
+        return mockVideos;
+      }
 
       return videoPosts.map((p: any) => ({
         id: p.id,
         title: p.title.rendered,
-        thumb: p._embedded?.['wp:featuredmedia']?.[0]?.source_url || `https://images.unsplash.com/photo-1492619334760-22c0217e33ff?auto=format&fit=crop&q=80&w=400`
+        // Tenta pegar a imagem destacada, se não tiver, usa uma padrão de vídeo
+        thumb: p._embedded?.['wp:featuredmedia']?.[0]?.source_url || 
+               'https://images.unsplash.com/photo-1492619334760-22c0217e33ff?auto=format&fit=crop&q=80&w=400'
       }));
     } catch (error) {
-      console.warn('DataService (Videos): Erro de conexão. Usando placeholders.');
+      console.error('DataService: Erro ao carregar vídeos:', error);
       return mockVideos;
     }
   },
