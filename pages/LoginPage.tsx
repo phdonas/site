@@ -13,7 +13,7 @@ const LoginPage: React.FC = () => {
     // Simulação de login com credencial admin
     setTimeout(() => {
       setLoading(false);
-      if (email === 'admin@phdonassolo.com' && password === 'admin') {
+      if (email === 'admin@phdonassolo.com' && password === 'Inter1909@fim') {
         localStorage.setItem('phd_session', 'admin');
         window.location.hash = '#/admin';
       } else {

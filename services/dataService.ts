@@ -2,8 +2,8 @@
 import { MOCK_ARTICLES, MOCK_COURSES, MOCK_RESOURCES, PILLARS } from '../constants';
 import { Article, Course, Resource, Pillar, PillarId } from '../types';
 
-const CACHE_KEY_ARTICLES = 'phd_articles_v11';
-const CACHE_KEY_VIDEOS = 'phd_videos_v11';
+const CACHE_KEY_ARTICLES = 'phd_articles_v12';
+const CACHE_KEY_VIDEOS = 'phd_videos_v12';
 
 let memoryArticles: Article[] = JSON.parse(localStorage.getItem(CACHE_KEY_ARTICLES) || '[]');
 let memoryVideos: any[] = JSON.parse(localStorage.getItem(CACHE_KEY_VIDEOS) || '[]');
@@ -38,34 +38,41 @@ const mapWPPostToArticle = (post: any): Article => {
 };
 
 const secureFetch = async (endpoint: string) => {
+  // Variações de URL para garantir que encontre o WP-JSON independente da config do servidor
   const urlsToTry = [
     `https://www.phdonassolo.com/wp-json/wp/v2${endpoint}`,
+    `https://www.phdonassolo.com/index.php/wp-json/wp/v2${endpoint}`,
     `https://phdonassolo.com/wp-json/wp/v2${endpoint}`
   ];
 
   for (const baseUrl of urlsToTry) {
-    const targetUrl = `${baseUrl}${baseUrl.includes('?') ? '&' : '?'}doing_wp_cron=1&nocache=${Date.now()}`;
+    // Garante que o parâmetro _embed esteja presente se estivermos buscando posts
+    const sep = baseUrl.includes('?') ? '&' : '?';
+    const targetUrl = `${baseUrl}${sep}_embed=1&doing_wp_cron=1&nocache=${Date.now()}`;
     
     try {
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 10000);
+      const timeout = setTimeout(() => controller.abort(), 12000);
       const res = await fetch(targetUrl, { signal: controller.signal });
       clearTimeout(timeout);
       
       if (res.ok) {
         const data = await res.json();
-        if (data && (Array.isArray(data) || typeof data === 'object')) return data;
-      }
-      throw new Error(`HTTP ${res.status}`);
-    } catch (e) {
-      console.warn(`Tentando proxy para: ${targetUrl}`);
-      const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}&t=${Date.now()}`;
-      try {
-        const res = await fetch(proxyUrl);
-        const wrapper = await res.json();
-        const data = typeof wrapper.contents === 'string' ? JSON.parse(wrapper.contents) : wrapper.contents;
         if (data) return data;
-      } catch (err) { continue; }
+      }
+    } catch (e) {
+      console.warn(`Falha direta em ${baseUrl}, tentando via Proxy...`);
+    }
+
+    // Fallback de Proxy se a conexão direta falhar (CORS ou Firewall)
+    const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}&t=${Date.now()}`;
+    try {
+      const res = await fetch(proxyUrl);
+      const wrapper = await res.json();
+      const data = typeof wrapper.contents === 'string' ? JSON.parse(wrapper.contents) : wrapper.contents;
+      if (data && !data.data?.status) return data; // Se não for um objeto de erro do WP
+    } catch (err) {
+      continue;
     }
   }
   return null;
@@ -82,46 +89,43 @@ export const DataService = {
     localStorage.removeItem(CACHE_KEY_VIDEOS);
     memoryArticles = [];
     memoryVideos = [];
-    await this.getArticles(20);
-    await this.getVideos(10);
+    await this.getArticles(20, true);
+    await this.getVideos(10, true);
   },
 
   async getArticles(limit = 12, force = false): Promise<Article[]> {
     const sync = async () => {
-      const posts = await secureFetch(`/posts?_embed&per_page=50`);
+      const posts = await secureFetch(`/posts?per_page=50`);
       if (Array.isArray(posts)) {
         const mapped = posts
           .filter(p => {
             const content = p.content.rendered.toLowerCase();
-            return !content.includes('<iframe') && 
-                   !content.includes('wp-block-embed') && 
-                   !content.includes('youtube.com') && 
-                   !content.includes('vimeo.com');
+            return !content.includes('<iframe') && !content.includes('video-container') && !content.includes('youtube.com');
           })
           .map(mapWPPostToArticle);
-        memoryArticles = mapped;
-        localStorage.setItem(CACHE_KEY_ARTICLES, JSON.stringify(mapped));
+        
+        if (mapped.length > 0) {
+          memoryArticles = mapped;
+          localStorage.setItem(CACHE_KEY_ARTICLES, JSON.stringify(mapped));
+        }
         return mapped;
       }
       return memoryArticles;
     };
 
     if (force || memoryArticles.length === 0) return await sync();
-    sync(); // background sync
+    sync(); 
     return memoryArticles.slice(0, limit);
   },
 
   async getVideos(limit = 4, force = false): Promise<any[]> {
     const sync = async () => {
-      const posts = await secureFetch(`/posts?_embed&per_page=50`);
+      const posts = await secureFetch(`/posts?per_page=50`);
       if (Array.isArray(posts)) {
         const mapped = posts
           .filter(p => {
             const content = p.content.rendered.toLowerCase();
-            return content.includes('<iframe') || 
-                   content.includes('wp-block-embed') || 
-                   content.includes('youtube.com') || 
-                   content.includes('vimeo.com');
+            return content.includes('<iframe') || content.includes('youtube.com') || content.includes('vimeo.com') || content.includes('wp-block-embed');
           })
           .map(p => ({
             id: p.id.toString(),
@@ -129,22 +133,25 @@ export const DataService = {
             content: p.content.rendered,
             thumb: p._embedded?.['wp:featuredmedia']?.[0]?.source_url || 'https://images.unsplash.com/photo-1492619334760-22c0217e33ff?auto=format&fit=crop&q=80&w=400'
           }));
-        memoryVideos = mapped;
-        localStorage.setItem(CACHE_KEY_VIDEOS, JSON.stringify(mapped));
+        
+        if (mapped.length > 0) {
+          memoryVideos = mapped;
+          localStorage.setItem(CACHE_KEY_VIDEOS, JSON.stringify(mapped));
+        }
         return mapped;
       }
       return memoryVideos;
     };
 
     if (force || memoryVideos.length === 0) return await sync();
-    sync(); // background sync
+    sync();
     return memoryVideos.slice(0, limit);
   },
 
   async getArticleById(id: string): Promise<Article | undefined> {
     const local = memoryArticles.find(a => a.id === id);
     if (local) return local;
-    const post = await secureFetch(`/posts/${id}?_embed`);
+    const post = await secureFetch(`/posts/${id}`);
     return post ? mapWPPostToArticle(post) : undefined;
   },
 

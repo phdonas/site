@@ -62,13 +62,23 @@ export const MOCK_COURSES: Course[] = [
     longDescription: 'Aprenda a construir, analisar e utilizar o DRE para rentabilizar o seu negócio.',
     imageUrl: 'https://images.unsplash.com/photo-1460472178825-e51c062365d3?auto=format&fit=crop&q=80&w=800',
     category: 'Educação',
-    salesUrl: '//https://www.udemy.com/course/descomplicando-o-dre/',
+    salesUrl: '//www.udemy.com/course/descomplicando-o-dre/',
     videos: []
   },
   { 
     id: 'c2', 
     name: 'Negociação para Vendas: IA+Ferramentas', 
     description: 'Técnicas de Negociação aplicadas às Vendas',
+    longDescription: 'Aprenda as técnicas de negociação consolidadasa e com o uso da IA para escalar suas negociações e vendas.',
+    imageUrl: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&q=80&w=800',
+    category: 'Educação',
+    salesUrl: 'https://www.udemy.com/course/negociacao-para-vendas-tecnicas-ia-professor/',
+    videos: []
+  }
+    { 
+    id: 'c2', 
+    name: 'Teste de Marcação', 
+    description: 'Técnicas de Marcação',
     longDescription: 'Aprenda as técnicas de negociação consolidadasa e com o uso da IA para escalar suas negociações e vendas.',
     imageUrl: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&q=80&w=800',
     category: 'Educação',
@@ -84,10 +94,10 @@ export const MOCK_COURSES: Course[] = [
 export const MOCK_BOOKS: Book[] = [
   {
     id: 'b1',
-    title: 'A Bíblia da Revenda de Gás',
+    title: 'Recriar a Gestão Comercial',
     description: 'Tudo o que você precisa saber para gerir uma revenda de sucesso.',
     imageUrl: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=800',
-    buyUrl: '#'
+    buyUrl: 'https://amazon.com.br'
   },
   {
     id: 'b2',
