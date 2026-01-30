@@ -3,9 +3,8 @@ import { MOCK_ARTICLES, MOCK_COURSES, MOCK_RESOURCES, PILLARS } from '../constan
 import { Article, Course, Resource, Pillar, PillarId } from '../types';
 import { WP_CONFIG } from '../config/wp-config';
 
-// Cache em memória + LocalStorage
-const CACHE_KEY_ARTICLES = 'phd_articles_cache_v3';
-const CACHE_KEY_VIDEOS = 'phd_videos_cache_v3';
+const CACHE_KEY_ARTICLES = 'phd_articles_cache_v6';
+const CACHE_KEY_VIDEOS = 'phd_videos_cache_v6';
 
 let cachedArticles: Article[] = JSON.parse(localStorage.getItem(CACHE_KEY_ARTICLES) || '[]');
 let cachedVideos: any[] = JSON.parse(localStorage.getItem(CACHE_KEY_VIDEOS) || '[]');
@@ -58,21 +57,75 @@ const mapWPPostToArticle = (post: any): Article => {
   };
 };
 
-const secureFetch = async (endpoint: string) => {
-  const targetUrl = `${WP_CONFIG.BASE_URL}${endpoint}`;
+const fetchWithTimeout = async (url: string, options: any = {}, timeout = 8000) => {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeout);
   try {
-    const res = await fetch(targetUrl);
-    if (res.ok) return await res.json();
-    throw new Error('Direct fetch failed');
+    const response = await fetch(url, { ...options, signal: controller.signal });
+    clearTimeout(id);
+    return response;
   } catch (e) {
-    const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}&timestamp=${Date.now()}`;
-    const proxyRes = await fetch(proxyUrl);
-    if (proxyRes.ok) {
-      const wrapper = await proxyRes.json();
-      return JSON.parse(wrapper.contents);
-    }
+    clearTimeout(id);
     throw e;
   }
+};
+
+/**
+ * Função de Fetch de Alta Disponibilidade
+ */
+const secureFetch = async (endpoint: string) => {
+  const domain = 'phdonassolo.com';
+  
+  // Lista de variações de URL para contornar problemas de permalinks e redirecionamentos na Hostgator
+  const urlVariations = [
+    // Padrão limpo (depende de mod_rewrite)
+    `https://${domain}/wp-json/wp/v2${endpoint}`,
+    `https://www.${domain}/wp-json/wp/v2${endpoint}`,
+    // Método rest_route (Fallback universal para quando permalinks falham)
+    `https://${domain}/index.php?rest_route=/wp/v2${endpoint}`,
+    `https://www.${domain}/index.php?rest_route=/wp/v2${endpoint}`
+  ];
+
+  for (const targetUrl of urlVariations) {
+    const strategies = [
+      // 1. Direto
+      async () => {
+        const res = await fetchWithTimeout(targetUrl, { mode: 'cors' });
+        if (res.ok) return await res.json();
+        throw new Error(`Direct failed: ${res.status}`);
+      },
+      // 2. Proxy: Corsproxy.io
+      async () => {
+        const res = await fetchWithTimeout(`https://corsproxy.io/?${encodeURIComponent(targetUrl)}`);
+        if (res.ok) return await res.json();
+        throw new Error(`Proxy 1 failed`);
+      },
+      // 3. Proxy: AllOrigins
+      async () => {
+        const res = await fetchWithTimeout(`https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}&t=${Date.now()}`);
+        if (res.ok) {
+          const wrapper = await res.json();
+          const content = typeof wrapper.contents === 'string' ? JSON.parse(wrapper.contents) : wrapper.contents;
+          if (content) return content;
+        }
+        throw new Error(`Proxy 2 failed`);
+      }
+    ];
+
+    for (const strategy of strategies) {
+      try {
+        const data = await strategy();
+        if (data && (Array.isArray(data) || typeof data === 'object')) {
+          console.debug(`Sucesso com a URL: ${targetUrl}`);
+          return data;
+        }
+      } catch (e) {
+        // Silencioso, tenta a próxima estratégia
+      }
+    }
+  }
+
+  throw new Error('Falha crítica de conexão. WordPress inacessível via API padrão ou Proxy.');
 };
 
 export const DataService = {
@@ -80,7 +133,9 @@ export const DataService = {
     try {
       const data = await secureFetch('/posts?per_page=1');
       return Array.isArray(data);
-    } catch { return false; }
+    } catch (e) { 
+      return false; 
+    }
   },
 
   async getArticles(limit = 12): Promise<Article[]> {
@@ -92,13 +147,16 @@ export const DataService = {
         saveArticlesCache();
         return mapped;
       }
-    } catch {}
+    } catch (err) {
+      console.error("DataService: Erro ao buscar artigos, usando fallback.");
+    }
     return cachedArticles.length > 0 ? cachedArticles.slice(0, limit) : MOCK_ARTICLES;
   },
 
   async getVideos(limit = 4): Promise<any[]> {
     try {
-      const posts = await secureFetch(`/posts?_embed&per_page=10`);
+      // Tentamos buscar posts que contenham iframes (vídeos)
+      const posts = await secureFetch(`/posts?_embed&per_page=20`);
       if (Array.isArray(posts)) {
         const mapped = posts
           .filter(p => p.content.rendered.includes('<iframe'))
@@ -114,17 +172,21 @@ export const DataService = {
           return mapped.slice(0, limit);
         }
       }
-    } catch {}
+    } catch (err) {
+      console.error("DataService: Erro ao buscar vídeos, usando fallback.");
+    }
     return cachedVideos.length > 0 ? cachedVideos.slice(0, limit) : [];
   },
 
   async getArticleById(id: string): Promise<Article | undefined> {
     const cached = cachedArticles.find(a => a.id === id);
-    if (cached) return cached;
     try {
       const post = await secureFetch(`/posts/${id}?_embed`);
-      return mapWPPostToArticle(post);
-    } catch { return cached; }
+      if (post && post.id) return mapWPPostToArticle(post);
+    } catch (err) {
+      console.warn("DataService: Artigo individual falhou, tentando cache.");
+    }
+    return cached;
   },
 
   async getArticlesByPillar(pillarId: PillarId, limit = 3): Promise<Article[]> {

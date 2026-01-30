@@ -3,11 +3,8 @@
  * Configurações de conexão com o WordPress Headless
  */
 export const WP_CONFIG = {
-  // AllOrigins /get é o mais robusto para contornar bloqueios de segurança em modo preview
-  CORS_PROXY: 'https://api.allorigins.win/get?url=', 
-  
-  // URL base da API do seu WordPress
-  BASE_URL: 'https://phdonassolo.com/wp-json/wp/v2',
+  // URL base limpa do site (sem wp-json, pois o DataService tentará múltiplos caminhos)
+  BASE_URL: 'https://phdonassolo.com',
   
   ENDPOINTS: {
     POSTS: '/posts',
