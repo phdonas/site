@@ -6,9 +6,11 @@ import ArticleGallery from '../components/ArticleGallery';
 import ServicesSection from '../components/ServicesSection';
 import LeadForm from '../components/LeadForm';
 import { DataService } from '../services/dataService';
+import { X } from 'lucide-react';
 
 const HomePage: React.FC = () => {
   const [videos, setVideos] = useState<any[]>([]);
+  const [selectedVideo, setSelectedVideo] = useState<any | null>(null);
 
   useEffect(() => {
     const loadVideos = async () => {
@@ -34,7 +36,11 @@ const HomePage: React.FC = () => {
           
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {videos.length > 0 ? videos.map((video) => (
-              <div key={video.id} className="aspect-[9/16] bg-gray-900 rounded-[32px] overflow-hidden relative group cursor-pointer border border-white/5 hover:border-white/20 transition-all">
+              <div 
+                key={video.id} 
+                onClick={() => setSelectedVideo(video)}
+                className="aspect-[9/16] bg-gray-900 rounded-[32px] overflow-hidden relative group cursor-pointer border border-white/5 hover:border-white/20 transition-all"
+              >
                 <img 
                   src={video.thumb} 
                   alt={video.title}
@@ -51,15 +57,42 @@ const HomePage: React.FC = () => {
               </div>
             )) : (
               <div className="col-span-full py-20 text-center text-gray-500 font-medium">
-                Suba vídeos na categoria "videos" do WordPress para exibi-los aqui.
+                Carregando vídeos...
               </div>
             )}
           </div>
         </div>
       </section>
 
-      <ArticleGallery />
+      {/* Video Modal Player */}
+      {selectedVideo && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 md:p-10">
+          <div 
+            className="absolute inset-0 bg-black/90 backdrop-blur-2xl" 
+            onClick={() => setSelectedVideo(null)}
+          ></div>
+          <div className="relative w-full max-w-4xl bg-black rounded-3xl overflow-hidden shadow-2xl border border-white/10 animate-in fade-in zoom-in duration-300">
+            <button 
+              onClick={() => setSelectedVideo(null)}
+              className="absolute top-6 right-6 z-10 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition-colors"
+            >
+              <X size={24} />
+            </button>
+            <div className="p-6 md:p-10">
+              <h3 className="text-xl font-bold mb-6 pr-12">{selectedVideo.title}</h3>
+              <div 
+                className="wp-video-container aspect-video rounded-2xl overflow-hidden bg-gray-900 flex items-center justify-center"
+                dangerouslySetInnerHTML={{ __html: selectedVideo.content }}
+              />
+              <div className="mt-6 text-gray-400 text-sm">
+                Dica: Se o vídeo não carregar, verifique se ele está publicado como post no WordPress com a categoria 'videos'.
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
+      <ArticleGallery />
       <LeadForm />
     </main>
   );

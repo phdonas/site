@@ -1,22 +1,16 @@
+
+# BEGIN WordPress CORS
 <IfModule mod_headers.c>
     Header set Access-Control-Allow-Origin "*"
-    Header set Access-Control-Allow-Methods "GET, POST, OPTIONS"
-    Header set Access-Control-Allow-Headers "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+    Header set Access-Control-Allow-Methods "GET, POST, OPTIONS, DELETE, PUT"
+    Header set Access-Control-Allow-Headers "Origin, X-Requested-With, Content-Type, Accept, Authorization, X-WP-Nonce"
+    Header set Access-Control-Allow-Credentials "true"
 </IfModule>
 
-# Use PHP56
-#AddHandler application/#x-httpd-php56 .php
+# Permitir requisições OPTIONS sem autenticação (importante para CORS pre-flight)
+RewriteEngine On
+RewriteCond % {REQUEST_METHOD} OPTIONS
+RewriteRule ^(.*)$ $1 [R=200,L]
+# END WordPress CORS
 
-
-# Block WordPress xmlrpc.php requests
-<Files xmlrpc.php>
-order deny,allow
-deny from all
-allow from 122.248.245.244/32
-allow from 54.217.201.243/32
-allow from 54.232.116.4/32
-allow from 192.0.80.0/20
-allow from 192.0.96.0/20
-allow from 192.0.112.0/20
-allow from 195.234.108.0/22
-</Files>
+# Resto das configurações padrão do WordPress abaixo...

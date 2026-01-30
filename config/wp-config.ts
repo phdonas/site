@@ -3,8 +3,8 @@
  * Configurações de conexão com o WordPress Headless
  */
 export const WP_CONFIG = {
-  // Ativando um proxy robusto para ignorar bloqueios de CORS do servidor
-  CORS_PROXY: 'https://api.allorigins.win/raw?url=', 
+  // AllOrigins /get é o mais robusto para contornar bloqueios de segurança em modo preview
+  CORS_PROXY: 'https://api.allorigins.win/get?url=', 
   
   // URL base da API do seu WordPress
   BASE_URL: 'https://phdonassolo.com/wp-json/wp/v2',
@@ -17,5 +17,6 @@ export const WP_CONFIG = {
     BOOKS: '/livros'
   },
   
+  // Define se o app deve tentar buscar dados reais ou usar apenas exemplos
   USE_LIVE_DATA: true 
 };
