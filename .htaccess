@@ -1,16 +1,24 @@
 
-# BEGIN WordPress CORS
+# BEGIN React Routing
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+  
+  # Ignorar a pasta do WordPress física
+  RewriteRule ^wordpress($|/) - [L]
+  
+  # Redirecionar todo o resto para o index.html do React
+  RewriteRule ^index\.html$ - [L]
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteCond %{REQUEST_URI} !^/wordpress [NC]
+  RewriteRule . /index.html [L]
+</IfModule>
+# END React Routing
+
+# CORS para o WordPress (Caso o .htaccess interno falhe)
 <IfModule mod_headers.c>
     Header set Access-Control-Allow-Origin "*"
-    Header set Access-Control-Allow-Methods "GET, POST, OPTIONS, DELETE, PUT"
-    Header set Access-Control-Allow-Headers "Origin, Content-Type, Accept, Authorization, X-WP-Nonce"
-    Header set Access-Control-Allow-Credentials "true"
+    Header set Access-Control-Allow-Methods "GET, POST, OPTIONS"
+    Header set Access-Control-Allow-Headers "Origin, Content-Type, Accept"
 </IfModule>
-
-# Permitir requisições OPTIONS sem autenticação (importante para CORS pre-flight)
-RewriteEngine On
-RewriteCond % {REQUEST_METHOD} OPTIONS
-RewriteRule ^(.*)$ $1 [R=200,L]
-# END WordPress CORS
-
-# Resto das configurações padrão do WordPress abaixo...

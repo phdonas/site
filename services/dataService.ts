@@ -2,8 +2,8 @@
 import { MOCK_ARTICLES, MOCK_COURSES, MOCK_RESOURCES, PILLARS } from '../constants';
 import { Article, Course, Resource, Pillar, PillarId } from '../types';
 
-const CACHE_KEY_ARTICLES = 'phd_articles_v15';
-const CACHE_KEY_VIDEOS = 'phd_videos_v15';
+const CACHE_KEY_ARTICLES = 'phd_articles_v16';
+const CACHE_KEY_VIDEOS = 'phd_videos_v16';
 
 let memoryArticles: Article[] = JSON.parse(localStorage.getItem(CACHE_KEY_ARTICLES) || '[]');
 let memoryVideos: any[] = JSON.parse(localStorage.getItem(CACHE_KEY_VIDEOS) || '[]');
@@ -43,9 +43,10 @@ const mapWPPostToArticle = (post: any): Article => {
 };
 
 const secureFetch = async (endpoint: string) => {
+  // URLs agora incluem o caminho /wordpress
   const urls = [
-    `https://www.phdonassolo.com/wp-json/wp/v2${endpoint}`,
-    `https://phdonassolo.com/wp-json/wp/v2${endpoint}`
+    `https://www.phdonassolo.com/wordpress/wp-json/wp/v2${endpoint}`,
+    `https://phdonassolo.com/wordpress/wp-json/wp/v2${endpoint}`
   ];
 
   for (const url of urls) {
@@ -59,7 +60,7 @@ const secureFetch = async (endpoint: string) => {
         if (Array.isArray(data) || (data && data.id)) return data;
       }
     } catch (e) {
-      console.warn("Falha direta, tentando proxy...");
+      console.warn("Falha direta no novo caminho, tentando proxy...");
     }
 
     try {
@@ -102,7 +103,7 @@ export const DataService = {
       localStorage.setItem(CACHE_KEY_ARTICLES, JSON.stringify(mapped));
       return mapped.slice(0, limit);
     }
-    return memoryArticles.slice(0, limit);
+    return memoryArticles.length > 0 ? memoryArticles.slice(0, limit) : MOCK_ARTICLES;
   },
 
   async getVideos(limit = 4, force = false): Promise<any[]> {
@@ -112,7 +113,7 @@ export const DataService = {
     if (Array.isArray(posts)) {
       const mapped = posts
         .filter(p => {
-          const c = p.content.rendered.toLowerCase();
+          const c = (p.content.rendered || '').toLowerCase();
           return c.includes('<iframe') || c.includes('youtube.com') || c.includes('vimeo.com') || c.includes('wp-block-embed');
         })
         .map(p => ({
@@ -126,7 +127,7 @@ export const DataService = {
       localStorage.setItem(CACHE_KEY_VIDEOS, JSON.stringify(mapped));
       return mapped.slice(0, limit);
     }
-    return memoryVideos.slice(0, limit);
+    return memoryVideos;
   },
 
   async getArticleById(id: string): Promise<Article | undefined> {
