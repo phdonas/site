@@ -1,0 +1,8 @@
+{
+  "name": "PH Donassolo - Digital Hub",
+  "description": "A premium, Apple-inspired content hub for education, real estate consultancy, and professional courses by Paulo Donassolo.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
