@@ -24,6 +24,11 @@
 
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
+    <script>
+      // Mock do ambiente process para o navegador (evita erro de inicialização na IA)
+      window.process = { env: { API_KEY: "" } };
+    </script>
+
     <style>
       body { font-family: 'Inter', sans-serif; background-color: #fbfbfd; color: #1d1d1f; margin: 0; overflow-x: hidden; }
       .apple-blur { backdrop-filter: saturate(180%) blur(20px); background-color: rgba(251, 251, 253, 0.8); }
@@ -37,7 +42,7 @@
       <div class="flex items-center justify-center min-h-screen bg-white">
         <div class="flex flex-col items-center gap-4">
           <div class="w-8 h-8 border-2 border-gray-100 border-t-blue-600 rounded-full animate-spin"></div>
-          <p class="text-[10px] text-gray-400 font-bold tracking-[0.2em] uppercase">Sincronizando Ecossistema...</p>
+          <p class="text-[10px] text-gray-400 font-bold tracking-[0.2em] uppercase">Iniciando Ecossistema Digital...</p>
         </div>
       </div>
     </div>
@@ -48,13 +53,15 @@
       window.onerror = function(msg, url, line) {
         if (msg.includes('Script error')) return;
         const display = document.getElementById('error-display');
-        display.style.display = 'block';
-        display.innerHTML = `<strong>Erro de Carregamento:</strong><br>${msg}<br><br><small>Arquivo: ${url} (Linha ${line})</small>`;
+        if (display) {
+          display.style.display = 'block';
+          display.innerHTML = `<strong>Erro Crítico:</strong><br>${msg}<br><br><small>Fonte: ${url}:${line}</small>`;
+        }
         return false;
       };
     </script>
 
-    <!-- Usando data-src para que o Babel gerencie o carregamento do arquivo externo com segurança -->
+    <!-- O Babel processa o arquivo index.tsx e gerencia as importações -->
     <script type="text/babel" data-src="index.tsx" data-presets="react,typescript"></script>
   </body>
 </html>

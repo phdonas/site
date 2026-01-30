@@ -1,35 +1,33 @@
-# BEGIN PH HUB - CONFIGURAÇÃO DE AMBIENTE HOSTGATOR
+# PH DONASSOLO - CONFIGURAÇÃO AMBIENTE
 <IfModule mod_rewrite.c>
-  RewriteEngine On
-  RewriteBase /
-  
-  # 1. Ignorar explicitamente a pasta do WordPress e a API
-  RewriteCond %{REQUEST_URI} ^/wordpress [NC]
-  RewriteRule . - [L]
-  
-  # 2. Ignorar arquivos de código e recursos para evitar erro 'Unexpected token <'
-  RewriteCond %{REQUEST_FILENAME} \.(js|ts|tsx|jsx|css|png|jpg|jpeg|gif|ico|svg|pdf|json)$ [NC]
-  RewriteRule . - [L]
+    RewriteEngine On
+    RewriteBase /
 
-  # 3. Se o arquivo ou pasta física existir, serve ele diretamente
-  RewriteCond %{REQUEST_FILENAME} -f [OR]
-  RewriteCond %{REQUEST_FILENAME} -d
-  RewriteRule ^ - [L]
-  
-  # 4. Fallback para o index.html (SPA routing)
-  RewriteRule . /index.html [L]
+    # Exceção para a pasta do WordPress
+    RewriteRule ^wordpress/ - [L,NC]
+
+    # Servir arquivos estáticos se existirem
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule . - [L]
+
+    # NÃO redirecionar scripts para o index.html
+    RewriteCond %{REQUEST_URI} \.(tsx|ts|js|jsx|css|json)$ [NC]
+    RewriteRule . - [L]
+
+    # SPA Routing
+    RewriteRule ^ index.html [L]
 </IfModule>
 
 <IfModule mod_mime.c>
-  # Forçar o tipo MIME correto para que o Babel/Navegador não se confundam
-  AddType application/javascript .tsx
-  AddType application/javascript .ts
+    # Fundamental para o Babel no cPanel reconhecer os arquivos
+    AddType application/javascript .tsx
+    AddType application/javascript .ts
 </IfModule>
 
 <IfModule mod_headers.c>
     Header set Access-Control-Allow-Origin "*"
-    <FilesMatch "\.(html|tsx|ts)$">
+    <FilesMatch "\.(tsx|ts|html)$">
         Header set Cache-Control "max-age=0, no-cache, no-store, must-revalidate"
     </FilesMatch>
 </IfModule>
-# END PH HUB
