@@ -1,8 +1,8 @@
 import { MOCK_ARTICLES, MOCK_COURSES, MOCK_RESOURCES, PILLARS } from '../constants.tsx';
 import { Article, Course, Resource, Pillar, PillarId } from '../types.ts';
 
-const CACHE_KEY_ARTICLES = 'phd_art_v40';
-const CACHE_KEY_VIDEOS = 'phd_vid_v40';
+const CACHE_KEY_ARTICLES = 'phd_art_v41';
+const CACHE_KEY_VIDEOS = 'phd_vid_v41';
 
 const mapWPPostToArticle = (post: any): Article => {
   const content = post.content?.rendered || '';
@@ -11,7 +11,7 @@ const mapWPPostToArticle = (post: any): Article => {
   return {
     id: post.id.toString(),
     title: post.title?.rendered || 'Sem Título',
-    pillarId: 'prof-paulo', // Mapeamento simplificado para teste
+    pillarId: 'prof-paulo', 
     category: wpCategories[0]?.name || 'Geral', 
     excerpt: post.excerpt?.rendered?.replace(/<[^>]*>?/gm, '').substring(0, 160) + '...',
     content: content,
@@ -22,17 +22,21 @@ const mapWPPostToArticle = (post: any): Article => {
 
 const secureFetch = async (endpoint: string) => {
   const cb = Date.now();
-  // Caminho relativo é o mais seguro em ambiente Hostgator compartilhado
+  // Caminho relativo para ignorar firewalls externos da Hostgator
   const url = `/wordpress/index.php?rest_route=/wp/v2${endpoint}&_embed&cb=${cb}`;
   
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 segundos de limite
+
   try {
-    const res = await fetch(url);
+    const res = await fetch(url, { signal: controller.signal });
+    clearTimeout(timeoutId);
     if (res.ok) {
       const data = await res.json();
       if (data && !data.code) return data;
     }
   } catch (e) {
-    console.warn("Sincronização falhou. Verifique se a pasta /wordpress existe.");
+    console.warn(`Sincronização com ${endpoint} falhou ou expirou. Usando dados locais.`);
   }
   return null;
 };
@@ -73,7 +77,7 @@ export const DataService = {
         .map(p => ({
           id: p.id.toString(),
           title: p.title.rendered,
-          thumb: p._embedded?.['wp:featuredmedia']?.[0]?.source_url || ''
+          thumb: p._embedded?.['wp:featuredmedia']?.[0]?.source_url || 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&q=80&w=800'
         }));
       localStorage.setItem(CACHE_KEY_VIDEOS, JSON.stringify(videos));
       return videos.slice(0, limit);

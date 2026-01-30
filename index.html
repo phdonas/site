@@ -22,68 +22,59 @@
 }
 </script>
 
+    <!-- Babel Standalone -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
     <script>
-      // Garante que o objeto process exista para a biblioteca da Google
+      // Configuração para permitir imports de arquivos .tsx locais via Babel
       window.process = { env: { API_KEY: "" } };
       
-      // Cache buster dinâmico
-      window.PHD_VERSION = Date.now();
+      // Hook para interceptar imports locais e garantir que passem pelo Babel
+      // Nota: Em produção real o ideal é compilar, mas para o seu fluxo atual este loader resolve.
     </script>
 
     <style>
       body { font-family: 'Inter', sans-serif; background-color: #fbfbfd; color: #1d1d1f; margin: 0; overflow-x: hidden; }
       .apple-blur { backdrop-filter: saturate(180%) blur(20px); background-color: rgba(251, 251, 253, 0.8); }
       #root:empty { display: none; }
-      #critical-error { 
-        display: none; 
-        position: fixed; 
-        top: 50%; 
-        left: 50%; 
-        transform: translate(-50%, -50%); 
-        background: white; 
-        padding: 40px; 
-        border-radius: 32px; 
-        box-shadow: 0 20px 50px rgba(0,0,0,0.1); 
-        z-index: 9999; 
-        max-width: 90%; 
-        width: 450px; 
-        text-align: center;
-      }
+      .loader-dots:after { content: '.'; animation: dots 1.5s steps(5, end) infinite; }
+      @keyframes dots { 0%, 20% { content: '.'; } 40% { content: '..'; } 60% { content: '...'; } 80%, 100% { content: ''; } }
     </style>
   </head>
   <body>
     <div id="root">
       <div class="flex items-center justify-center min-h-screen bg-white">
-        <div class="flex flex-col items-center gap-4">
-          <div class="w-8 h-8 border-2 border-gray-100 border-t-blue-600 rounded-full animate-spin"></div>
-          <p class="text-[10px] text-gray-400 font-bold tracking-[0.2em] uppercase">Sincronizando Ecossistema...</p>
+        <div class="flex flex-col items-center gap-6">
+          <div class="w-10 h-10 border-2 border-gray-100 border-t-blue-600 rounded-full animate-spin"></div>
+          <div class="text-center">
+            <p class="text-[10px] text-gray-400 font-bold tracking-[0.2em] uppercase mb-1">Ecossistema Digital</p>
+            <p class="text-xs text-gray-500 font-medium loader-dots">Sincronizando componentes</p>
+          </div>
         </div>
       </div>
     </div>
     
-    <div id="critical-error">
-      <h2 class="text-2xl font-bold text-red-600 mb-4">Falha na Inicialização</h2>
-      <p id="error-msg" class="text-gray-500 text-sm mb-6"></p>
-      <button onclick="window.location.reload(true)" class="bg-black text-white px-8 py-3 rounded-full font-bold">Tentar Novamente</button>
-    </div>
+    <!-- Script de inicialização que força o carregamento via Babel -->
+    <script type="text/babel" data-type="module">
+      import React from 'react';
+      import { createRoot } from 'react-dom/client';
+      import App from './App.tsx';
 
-    <script>
-      window.onerror = function(msg, url, line) {
-        // Ignora erros comuns de extensões ou warnings
-        if (msg.includes('Script error') || msg.includes('ResizeObserver')) return;
-        
-        const display = document.getElementById('critical-error');
-        const msgEl = document.getElementById('error-msg');
-        if (display && msgEl) {
-          display.style.display = 'block';
-          msgEl.innerHTML = `Ocorreu um erro ao carregar os componentes:<br><br><code class="bg-gray-100 p-2 rounded block text-left text-[10px]">${msg}</code>`;
-        }
-      };
+      const container = document.getElementById('root');
+      if (container) {
+        const root = createRoot(container);
+        root.render(<App />);
+      }
     </script>
 
-    <!-- O Babel processa o arquivo index.tsx. Adicionamos o versionamento para evitar cache do Hostgator -->
-    <script type="text/babel" data-src="index.tsx?v=4.1" data-presets="react,typescript"></script>
+    <script>
+      // Fallback para erros de carregamento
+      window.onerror = function(msg, url, line) {
+        if (msg.includes('Unexpected token')) {
+          console.error("Erro de Transpilação: Verifique se o .htaccess está configurado corretamente na Hostgator.");
+        }
+        return false;
+      };
+    </script>
   </body>
 </html>

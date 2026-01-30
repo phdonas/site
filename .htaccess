@@ -3,32 +3,31 @@
     RewriteEngine On
     RewriteBase /
 
-    # 1. IGNORAR COMPLETAMENTE A PASTA WORDPRESS
+    # 1. Ignorar a pasta do WordPress (essencial para a API funcionar)
     RewriteRule ^wordpress/ - [L,NC]
 
-    # 2. NÃO REDIRECIONAR ARQUIVOS QUE REALMENTE EXISTEM
+    # 2. Se o arquivo ou pasta existir fisicamente, não redirecione
     RewriteCond %{REQUEST_FILENAME} -f [OR]
     RewriteCond %{REQUEST_FILENAME} -d
     RewriteRule . - [L]
 
-    # 3. EXCEÇÃO CRÍTICA PARA SCRIPTS (Evita o erro Unexpected token <)
-    # Se a URL termina com essas extensões, não aplique a regra do SPA
-    RewriteCond %{REQUEST_URI} \.(tsx|ts|js|jsx|css|json|png|jpg|jpeg|gif|ico|svg)$ [NC]
+    # 3. EXCEÇÃO CRÍTICA: Arquivos de código NÃO devem ser redirecionados para o index.html
+    # Isso evita que o Babel receba HTML quando pede um .tsx
+    RewriteCond %{REQUEST_URI} \.(tsx|ts|js|jsx|css|json)$ [NC]
     RewriteRule . - [L]
 
-    # 4. SPA ROUTING (Somente para rotas de navegação)
-    # Tudo o que restou e não é um arquivo real vai para o index.html
+    # 4. SPA Routing: Tudo o que não for arquivo real vai para o index.html
     RewriteRule ^ index.html [L]
 </IfModule>
 
 <IfModule mod_mime.c>
-    # Força o servidor a tratar .tsx e .ts como JavaScript para o Babel processar
+    # Informa ao servidor que .tsx e .ts são arquivos de script
     AddType application/javascript .tsx
     AddType application/javascript .ts
 </IfModule>
 
 <IfModule mod_headers.c>
-    # Prevenção de Cache agressiva para arquivos de código durante o desenvolvimento
+    # Desabilita cache para arquivos de desenvolvimento para ver as mudanças na hora
     <FilesMatch "\.(tsx|ts|html)$">
         Header set Cache-Control "max-age=0, no-cache, no-store, must-revalidate"
     </FilesMatch>
