@@ -16,12 +16,13 @@
     "react-dom/client": "https://esm.sh/react-dom@19.0.0/client",
     "lucide-react": "https://esm.sh/lucide-react@0.460.0",
     "@google/genai": "https://esm.sh/@google/genai@1.3.0",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
     "react/": "https://esm.sh/react@^19.2.4/"
   }
 }
 </script>
 
-    <!-- Babel Standalone para converter TSX em JS no navegador -->
+    <!-- Babel Standalone para transformar TSX em JS no navegador -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
     <style>
@@ -29,7 +30,7 @@
       .apple-blur { backdrop-filter: saturate(180%) blur(20px); background-color: rgba(251, 251, 253, 0.8); }
       .card-shadow { box-shadow: 0 4px 24px rgba(0,0,0,0.04); transition: all 0.4s ease; }
       .no-scrollbar::-webkit-scrollbar { display: none; }
-      #error-display { display: none; padding: 20px; background: #fff5f5; color: #c53030; font-family: monospace; font-size: 12px; border: 1px solid #feb2b2; margin: 20px; border-radius: 8px; }
+      #error-display { display: none; padding: 20px; background: #fff5f5; color: #c53030; font-family: monospace; font-size: 12px; border: 1px solid #feb2b2; margin: 20px; border-radius: 8px; z-index: 9999; }
     </style>
   </head>
   <body>
@@ -37,7 +38,7 @@
       <div class="flex items-center justify-center min-h-screen bg-white">
         <div class="flex flex-col items-center gap-4">
           <div class="w-8 h-8 border-2 border-gray-200 border-t-black rounded-full animate-spin"></div>
-          <p class="text-xs text-gray-400 font-medium">Carregando Hub Digital...</p>
+          <p class="text-xs text-gray-400 font-medium tracking-tight">Carregando Hub Digital...</p>
         </div>
       </div>
     </div>
@@ -45,31 +46,24 @@
     <div id="error-display"></div>
 
     <script>
-      // Capturador de erros para diagnosticar a "Tela Branca"
-      window.onerror = function(msg, url, lineNo, columnNo, error) {
+      window.onerror = function(msg, url, line) {
         const display = document.getElementById('error-display');
         display.style.display = 'block';
-        display.innerHTML = `<strong>Erro de Inicialização:</strong><br>${msg}<br><br><small>Arquivo: ${url} (Linha ${lineNo})</small>`;
+        display.innerHTML = `<strong>Erro de Inicialização:</strong><br>${msg}<br><br><small>Arquivo: ${url} (Linha ${line})</small>`;
         return false;
       };
     </script>
 
-    <!-- Script principal processado pelo Babel -->
+    <!-- Script de Bootstrap processado pelo Babel -->
     <script type="text/babel" data-type="module" data-presets="react,typescript,env">
       import React from 'react';
       import { createRoot } from 'react-dom/client';
       import App from './App.tsx';
 
-      try {
-        const container = document.getElementById('root');
-        if (container) {
-          const root = createRoot(container);
-          root.render(<App />);
-        }
-      } catch (err) {
-        console.error("Erro ao renderizar App:", err);
-        document.getElementById('error-display').style.display = 'block';
-        document.getElementById('error-display').innerText = "Erro ao renderizar interface: " + err.message;
+      const container = document.getElementById('root');
+      if (container) {
+        const root = createRoot(container);
+        root.render(<App />);
       }
     </script>
   </body>
