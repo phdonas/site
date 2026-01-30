@@ -1,9 +1,8 @@
 import { MOCK_ARTICLES, MOCK_COURSES, MOCK_RESOURCES, PILLARS } from '../constants.tsx';
 import { Article, Course, Resource, Pillar, PillarId } from '../types.ts';
-import { WP_CONFIG } from '../config/wp-config.ts';
 
-const CACHE_KEY_ARTICLES = 'phd_articles_v28';
-const CACHE_KEY_VIDEOS = 'phd_videos_v28';
+const CACHE_KEY_ARTICLES = 'phd_articles_v30';
+const CACHE_KEY_VIDEOS = 'phd_videos_v30';
 
 const mapCategoryToPillar = (wpCategories: any[]): PillarId => {
   if (!wpCategories || wpCategories.length === 0) return 'prof-paulo';
@@ -27,7 +26,7 @@ const mapWPPostToArticle = (post: any): Article => {
   const wpCategories = post._embedded?.['wp:term']?.[0] || [];
   return {
     id: post.id.toString(),
-    title: post.title.rendered,
+    title: post.title?.rendered || 'Sem Título',
     pillarId: mapCategoryToPillar(wpCategories),
     category: wpCategories[0]?.name || 'Geral', 
     excerpt: post.excerpt?.rendered?.replace(/<[^>]*>?/gm, '').substring(0, 160) + '...',
@@ -37,34 +36,30 @@ const mapWPPostToArticle = (post: any): Article => {
   };
 };
 
-const tryParseJson = async (response: Response) => {
-  const contentType = response.headers.get("content-type");
-  if (!contentType || !contentType.includes("application/json")) return null;
-  try {
-    return await response.json();
-  } catch (e) {
-    return null;
-  }
-};
-
 const secureFetch = async (endpoint: string) => {
-  const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+  // Na Hostgator, se os links permanentes não forem "Nome do Post", a API só funciona via rest_route
   const targets = [
-    `/wordpress/wp-json/wp/v2${cleanEndpoint}`,
-    `https://phdonassolo.com/wordpress/wp-json/wp/v2${cleanEndpoint}`
+    `/wordpress/wp-json/wp/v2${endpoint}`, // Tentativa 1: URL Padrão
+    `/wordpress/index.php?rest_route=/wp/v2${endpoint}`, // Tentativa 2: Fallback rest_route
+    `https://phdonassolo.com/wordpress/wp-json/wp/v2${endpoint}` // Tentativa 3: Absoluta
   ];
 
   for (const url of targets) {
     try {
-      const finalUrl = `${url}${url.includes('?') ? '&' : '?'}_embed&cache_bust=${Date.now()}`;
-      const res = await fetch(finalUrl, { method: 'GET' });
+      const finalUrl = `${url}${url.includes('?') ? '&' : '?'}_embed&cb=${Date.now()}`;
+      const res = await fetch(finalUrl, { 
+        method: 'GET',
+        headers: { 'Accept': 'application/json' }
+      });
+      
       if (res.ok) {
-        const data = await tryParseJson(res);
+        const data = await res.json();
         if (data && !data.code) return data;
       }
-    } catch (e) {}
+    } catch (e) {
+      console.warn(`Falha na tentativa de conexão: ${url}`);
+    }
   }
-
   return null;
 };
 
@@ -86,12 +81,14 @@ export const DataService = {
       try {
         const parsed = JSON.parse(cached);
         if (Array.isArray(parsed) && parsed.length > 0) return parsed.slice(0, limit);
-      } catch (e) { localStorage.removeItem(CACHE_KEY_ARTICLES); }
+      } catch (e) { 
+        localStorage.removeItem(CACHE_KEY_ARTICLES); 
+      }
     }
     
     const posts = await secureFetch(`/posts?per_page=50`);
     if (Array.isArray(posts)) {
-      const mapped = posts.filter(p => p.title && p.content).map(mapWPPostToArticle);
+      const mapped = posts.map(mapWPPostToArticle);
       if (mapped.length > 0) {
         localStorage.setItem(CACHE_KEY_ARTICLES, JSON.stringify(mapped));
         return mapped.slice(0, limit);
@@ -106,7 +103,9 @@ export const DataService = {
       try {
         const parsed = JSON.parse(cached);
         if (Array.isArray(parsed)) return parsed.slice(0, limit);
-      } catch(e) { localStorage.removeItem(CACHE_KEY_VIDEOS); }
+      } catch(e) { 
+        localStorage.removeItem(CACHE_KEY_VIDEOS); 
+      }
     }
 
     const posts = await secureFetch(`/posts?per_page=50`);
@@ -118,7 +117,7 @@ export const DataService = {
         })
         .map(p => ({
           id: p.id.toString(),
-          title: p.title.rendered,
+          title: p.title?.rendered || 'Vídeo',
           thumb: p._embedded?.['wp:featuredmedia']?.[0]?.source_url || extractFirstImage(p.content.rendered)
         }));
       if (videos.length > 0) {
