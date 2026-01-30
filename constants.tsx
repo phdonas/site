@@ -53,7 +53,7 @@ export const MOCK_ARTICLES: Article[] = [
     pillarId: 'prof-paulo',
     category: 'Educação',
     excerpt: 'Como a tecnologia está moldando a nova sala de aula e o papel do mentor.',
-    content: `...`,
+    content: `<p>Conteúdo completo aqui...</p>`,
     date: '2024-05-15',
     imageUrl: 'https://images.unsplash.com/photo-1501504905252-473c47e087f8?auto=format&fit=crop&q=80&w=1200'
   },
@@ -63,7 +63,7 @@ export const MOCK_ARTICLES: Article[] = [
     pillarId: 'consultoria-imobiliaria',
     category: 'Mercado',
     excerpt: 'Análise profunda sobre onde investir nas grandes capitais brasileiras.',
-    content: `...`,
+    content: `<p>Conteúdo completo aqui...</p>`,
     date: '2024-05-10',
     imageUrl: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&q=80&w=1200'
   },
@@ -73,7 +73,7 @@ export const MOCK_ARTICLES: Article[] = [
     pillarId: '4050oumais',
     category: 'Carreira',
     excerpt: 'Por que o público sênior é a nova fronteira do consumo inteligente.',
-    content: `...`,
+    content: `<p>Conteúdo completo aqui...</p>`,
     date: '2024-05-08',
     imageUrl: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&q=80&w=1200'
   }
@@ -84,22 +84,43 @@ export const MOCK_COURSES: Course[] = [
     id: 'c1', 
     name: 'Master em Investimento Imobiliário', 
     description: 'O guia definitivo para quem deseja construir um portfólio sólido e lucrativo.',
+    longDescription: 'Este curso master foi desenhado para levar você do zero ao nível avançado em investimentos imobiliários. Abordamos desde análise de terreno até estruturação de SPEs e ciclos macroeconômicos. Aprenda a ler o mercado como um profissional e proteja seu patrimônio.',
     imageUrl: 'https://images.unsplash.com/photo-1460472178825-e51c062365d3?auto=format&fit=crop&q=80&w=800',
-    category: 'Imobiliário'
+    category: 'Imobiliário',
+    salesUrl: 'https://hotmart.com/exemplo-imobiliario',
+    videos: [
+      { title: 'Introdução aos Ciclos Imobiliários', thumbnail: 'https://picsum.photos/seed/c1v1/800/450', duration: '12:45' },
+      { title: 'Matemática Financeira para Investidores', thumbnail: 'https://picsum.photos/seed/c1v2/800/450', duration: '24:10' },
+      { title: 'Análise de Risco e Due Diligence', thumbnail: 'https://picsum.photos/seed/c1v3/800/450', duration: '18:30' }
+    ]
   },
   { 
     id: 'c2', 
     name: 'Metodologia Prof. Paulo', 
     description: 'Transforme seu conhecimento em aulas que engajam e mentorias que entregam resultados.',
+    longDescription: 'Aprenda as técnicas didáticas e de oratória que transformaram Paulo Donassolo em uma referência acadêmica. Este curso foca em metodologias ativas, design de experiências de aprendizagem e como monetizar sua expertise através de mentorias de alto ticket.',
     imageUrl: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&q=80&w=800',
-    category: 'Educação'
+    category: 'Educação',
+    salesUrl: 'https://hotmart.com/exemplo-metodologia',
+    videos: [
+      { title: 'O Mindset do Professor Mentor', thumbnail: 'https://picsum.photos/seed/c2v1/800/450', duration: '15:20' },
+      { title: 'Estruturando sua Mentoria', thumbnail: 'https://picsum.photos/seed/c2v2/800/450', duration: '21:05' },
+      { title: 'Engajamento no Ambiente Digital', thumbnail: 'https://picsum.photos/seed/c2v3/800/450', duration: '19:40' }
+    ]
   },
   { 
     id: 'c3', 
     name: 'Segurança no Setor de Gás', 
     description: 'Especialize sua equipe e evite acidentes com o treinamento padrão ouro da Academia do Gás.',
+    longDescription: 'Segurança não é apenas uma norma, é a base da rentabilidade no setor de GLP. Este curso técnico fornece todas as diretrizes da ANP e normas de segurança para revendedores, transportadores e técnicos, garantindo uma operação livre de riscos.',
     imageUrl: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&q=80&w=800',
-    category: 'Energia'
+    category: 'Energia',
+    salesUrl: 'https://hotmart.com/exemplo-gas',
+    videos: [
+      { title: 'Normas da ANP Descomplicadas', thumbnail: 'https://picsum.photos/seed/c3v1/800/450', duration: '10:15' },
+      { title: 'Prevenção e Combate a Incêndios', thumbnail: 'https://picsum.photos/seed/c3v2/800/450', duration: '28:50' },
+      { title: 'Gestão de Estoque e Segurança', thumbnail: 'https://picsum.photos/seed/c3v3/800/450', duration: '14:25' }
+    ]
   }
 ];
 

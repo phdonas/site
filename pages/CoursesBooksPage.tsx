@@ -43,9 +43,12 @@ const CoursesBooksPage: React.FC = () => {
                       {course.description}
                     </p>
                   </div>
-                  <button className="bg-black text-white w-full py-4 rounded-2xl font-bold text-lg hover:bg-gray-800 transition-all flex items-center justify-center gap-2">
+                  <a 
+                    href={`#/curso/${course.id}`}
+                    className="bg-black text-white w-full py-4 rounded-2xl font-bold text-center flex items-center justify-center gap-2 hover:bg-gray-800 transition-all text-lg"
+                  >
                     Ver Detalhes do Curso <ArrowUpRight size={20} />
-                  </button>
+                  </a>
                 </div>
               </div>
             ))}

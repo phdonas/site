@@ -32,13 +32,21 @@ export interface Resource {
   url: string;
 }
 
+export interface CourseVideo {
+  title: string;
+  thumbnail: string;
+  duration: string;
+}
+
 export interface Course {
   id: string;
   name: string;
   description: string;
+  longDescription: string;
   imageUrl: string;
-  videoUrl?: string;
   category: string;
+  salesUrl: string;
+  videos: CourseVideo[];
 }
 
 export interface Book {

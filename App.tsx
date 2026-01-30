@@ -6,6 +6,7 @@ import LoginPage from './pages/LoginPage';
 import AdminPage from './pages/AdminPage';
 import ArticlesPage from './pages/ArticlesPage';
 import ArticleDetailPage from './pages/ArticleDetailPage';
+import CourseDetailPage from './pages/CourseDetailPage';
 import ServicesPage from './pages/ServicesPage';
 import DownloadsPage from './pages/DownloadsPage';
 import ContactPage from './pages/ContactPage';
@@ -34,6 +35,12 @@ const App: React.FC = () => {
     if (currentHash.startsWith('#/artigo/')) {
       const articleId = currentHash.replace('#/artigo/', '');
       return <ArticleDetailPage articleId={articleId} />;
+    }
+
+    // Handling dynamic route for course details
+    if (currentHash.startsWith('#/curso/')) {
+      const courseId = currentHash.replace('#/curso/', '');
+      return <CourseDetailPage courseId={courseId} />;
     }
 
     // Handle hash sections for pillars page (e.g. #/pilares#prof-paulo)

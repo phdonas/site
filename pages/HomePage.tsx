@@ -12,9 +12,8 @@ const HomePage: React.FC = () => {
       <Hero />
       <PillarGrid />
       <ServicesSection />
-      <ArticleGallery />
       
-      {/* Short Videos Section */}
+      {/* Short Videos Section - Moved Up */}
       <section className="py-20 px-6 bg-black text-white overflow-hidden">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-4xl md:text-5xl font-bold mb-12 text-center">Aulas Curtas & Insights</h2>
@@ -39,6 +38,8 @@ const HomePage: React.FC = () => {
           </div>
         </div>
       </section>
+
+      <ArticleGallery />
 
       <LeadForm />
     </main>
