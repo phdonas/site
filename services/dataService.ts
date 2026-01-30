@@ -38,10 +38,31 @@ export const DataService = {
       const response = await fetch(`${WP_CONFIG.BASE_URL}${WP_CONFIG.ENDPOINTS.POSTS}?_embed&per_page=12`);
       if (!response.ok) throw new Error('CORS ou Erro de Conexão');
       const posts = await response.json();
-      return posts.map(mapWPPostToArticle);
+      // Filtra posts que NÃO são da categoria de vídeos para a galeria de artigos
+      return posts
+        .filter((p: any) => !p._embedded?.['wp:term']?.[0]?.some((cat: any) => cat.slug === 'videos'))
+        .map(mapWPPostToArticle);
     } catch (error) {
-      console.warn('Usando dados simulados (Verifique o Plugin de CORS no WP):', error);
+      console.warn('Usando dados simulados para artigos:', error);
       return MOCK_ARTICLES;
+    }
+  },
+
+  async getVideos(): Promise<any[]> {
+    if (!WP_CONFIG.USE_LIVE_DATA) return [1, 2, 3, 4].map(i => ({ id: i, title: `Aula Exemplo ${i}`, thumb: `https://picsum.photos/400/700?random=${i}` }));
+    
+    try {
+      // Busca posts da categoria 'videos'
+      const response = await fetch(`${WP_CONFIG.BASE_URL}${WP_CONFIG.ENDPOINTS.POSTS}?_embed&category_slug=videos&per_page=4`);
+      if (!response.ok) return [];
+      const posts = await response.json();
+      return posts.map((p: any) => ({
+        id: p.id,
+        title: p.title.rendered,
+        thumb: p._embedded?.['wp:featuredmedia']?.[0]?.source_url || `https://picsum.photos/400/700?random=${p.id}`
+      }));
+    } catch (error) {
+      return [];
     }
   },
 
@@ -57,27 +78,16 @@ export const DataService = {
     }
   },
 
-  async getArticlesByPillar(pillarId: string): Promise<Article[]> {
-    const all = await this.getArticles();
-    return all.filter(a => a.pillarId === pillarId);
-  },
-
   async getCourses(): Promise<Course[]> {
     return MOCK_COURSES;
   },
 
+  // Fix: Added getCourseById to resolve missing property error in CourseDetailPage.tsx
   async getCourseById(id: string): Promise<Course | undefined> {
     return MOCK_COURSES.find(c => c.id === id);
   },
 
-  async getBooks(): Promise<Book[]> {
-    return MOCK_BOOKS;
-  },
-
-  // DOWNLOADS DINÂMICOS
   async getResources(): Promise<Resource[]> {
-    // Por enquanto, o WordPress não tem um campo padrão de 'Download'
-    // Mantemos o Mock mas preparamos para receber de uma categoria 'Downloads' do WP no futuro
     return MOCK_RESOURCES;
   },
 
