@@ -1,1 +1,1 @@
-// O ponto de entrada agora é gerenciado pelo script no index.html para garantir compatibilidade com Babel Standalone na Hostgator.
+// Inicialização movida para o index.html para compatibilidade com ambiente sem build (Hostgator).

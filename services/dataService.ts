@@ -2,8 +2,8 @@ import { MOCK_ARTICLES, MOCK_COURSES, MOCK_RESOURCES, PILLARS } from '../constan
 import { Article, Course, Resource, Pillar, PillarId } from '../types.ts';
 import { WP_CONFIG } from '../config/wp-config.ts';
 
-const CACHE_KEY_ARTICLES = 'phd_articles_v27';
-const CACHE_KEY_VIDEOS = 'phd_videos_v27';
+const CACHE_KEY_ARTICLES = 'phd_articles_v28';
+const CACHE_KEY_VIDEOS = 'phd_videos_v28';
 
 const mapCategoryToPillar = (wpCategories: any[]): PillarId => {
   if (!wpCategories || wpCategories.length === 0) return 'prof-paulo';
@@ -51,7 +51,6 @@ const secureFetch = async (endpoint: string) => {
   const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
   const targets = [
     `/wordpress/wp-json/wp/v2${cleanEndpoint}`,
-    `${window.location.origin}/wordpress/wp-json/wp/v2${cleanEndpoint}`,
     `https://phdonassolo.com/wordpress/wp-json/wp/v2${cleanEndpoint}`
   ];
 
@@ -65,16 +64,6 @@ const secureFetch = async (endpoint: string) => {
       }
     } catch (e) {}
   }
-
-  const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targets[2])}&nocache=${Date.now()}`;
-  try {
-    const res = await fetch(proxyUrl);
-    const wrapper = await res.json();
-    if (wrapper?.contents) {
-      const json = JSON.parse(wrapper.contents);
-      if (json && !json.code) return json;
-    }
-  } catch (e) {}
 
   return null;
 };

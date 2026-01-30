@@ -5,8 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     
     <title>PH Donassolo | Hub de Conteúdo</title>
-    <meta name="description" content="Hub de conteúdo premium de Paulo Donassolo." />
+    <meta name="description" content="Hub de conteúdo premium de Paulo Donassolo inspirado na UI/UX da Apple." />
 
+    <!-- Tailwind para Estilização -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
@@ -23,6 +24,7 @@
 }
 </script>
 
+    <!-- Babel Standalone para processar TSX no navegador (Essencial para Hostgator) -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
     <style>
@@ -36,13 +38,6 @@
         backdrop-filter: saturate(180%) blur(20px);
         background-color: rgba(251, 251, 253, 0.8);
       }
-      .wp-content-render img {
-        border-radius: 1.5rem;
-        height: auto;
-        max-width: 100%;
-        margin: 2.5rem auto;
-        display: block;
-      }
       .card-shadow {
         box-shadow: 0 4px 24px rgba(0,0,0,0.04);
         transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -51,27 +46,62 @@
         box-shadow: 0 12px 48px rgba(0,0,0,0.08);
         transform: scale(1.01);
       }
-      .no-scrollbar::-webkit-scrollbar {
-          display: none;
-      }
-      .no-scrollbar {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-      }
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      
+      /* Previne FOUC (Flash of Unstyled Content) */
+      [react-cloak] { display: none; }
     </style>
   </head>
   <body>
-    <div id="root"></div>
-    <script type="text/babel" data-type="module" data-presets="react,typescript">
-      import React from 'react';
-      import { createRoot } from 'react-dom/client';
-      import App from './App.tsx';
+    <div id="root">
+      <!-- Loading state enquanto o Babel processa -->
+      <div className="flex items-center justify-center min-h-screen bg-white">
+        <div className="w-8 h-8 border-2 border-gray-200 border-t-black rounded-full animate-spin"></div>
+      </div>
+    </div>
 
-      const rootElement = document.getElementById('root');
-      if (rootElement) {
-        const root = createRoot(rootElement);
-        root.render(<App />);
-      }
+    <!-- Script de Inicialização -->
+    <script type="text/babel" data-type="module" data-presets="react,typescript">
+      import React, { useState, useEffect } from 'react';
+      import { createRoot } from 'react-dom/client';
+      
+      // Carregamento dinâmico do App para evitar erro de sintaxe 'Unexpected token <'
+      // Na Hostgator, precisamos garantir que o Babel processe o arquivo App.tsx
+      const init = async () => {
+        try {
+          const response = await fetch('./App.tsx');
+          const code = await response.text();
+          
+          // Transpila o código do App.tsx manualmente se o import nativo falhar
+          const transformed = Babel.transform(code, {
+            presets: ['react', 'typescript'],
+            filename: 'App.tsx'
+          }).code;
+
+          // Cria um Blob para carregar o código como um módulo
+          const blob = new Blob([transformed], { type: 'application/javascript' });
+          const url = URL.createObjectURL(blob);
+          const { default: App } = await import(url);
+
+          const rootElement = document.getElementById('root');
+          if (rootElement) {
+            const root = createRoot(rootElement);
+            root.render(<App />);
+          }
+        } catch (err) {
+          console.error("Erro ao inicializar App:", err);
+          document.getElementById('root').innerHTML = `
+            <div style="padding: 40px; text-align: center; font-family: sans-serif;">
+              <h1 style="font-size: 24px;">Erro de Carregamento</h1>
+              <p style="color: #666;">Não foi possível carregar os componentes. Por favor, limpe o cache do navegador e tente novamente.</p>
+              <button onclick="window.location.reload()" style="background: black; color: white; border: none; padding: 10px 20px; border-radius: 20px; cursor: pointer; margin-top: 20px;">Recarregar Site</button>
+            </div>
+          `;
+        }
+      };
+
+      init();
     </script>
   </body>
 </html>

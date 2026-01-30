@@ -1,6 +1,4 @@
 ---
 deployment:
   tasks:
-    - export DEPLOYPATH=/home/$USER/public_html/
-    - /bin/cp -R * $DEPLOYPATH
-    - /bin/echo "Deploy finalizado com sucesso em $DEPLOYPATH"
+    - /bin/cp -R * public_html/
