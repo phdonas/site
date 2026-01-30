@@ -26,7 +26,7 @@ const PillarGrid: React.FC = () => {
               </div>
               <div className="mt-8">
                 <a 
-                  href={pillar.link}
+                  href={`#/pilares#${pillar.id}`}
                   className="inline-flex items-center text-lg font-semibold text-blue-600 hover:underline"
                 >
                   Saiba mais <span className="ml-1 text-2xl">›</span>

@@ -16,6 +16,8 @@ export interface Pillar {
   id: PillarId;
   title: string;
   description: string;
+  longDescription?: string;
+  imageUrl?: string;
   icon: string;
   accentColor: string;
   link: string;
@@ -33,6 +35,18 @@ export interface Resource {
 export interface Course {
   id: string;
   name: string;
+  description: string;
+  imageUrl: string;
+  videoUrl?: string;
+  category: string;
+}
+
+export interface Book {
+  id: string;
+  title: string;
+  description: string;
+  imageUrl: string;
+  buyUrl: string;
 }
 
 export interface Student {

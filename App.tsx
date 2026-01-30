@@ -5,9 +5,12 @@ import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import AdminPage from './pages/AdminPage';
 import ArticlesPage from './pages/ArticlesPage';
+import ArticleDetailPage from './pages/ArticleDetailPage';
 import ServicesPage from './pages/ServicesPage';
 import DownloadsPage from './pages/DownloadsPage';
 import ContactPage from './pages/ContactPage';
+import PillarsPage from './pages/PillarsPage';
+import CoursesBooksPage from './pages/CoursesBooksPage';
 import AIChat from './components/AIChat';
 
 const App: React.FC = () => {
@@ -16,13 +19,28 @@ const App: React.FC = () => {
   useEffect(() => {
     const handleHashChange = () => {
       setCurrentHash(window.location.hash || '#/');
-      window.scrollTo(0, 0); // Reset scroll on route change
+      
+      // Don't scroll to top if we're jumping to an anchor on the same page
+      if (!window.location.hash.includes('#/pilares#')) {
+        window.scrollTo(0, 0);
+      }
     };
     window.addEventListener('hashchange', handleHashChange);
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
   const renderContent = () => {
+    // Handling dynamic route for article details
+    if (currentHash.startsWith('#/artigo/')) {
+      const articleId = currentHash.replace('#/artigo/', '');
+      return <ArticleDetailPage articleId={articleId} />;
+    }
+
+    // Handle hash sections for pillars page (e.g. #/pilares#prof-paulo)
+    if (currentHash.startsWith('#/pilares')) {
+      return <PillarsPage />;
+    }
+
     switch (currentHash) {
       case '#/login': return <LoginPage />;
       case '#/admin': return <AdminPage />;
@@ -30,6 +48,7 @@ const App: React.FC = () => {
       case '#/servicos': return <ServicesPage />;
       case '#/downloads': return <DownloadsPage />;
       case '#/contato': return <ContactPage />;
+      case '#/livros': return <CoursesBooksPage />;
       default: return <HomePage />;
     }
   };
@@ -59,7 +78,7 @@ const App: React.FC = () => {
               <h4 className="font-bold text-xs uppercase text-gray-400 mb-4">Conteúdo</h4>
               <ul className="text-sm space-y-2 text-gray-600">
                 <li><a href="#/artigos" className="hover:underline">Artigos</a></li>
-                <li><a href="#" className="hover:underline">Livros</a></li>
+                <li><a href="#/livros" className="hover:underline">Livros</a></li>
                 <li><a href="#/downloads" className="hover:underline">Downloads</a></li>
               </ul>
             </div>
@@ -72,10 +91,12 @@ const App: React.FC = () => {
               </ul>
             </div>
             <div>
-              <h4 className="font-bold text-xs uppercase text-gray-400 mb-4">Suporte</h4>
+              <h4 className="font-bold text-xs uppercase text-gray-400 mb-4">Pilares</h4>
               <ul className="text-sm space-y-2 text-gray-600">
-                <li><a href="#/contato" className="hover:underline">Contato</a></li>
-                <li><a href="#" className="hover:underline">Privacidade</a></li>
+                <li><a href="#/pilares#prof-paulo" className="hover:underline">Prof. Paulo</a></li>
+                <li><a href="#/pilares#consultoria-imobiliaria" className="hover:underline">Imobiliário</a></li>
+                <li><a href="#/pilares#4050oumais" className="hover:underline">4050oumais</a></li>
+                <li><a href="#/pilares#academia-do-gas" className="hover:underline">Academia do Gás</a></li>
               </ul>
             </div>
           </div>
