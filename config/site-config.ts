@@ -12,6 +12,13 @@ export const SITE_CONFIG = {
     tag: "Site Oficial"
   },
   
+  // Configurações do Assistente AI (Gemini)
+  assistant: {
+    name: "Assistente Digital PH",
+    welcome_message: "Olá! Sou o assistente do Paulo Donassolo. Como posso ajudar você hoje com nossos conteúdos, cursos ou consultorias?",
+    instructions: "Você é o assistente virtual de Paulo Donassolo. Seu tom deve ser profissional, elegante e prestativo (estilo Apple). Priorize informações sobre os 4 pilares: Professor Paulo, Consultoria Imobiliária, 4050oumais e Academia do Gás. Se o usuário perguntar sobre preços ou detalhes muito específicos de agenda, sugira clicar no botão de WhatsApp para falar diretamente com o Paulo."
+  },
+  
   // Seções da Home
   sections: {
     videos_title: "Aulas Curtas & Insights",

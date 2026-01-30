@@ -17,9 +17,12 @@ const ServicesSection: React.FC = () => {
                 Soluções sob medida para o mercado imobiliário e setor de energia.
               </p>
             </div>
-            <button className="bg-black text-white px-8 py-3 rounded-full text-lg font-semibold hover:bg-gray-800 transition-all flex items-center gap-2 group relative z-10">
+            <a 
+              href="#/contato"
+              className="bg-black text-white px-8 py-3 rounded-full text-lg font-semibold hover:bg-gray-800 transition-all flex items-center gap-2 group relative z-10"
+            >
               Agendar Conversa <ArrowUpRight size={20} />
-            </button>
+            </a>
             <div className="absolute -bottom-10 -right-10 w-64 h-64 bg-blue-100 rounded-full blur-3xl opacity-50 group-hover:scale-125 transition-transform"></div>
           </div>
 
@@ -33,9 +36,12 @@ const ServicesSection: React.FC = () => {
                 Acelere sua carreira e projetos com orientação direta do Prof. Paulo.
               </p>
             </div>
-            <button className="bg-white text-black px-8 py-3 rounded-full text-lg font-semibold hover:bg-gray-200 transition-all flex items-center gap-2 relative z-10">
+            <a 
+              href="#/servicos"
+              className="bg-white text-black px-8 py-3 rounded-full text-lg font-semibold hover:bg-gray-200 transition-all flex items-center gap-2 relative z-10"
+            >
               Saiba Mais <ArrowUpRight size={20} />
-            </button>
+            </a>
             <div className="absolute -top-10 -right-10 w-64 h-64 bg-orange-500 rounded-full blur-[100px] opacity-20 group-hover:scale-125 transition-transform"></div>
           </div>
         </div>
