@@ -15,6 +15,7 @@ import CoursesBooksPage from './pages/CoursesBooksPage';
 import PrivacyPage from './pages/PrivacyPage';
 import NotFoundPage from './pages/NotFoundPage';
 import AIChat from './components/AIChat';
+import WhatsAppButton from './components/WhatsAppButton';
 import { SITE_CONFIG } from './config/site-config';
 
 const App: React.FC = () => {
@@ -23,6 +24,7 @@ const App: React.FC = () => {
   useEffect(() => {
     const handleHashChange = () => {
       setCurrentHash(window.location.hash || '#/');
+      // Se não for uma navegação de âncora dentro da mesma página de pilares, sobe para o topo
       if (!window.location.hash.includes('#/pilares#')) {
         window.scrollTo(0, 0);
       }
@@ -32,7 +34,7 @@ const App: React.FC = () => {
   }, []);
 
   const renderContent = () => {
-    // Rotas Dinâmicas
+    // 1. Rotas Dinâmicas com Prefixo
     if (currentHash.startsWith('#/artigo/')) {
       const articleId = currentHash.replace('#/artigo/', '');
       return <ArticleDetailPage articleId={articleId} />;
@@ -42,10 +44,16 @@ const App: React.FC = () => {
       return <CourseDetailPage courseId={courseId} />;
     }
     
-    // Rotas Estáticas
+    // 2. Rota de Pilares (Suporta âncoras para não dar 404)
+    if (currentHash.startsWith('#/pilares')) {
+      return <PillarsPage />;
+    }
+
+    // 3. Rotas Estáticas Exatas
     switch (currentHash) {
       case '#/': 
-      case '#': return <HomePage />;
+      case '#': 
+      case '': return <HomePage />;
       case '#/login': return <LoginPage />;
       case '#/admin': return <AdminPage />;
       case '#/artigos': return <ArticlesPage />;
@@ -53,9 +61,7 @@ const App: React.FC = () => {
       case '#/downloads': return <DownloadsPage />;
       case '#/contato': return <ContactPage />;
       case '#/livros': return <CoursesBooksPage />;
-      case '#/pilares': return <PillarsPage />;
       case '#/privacidade': return <PrivacyPage />;
-      // Se não for nenhuma das rotas acima, retorna 404
       default: return <NotFoundPage />;
     }
   };
@@ -66,6 +72,7 @@ const App: React.FC = () => {
       <div className="flex-1">{renderContent()}</div>
       
       <AIChat />
+      <WhatsAppButton />
 
       <footer className="py-20 px-6 bg-[#f5f5f7] border-t border-gray-200">
         <div className="max-w-6xl mx-auto">
