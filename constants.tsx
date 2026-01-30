@@ -1,11 +1,10 @@
 
-import React from 'react';
 import { User, Home, TrendingUp, Zap } from 'lucide-react';
+import React from 'react';
 import { Pillar, Article, Course, Resource, Book } from './types';
 
 /**
  * 1. PILARES DE CONTEÚDO
- * Altere as descrições e as cores de destaque de cada pilar aqui.
  */
 export const PILLARS: Pillar[] = [
   {
@@ -52,36 +51,25 @@ export const PILLARS: Pillar[] = [
 
 /**
  * 2. CURSOS ONLINE
- * Altere os nomes, descrições, imagens e links da Hotmart aqui.
  */
 export const MOCK_COURSES: Course[] = [
   { 
     id: 'c1', 
     name: 'Descomplicando o DRE', 
-    description: 'O guia definitivo para quem deseja usar esta fundamental para avaliar a saúde da sua empresa.',
+    description: 'O guia definitivo para avaliar a saúde da sua empresa.',
     longDescription: 'Aprenda a construir, analisar e utilizar o DRE para rentabilizar o seu negócio.',
     imageUrl: 'https://images.unsplash.com/photo-1460472178825-e51c062365d3?auto=format&fit=crop&q=80&w=800',
     category: 'Educação',
-    salesUrl: '//www.udemy.com/course/descomplicando-o-dre/',
+    salesUrl: 'https://www.udemy.com/course/descomplicando-o-dre/',
     videos: []
   },
   { 
     id: 'c2', 
-    name: 'Negociação para Vendas: IA+Ferramentas', 
-    description: 'Técnicas de Negociação aplicadas às Vendas',
-    longDescription: 'Aprenda as técnicas de negociação consolidadasa e com o uso da IA para escalar suas negociações e vendas.',
+    name: 'Negociação para Vendas', 
+    description: 'Técnicas de Negociação aplicadas às Vendas com IA.',
+    longDescription: 'Aprenda as técnicas de negociação consolidadas e com o uso da IA para escalar suas vendas.',
     imageUrl: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&q=80&w=800',
-    category: 'Educação',
-    salesUrl: 'https://www.udemy.com/course/negociacao-para-vendas-tecnicas-ia-professor/',
-    videos: []
-  }
-    { 
-    id: 'c2', 
-    name: 'Teste de Marcação', 
-    description: 'Técnicas de Marcação',
-    longDescription: 'Aprenda as técnicas de negociação consolidadasa e com o uso da IA para escalar suas negociações e vendas.',
-    imageUrl: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&q=80&w=800',
-    category: 'Educação',
+    category: 'Vendas',
     salesUrl: 'https://www.udemy.com/course/negociacao-para-vendas-tecnicas-ia-professor/',
     videos: []
   }
@@ -89,7 +77,6 @@ export const MOCK_COURSES: Course[] = [
 
 /**
  * 3. LIVROS PUBLICADOS
- * Altere as capas e links de compra (Amazon/Próprio) aqui.
  */
 export const MOCK_BOOKS: Book[] = [
   {
@@ -104,7 +91,7 @@ export const MOCK_BOOKS: Book[] = [
     title: 'O Novo Investidor Imobiliário',
     description: 'Como navegar pelos ciclos econômicos e encontrar oportunidades.',
     imageUrl: 'https://images.unsplash.com/photo-1589829085413-56de8ae18c73?auto=format&fit=crop&q=80&w=800',
-    buyUrl: '#'
+    buyUrl: 'https://amazon.com.br'
   }
 ];
 
@@ -118,15 +105,14 @@ export const MOCK_RESOURCES: Resource[] = [
 
 /**
  * 5. ARTIGOS DE EXEMPLO (FALLBACK)
- * Usado apenas se a conexão com o WordPress falhar.
  */
 export const MOCK_ARTICLES: Article[] = [
   {
     id: '1',
-    title: 'Carregando conteúdos do WordPress...',
+    title: 'Sincronizando conteúdos...',
     pillarId: 'prof-paulo',
     category: 'Status',
-    excerpt: 'Se este texto persistir, verifique a conexão do WordPress no Admin.',
+    excerpt: 'Estamos buscando os últimos artigos do seu WordPress. Se demorar, verifique o Painel Admin.',
     content: `<p>Aguarde enquanto sincronizamos os dados...</p>`,
     date: new Date().toISOString(),
     imageUrl: 'https://images.unsplash.com/photo-1501504905252-473c47e087f8?auto=format&fit=crop&q=80&w=1200'

@@ -103,28 +103,23 @@ const AdminPage: React.FC = () => {
                 </div>
               </div>
               <h3 className="text-2xl font-bold mb-2">Status da API</h3>
-              <p className="text-sm text-gray-500 mb-6 leading-relaxed">Verificando comunicação com <strong>phdonassolo.com</strong>. Se o ícone estiver vermelho, o servidor está bloqueando o acesso externo.</p>
-              
-              {lastError && <div className="p-4 bg-orange-50 border border-orange-100 text-orange-700 text-xs rounded-2xl mb-6 font-medium leading-relaxed flex gap-2"><Info size={24} className="shrink-0" /> {lastError}</div>}
+              <p className="text-sm text-gray-500 mb-6 leading-relaxed">Verificando comunicação com <strong>phdonassolo.com</strong>.</p>
               
               <div className="flex flex-col gap-3">
-                <button onClick={checkConn} className="bg-gray-100 text-gray-700 px-6 py-3 rounded-xl font-bold text-xs flex items-center justify-center gap-2 hover:bg-gray-200 transition-all">
-                  <RefreshCw size={14} /> Testar Novamente
-                </button>
                 <button onClick={handleForceSync} disabled={syncing} className="bg-blue-600 text-white px-6 py-3 rounded-xl font-bold text-xs flex items-center justify-center gap-2 hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/20 disabled:opacity-50">
-                  <RefreshCw size={14} className={syncing ? 'animate-spin' : ''} /> {syncing ? 'Sincronizando Conteúdo...' : 'Forçar Atualização de Conteúdo'}
+                  <RefreshCw size={14} className={syncing ? 'animate-spin' : ''} /> {syncing ? 'Sincronizando Conteúdo...' : 'Forçar Sincronização de Vídeos e Posts'}
                 </button>
               </div>
             </div>
             
             <div className="bg-black text-white p-8 rounded-[32px] card-shadow border border-gray-100 flex flex-col justify-between">
               <div>
-                <h3 className="text-2xl font-bold mb-2">Gestão de Posts</h3>
-                <p className="text-gray-400 text-sm">O conteúdo deste site vem diretamente do seu WordPress.</p>
+                <h3 className="text-2xl font-bold mb-2">Links Externos</h3>
+                <p className="text-gray-400 text-sm">Como abrir links em nova aba?</p>
               </div>
-              <a href="https://phdonassolo.com/wp-admin" target="_blank" className="bg-white text-black px-6 py-4 rounded-2xl font-bold text-sm text-center flex items-center justify-center gap-2 mt-6">
-                Acessar WordPress Admin <ExternalLink size={18} />
-              </a>
+              <div className="mt-4 p-4 bg-white/5 rounded-xl border border-white/10 text-[10px] font-mono leading-relaxed">
+                {`<a href="URL" target="_blank" rel="noopener">Texto</a>`}
+              </div>
             </div>
           </div>
         )}
@@ -146,16 +141,6 @@ const AdminPage: React.FC = () => {
                     <p className="text-xs text-gray-500 leading-relaxed mb-4">Para mudar o número do WhatsApp, e-mail de contato ou nome do site:</p>
                     <code className="text-[10px] bg-white px-2 py-1 rounded border text-blue-600 block">config/site-config.ts</code>
                   </div>
-                  <div className="p-6 bg-gray-50 rounded-3xl border border-gray-100">
-                    <h5 className="font-bold mb-2">Instruções do Robô (IA)</h5>
-                    <p className="text-xs text-gray-500 leading-relaxed mb-4">Para treinar o assistente sobre como ele deve responder aos clientes:</p>
-                    <code className="text-[10px] bg-white px-2 py-1 rounded border text-blue-600 block">config/site-config.ts > assistant</code>
-                  </div>
-                  <div className="p-6 bg-gray-50 rounded-3xl border border-gray-100">
-                    <h5 className="font-bold mb-2">Vídeos e Artigos</h5>
-                    <p className="text-xs text-gray-500 leading-relaxed mb-4">Estes são automáticos. Basta postar no WordPress. Vídeos precisam de um link YouTube no corpo do post.</p>
-                    <span className="text-[10px] font-bold text-green-600 uppercase">Automático via API</span>
-                  </div>
                 </div>
               </section>
             </div>
@@ -165,37 +150,15 @@ const AdminPage: React.FC = () => {
         {activeTab === 'server' && (
           <div className="bg-white rounded-[40px] p-8 md:p-12 border border-gray-100 shadow-sm animate-in slide-in-from-right-4 duration-500">
             <h2 className="text-3xl font-bold mb-6">Ajuste na Hostgator</h2>
-            <p className="text-gray-500 mb-10 leading-relaxed">Para que este hub moderno consiga ler os dados do seu WordPress, você precisa autorizar o acesso no arquivo <strong>.htaccess</strong> (dentro do Gerenciador de Arquivos da Hostgator).</p>
-            
+            <p className="text-gray-500 mb-10 leading-relaxed">Para evitar bloqueios de segurança (CORS):</p>
             <div className="bg-gray-900 rounded-3xl p-8 overflow-hidden relative group">
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-xs font-bold text-gray-500 uppercase">Adicione isto ao topo do seu .htaccess</span>
-                <span className="text-orange-500 text-[10px] font-bold animate-pulse">RECOMENDADO</span>
-              </div>
               <pre className="text-blue-400 text-xs font-mono overflow-x-auto leading-relaxed">
 {`<IfModule mod_headers.c>
     Header set Access-Control-Allow-Origin "*"
     Header set Access-Control-Allow-Methods "GET, POST, OPTIONS"
-    Header set Access-Control-Allow-Headers "Origin, Content-Type, Accept, Authorization"
+    Header set Access-Control-Allow-Headers "Origin, Content-Type, Accept"
 </IfModule>`}
               </pre>
-            </div>
-            
-            <div className="mt-10 grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="flex gap-4 p-6 bg-blue-50 rounded-3xl border border-blue-100">
-                <Info className="text-blue-600 shrink-0" />
-                <div>
-                  <h5 className="font-bold text-blue-900 mb-1">Por que isso é necessário?</h5>
-                  <p className="text-xs text-blue-700 leading-relaxed">Sem isso, o navegador bloqueia a leitura dos seus artigos por "CORS". É uma trava de segurança comum em hospedagens compartilhadas.</p>
-                </div>
-              </div>
-              <div className="flex gap-4 p-6 bg-green-50 rounded-3xl border border-green-100">
-                <ShieldCheck className="text-green-600 shrink-0" />
-                <div>
-                  <h5 className="font-bold text-green-900 mb-1">Dica de Performance</h5>
-                  <p className="text-xs text-green-700 leading-relaxed">Certifique-se de que o PHP está na versão <strong>8.2</strong> no seu cPanel. Isso torna a API 40% mais rápida.</p>
-                </div>
-              </div>
             </div>
           </div>
         )}
@@ -210,7 +173,7 @@ const AdminPage: React.FC = () => {
                    <input type="text" value={config.name} onChange={(e) => setConfig({...config, name: e.target.value})} className="w-full p-4 bg-gray-50 rounded-xl border border-gray-100 font-medium" />
                  </div>
                  <div>
-                   <label className="block text-xs font-bold mb-2 uppercase text-gray-400">WhatsApp (Somente Números)</label>
+                   <label className="block text-xs font-bold mb-2 uppercase text-gray-400">WhatsApp Oficial</label>
                    <input type="text" value={config.whatsapp} onChange={(e) => setConfig({...config, whatsapp: e.target.value})} className="w-full p-4 bg-gray-50 rounded-xl border border-gray-100 font-medium" />
                  </div>
                </div>

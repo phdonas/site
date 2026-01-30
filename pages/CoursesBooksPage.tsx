@@ -43,12 +43,22 @@ const CoursesBooksPage: React.FC = () => {
                       {course.description}
                     </p>
                   </div>
-                  <a 
-                    href={`#/curso/${course.id}`}
-                    className="bg-black text-white w-full py-4 rounded-2xl font-bold text-center flex items-center justify-center gap-2 hover:bg-gray-800 transition-all text-lg"
-                  >
-                    Ver Detalhes do Curso <ArrowUpRight size={20} />
-                  </a>
+                  <div className="flex flex-col gap-3">
+                    <a 
+                      href={`#/curso/${course.id}`}
+                      className="bg-black text-white w-full py-4 rounded-2xl font-bold text-center flex items-center justify-center gap-2 hover:bg-gray-800 transition-all text-lg"
+                    >
+                      Ver Detalhes
+                    </a>
+                    <a 
+                      href={course.salesUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="bg-white text-black border border-gray-200 w-full py-4 rounded-2xl font-bold text-center flex items-center justify-center gap-2 hover:bg-gray-50 transition-all text-lg"
+                    >
+                      Ir para Udemy/Hotmart <ArrowUpRight size={20} />
+                    </a>
+                  </div>
                 </div>
               </div>
             ))}
@@ -78,9 +88,11 @@ const CoursesBooksPage: React.FC = () => {
                   </p>
                   <a 
                     href={book.buyUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="mt-auto bg-blue-600 text-white w-full py-3 rounded-xl font-bold text-center flex items-center justify-center gap-2 hover:bg-blue-700 transition-colors"
                   >
-                    <ShoppingCart size={18} /> Comprar Livro
+                    <ShoppingCart size={18} /> Comprar na Amazon
                   </a>
                 </div>
               </div>
