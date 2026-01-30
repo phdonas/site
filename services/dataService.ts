@@ -2,8 +2,8 @@
 import { MOCK_ARTICLES, MOCK_COURSES, MOCK_RESOURCES, PILLARS } from '../constants';
 import { Article, Course, Resource, Pillar, PillarId } from '../types';
 
-const CACHE_KEY_ARTICLES = 'phd_articles_v16';
-const CACHE_KEY_VIDEOS = 'phd_videos_v16';
+const CACHE_KEY_ARTICLES = 'phd_articles_v18';
+const CACHE_KEY_VIDEOS = 'phd_videos_v18';
 
 let memoryArticles: Article[] = JSON.parse(localStorage.getItem(CACHE_KEY_ARTICLES) || '[]');
 let memoryVideos: any[] = JSON.parse(localStorage.getItem(CACHE_KEY_VIDEOS) || '[]');
@@ -11,12 +11,10 @@ let memoryVideos: any[] = JSON.parse(localStorage.getItem(CACHE_KEY_VIDEOS) || '
 const mapCategoryToPillar = (wpCategories: any[]): PillarId => {
   if (!wpCategories || wpCategories.length === 0) return 'prof-paulo';
   const names = wpCategories.map(c => (c.name || '').toLowerCase());
-  
   if (names.some(n => n.includes('paulo') || n.includes('prof'))) return 'prof-paulo';
   if (names.some(n => n.includes('imob') || n.includes('consultor'))) return 'consultoria-imobiliaria';
   if (names.some(n => n.includes('4050') || n.includes('longevid') || n.includes('mais'))) return '4050oumais';
   if (names.some(n => n.includes('gas') || n.includes('academia'))) return 'academia-do-gas';
-  
   return 'prof-paulo';
 };
 
@@ -29,7 +27,6 @@ const extractFirstImage = (content: string): string => {
 const mapWPPostToArticle = (post: any): Article => {
   const imageUrl = post._embedded?.['wp:featuredmedia']?.[0]?.source_url || extractFirstImage(post.content.rendered);
   const wpCategories = post._embedded?.['wp:term']?.[0] || [];
-  
   return {
     id: post.id.toString(),
     title: post.title.rendered,
@@ -43,34 +40,22 @@ const mapWPPostToArticle = (post: any): Article => {
 };
 
 const secureFetch = async (endpoint: string) => {
-  // URLs agora incluem o caminho /wordpress
   const urls = [
     `https://www.phdonassolo.com/wordpress/wp-json/wp/v2${endpoint}`,
     `https://phdonassolo.com/wordpress/wp-json/wp/v2${endpoint}`
   ];
 
   for (const url of urls) {
-    const sep = url.includes('?') ? '&' : '?';
-    const finalUrl = `${url}${sep}_embed&nocache=${Date.now()}`;
-    
     try {
+      const sep = url.includes('?') ? '&' : '?';
+      const finalUrl = `${url}${sep}_embed&nocache=${Date.now()}`;
       const res = await fetch(finalUrl);
       if (res.ok) {
         const data = await res.json();
-        if (Array.isArray(data) || (data && data.id)) return data;
+        return data;
       }
     } catch (e) {
-      console.warn("Falha direta no novo caminho, tentando proxy...");
-    }
-
-    try {
-      const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(finalUrl)}&t=${Date.now()}`;
-      const proxyRes = await fetch(proxyUrl);
-      const wrapper = await proxyRes.json();
-      const data = typeof wrapper.contents === 'string' ? JSON.parse(wrapper.contents) : wrapper.contents;
-      if (data && !data.data?.status) return data;
-    } catch (err) {
-      continue;
+      console.warn("Fetch falhou no caminho: ", url);
     }
   }
   return null;
@@ -81,7 +66,6 @@ export const DataService = {
     const data = await secureFetch('/posts?per_page=1');
     return !!data;
   },
-
   async clearCache() {
     localStorage.removeItem(CACHE_KEY_ARTICLES);
     localStorage.removeItem(CACHE_KEY_VIDEOS);
@@ -89,26 +73,19 @@ export const DataService = {
     memoryVideos = [];
     window.location.reload();
   },
-
   async getArticles(limit = 12, force = false): Promise<Article[]> {
     if (!force && memoryArticles.length > 0) return memoryArticles.slice(0, limit);
-    
     const posts = await secureFetch(`/posts?per_page=50`);
     if (Array.isArray(posts)) {
-      const mapped = posts
-        .filter(p => !p.content.rendered.toLowerCase().includes('<iframe'))
-        .map(mapWPPostToArticle);
-      
+      const mapped = posts.filter(p => !p.content.rendered.toLowerCase().includes('<iframe')).map(mapWPPostToArticle);
       memoryArticles = mapped;
       localStorage.setItem(CACHE_KEY_ARTICLES, JSON.stringify(mapped));
       return mapped.slice(0, limit);
     }
     return memoryArticles.length > 0 ? memoryArticles.slice(0, limit) : MOCK_ARTICLES;
   },
-
   async getVideos(limit = 4, force = false): Promise<any[]> {
     if (!force && memoryVideos.length > 0) return memoryVideos.slice(0, limit);
-
     const posts = await secureFetch(`/posts?per_page=50`);
     if (Array.isArray(posts)) {
       const mapped = posts
@@ -122,26 +99,22 @@ export const DataService = {
           content: p.content.rendered,
           thumb: p._embedded?.['wp:featuredmedia']?.[0]?.source_url || extractFirstImage(p.content.rendered)
         }));
-      
       memoryVideos = mapped;
       localStorage.setItem(CACHE_KEY_VIDEOS, JSON.stringify(mapped));
       return mapped.slice(0, limit);
     }
-    return memoryVideos;
+    return memoryVideos.length > 0 ? memoryVideos.slice(0, limit) : [];
   },
-
   async getArticleById(id: string): Promise<Article | undefined> {
     const local = memoryArticles.find(a => a.id === id);
     if (local) return local;
     const post = await secureFetch(`/posts/${id}`);
     return post ? mapWPPostToArticle(post) : undefined;
   },
-
   async getArticlesByPillar(pillarId: PillarId, limit = 3): Promise<Article[]> {
     if (memoryArticles.length === 0) await this.getArticles(50);
     return memoryArticles.filter(a => a.pillarId === pillarId).slice(0, limit);
   },
-
   async getCourses(): Promise<Course[]> { return MOCK_COURSES; },
   async getResources(): Promise<Resource[]> { return MOCK_RESOURCES; },
   async getPillars(): Promise<Pillar[]> { return PILLARS; },

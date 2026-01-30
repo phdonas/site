@@ -1,24 +1,27 @@
 
-# BEGIN React Routing
+# BEGIN PH HUB
 <IfModule mod_rewrite.c>
   RewriteEngine On
   RewriteBase /
   
-  # Ignorar a pasta do WordPress física
+  # Permitir acesso direto aos arquivos do WordPress
   RewriteRule ^wordpress($|/) - [L]
   
-  # Redirecionar todo o resto para o index.html do React
+  # Forçar tipo MIME para arquivos TSX e TS se o navegador pedir como módulo
+  AddType application/javascript .tsx
+  AddType application/javascript .ts
+
+  # Redirecionar rotas do React para o index.html
   RewriteRule ^index\.html$ - [L]
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
   RewriteCond %{REQUEST_URI} !^/wordpress [NC]
   RewriteRule . /index.html [L]
 </IfModule>
-# END React Routing
 
-# CORS para o WordPress (Caso o .htaccess interno falhe)
 <IfModule mod_headers.c>
     Header set Access-Control-Allow-Origin "*"
     Header set Access-Control-Allow-Methods "GET, POST, OPTIONS"
-    Header set Access-Control-Allow-Headers "Origin, Content-Type, Accept"
+    Header set Access-Control-Allow-Headers "Origin, Content-Type, Accept, Authorization"
 </IfModule>
+# END PH HUB
