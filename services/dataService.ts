@@ -1,4 +1,3 @@
-
 import { MOCK_ARTICLES, MOCK_COURSES, MOCK_BOOKS, MOCK_RESOURCES, PILLARS } from '../constants';
 import { Article, Course, Book, Resource, Pillar, PillarId } from '../types';
 import { WP_CONFIG } from '../config/wp-config';
@@ -31,66 +30,72 @@ const mapWPPostToArticle = (post: any): Article => {
   };
 };
 
+/**
+ * Utilitário de fetch resiliente.
+ * Removendo headers manuais para tornar a requisição "Simple", 
+ * o que reduz problemas de CORS em servidores legados.
+ */
+const secureFetch = async (endpoint: string) => {
+  const url = `${WP_CONFIG.CORS_PROXY}${WP_CONFIG.BASE_URL}${endpoint}`;
+  try {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    return await response.json();
+  } catch (error) {
+    throw error;
+  }
+};
+
 export const DataService = {
   async getArticles(): Promise<Article[]> {
     if (!WP_CONFIG.USE_LIVE_DATA) return MOCK_ARTICLES;
     try {
-      const response = await fetch(`${WP_CONFIG.BASE_URL}${WP_CONFIG.ENDPOINTS.POSTS}?_embed&per_page=20`);
-      if (!response.ok) throw new Error(`Erro API: ${response.status}`);
-      const posts = await response.json();
+      const posts = await secureFetch(`${WP_CONFIG.ENDPOINTS.POSTS}?_embed&per_page=20`);
       
-      // Filtra posts que NÃO pertencem à categoria 'videos'
-      return posts
+      const articles = posts
         .filter((p: any) => {
           const terms = p._embedded?.['wp:term']?.[0] || [];
           return !terms.some((term: any) => term.slug === 'videos');
         })
         .map(mapWPPostToArticle);
+        
+      return articles.length > 0 ? articles : MOCK_ARTICLES;
     } catch (error) {
-      console.warn('DataService: Usando mocks para artigos devido a erro:', error);
+      console.warn('DataService: Conexão com WordPress falhou. Ativando Fallback para dados locais.');
       return MOCK_ARTICLES;
     }
   },
 
   async getVideos(): Promise<any[]> {
-    if (!WP_CONFIG.USE_LIVE_DATA) return [1, 2, 3, 4].map(i => ({ id: i, title: `Aula Exemplo ${i}`, thumb: `https://picsum.photos/400/700?random=${i}` }));
+    const mockVideos = [1, 2, 3, 4].map(i => ({ id: `mock-${i}`, title: `Aula Exemplo ${i} (Demo)`, thumb: `https://picsum.photos/400/700?random=${i}` }));
+    
+    if (!WP_CONFIG.USE_LIVE_DATA) return mockVideos;
     
     try {
-      // Buscamos os posts mais recentes. 
-      // Em vez de confiar no filtro de URL que pode variar por servidor, buscamos e filtramos no cliente.
-      const response = await fetch(`${WP_CONFIG.BASE_URL}${WP_CONFIG.ENDPOINTS.POSTS}?_embed&per_page=50`);
-      if (!response.ok) throw new Error(`Erro API Vídeos: ${response.status}`);
+      const posts = await secureFetch(`${WP_CONFIG.ENDPOINTS.POSTS}?_embed&per_page=50`);
       
-      const posts = await response.json();
-      
-      // Filtra posts que POSSUEM a categoria 'videos' nos termos embedados
       const videoPosts = posts.filter((p: any) => {
         const terms = p._embedded?.['wp:term']?.[0] || [];
         return terms.some((term: any) => term.slug === 'videos');
       });
 
-      if (videoPosts.length === 0) {
-        console.info('DataService: Nenhum post "Publicado" com categoria "videos" foi encontrado. Verifique se o post no WP não está como "Agendado" para o futuro.');
-      }
+      if (videoPosts.length === 0) return mockVideos;
 
       return videoPosts.map((p: any) => ({
         id: p.id,
         title: p.title.rendered,
-        // Se não tiver imagem destacada, usa uma temporária para não ficar preto
         thumb: p._embedded?.['wp:featuredmedia']?.[0]?.source_url || `https://images.unsplash.com/photo-1492619334760-22c0217e33ff?auto=format&fit=crop&q=80&w=400`
       }));
     } catch (error) {
-      console.error('DataService Error (Videos):', error);
-      return [];
+      console.warn('DataService (Videos): Erro de conexão. Usando placeholders.');
+      return mockVideos;
     }
   },
 
   async getArticleById(id: string): Promise<Article | undefined> {
     if (!WP_CONFIG.USE_LIVE_DATA) return MOCK_ARTICLES.find(a => a.id === id);
     try {
-      const response = await fetch(`${WP_CONFIG.BASE_URL}${WP_CONFIG.ENDPOINTS.POSTS}/${id}?_embed`);
-      if (!response.ok) return MOCK_ARTICLES.find(a => a.id === id);
-      const post = await response.json();
+      const post = await secureFetch(`${WP_CONFIG.ENDPOINTS.POSTS}/${id}?_embed`);
       return mapWPPostToArticle(post);
     } catch (error) {
       return MOCK_ARTICLES.find(a => a.id === id);
