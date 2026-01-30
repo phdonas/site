@@ -1,17 +1,12 @@
-
 # BEGIN PH HUB
 <IfModule mod_rewrite.c>
   RewriteEngine On
   RewriteBase /
-  
-  # Permitir acesso direto aos arquivos do WordPress
+  # teste
+  # Permitir acesso direto ao WordPress
   RewriteRule ^wordpress($|/) - [L]
   
-  # Forçar tipo MIME para arquivos TSX e TS se o navegador pedir como módulo
-  AddType application/javascript .tsx
-  AddType application/javascript .ts
-
-  # Redirecionar rotas do React para o index.html
+  # Redirecionar rotas do React para o index.html (SPA mode)
   RewriteRule ^index\.html$ - [L]
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
@@ -19,9 +14,24 @@
   RewriteRule . /index.html [L]
 </IfModule>
 
+<IfModule mod_mime.c>
+  # Força o navegador a tratar arquivos de código como scripts
+  AddType application/javascript .tsx
+  AddType application/javascript .ts
+  AddType application/javascript .jsx
+</IfModule>
+
 <IfModule mod_headers.c>
+    # Permite que o React busque os dados no subdiretório /wordpress sem bloqueio de CORS
     Header set Access-Control-Allow-Origin "*"
     Header set Access-Control-Allow-Methods "GET, POST, OPTIONS"
     Header set Access-Control-Allow-Headers "Origin, Content-Type, Accept, Authorization"
+    
+    # Previne cache de arquivos de sistema para que o deploy apareça na hora
+    <FilesMatch "\.(html|tsx|ts|yml)$">
+        Header set Cache-Control "max-age=0, no-cache, no-store, must-revalidate"
+        Header set Pragma "no-cache"
+        Header set Expires "Wed, 11 Jan 1984 05:00:00 GMT"
+    </FilesMatch>
 </IfModule>
 # END PH HUB
