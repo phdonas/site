@@ -1,33 +1,36 @@
-# PH DONASSOLO - CONFIGURAÇÃO AMBIENTE
+# PH DONASSOLO - HUB CONFIG
 <IfModule mod_rewrite.c>
     RewriteEngine On
     RewriteBase /
 
-    # Exceção para a pasta do WordPress
+    # 1. IGNORAR COMPLETAMENTE A PASTA WORDPRESS
     RewriteRule ^wordpress/ - [L,NC]
 
-    # Servir arquivos estáticos se existirem
+    # 2. NÃO REDIRECIONAR ARQUIVOS QUE REALMENTE EXISTEM
     RewriteCond %{REQUEST_FILENAME} -f [OR]
     RewriteCond %{REQUEST_FILENAME} -d
     RewriteRule . - [L]
 
-    # NÃO redirecionar scripts para o index.html
-    RewriteCond %{REQUEST_URI} \.(tsx|ts|js|jsx|css|json)$ [NC]
+    # 3. EXCEÇÃO CRÍTICA PARA SCRIPTS (Evita o erro Unexpected token <)
+    # Se a URL termina com essas extensões, não aplique a regra do SPA
+    RewriteCond %{REQUEST_URI} \.(tsx|ts|js|jsx|css|json|png|jpg|jpeg|gif|ico|svg)$ [NC]
     RewriteRule . - [L]
 
-    # SPA Routing
+    # 4. SPA ROUTING (Somente para rotas de navegação)
+    # Tudo o que restou e não é um arquivo real vai para o index.html
     RewriteRule ^ index.html [L]
 </IfModule>
 
 <IfModule mod_mime.c>
-    # Fundamental para o Babel no cPanel reconhecer os arquivos
+    # Força o servidor a tratar .tsx e .ts como JavaScript para o Babel processar
     AddType application/javascript .tsx
     AddType application/javascript .ts
 </IfModule>
 
 <IfModule mod_headers.c>
-    Header set Access-Control-Allow-Origin "*"
+    # Prevenção de Cache agressiva para arquivos de código durante o desenvolvimento
     <FilesMatch "\.(tsx|ts|html)$">
         Header set Cache-Control "max-age=0, no-cache, no-store, must-revalidate"
     </FilesMatch>
+    Header set Access-Control-Allow-Origin "*"
 </IfModule>
