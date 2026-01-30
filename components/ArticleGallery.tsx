@@ -3,7 +3,11 @@ import React, { useState, useEffect } from 'react';
 import { DataService } from '../services/dataService';
 import { Article, Pillar, PillarId } from '../types';
 
-const ArticleGallery: React.FC = () => {
+interface Props {
+  limit?: number;
+}
+
+const ArticleGallery: React.FC<Props> = ({ limit = 12 }) => {
   const [selectedPillar, setSelectedPillar] = useState<PillarId | 'all'>('all');
   const [articles, setArticles] = useState<Article[]>([]);
   const [pillars, setPillars] = useState<Pillar[]>([]);
@@ -13,7 +17,7 @@ const ArticleGallery: React.FC = () => {
     const loadContent = async () => {
       setLoading(true);
       const [artData, pilData] = await Promise.all([
-        DataService.getArticles(),
+        DataService.getArticles(limit),
         DataService.getPillars()
       ]);
       setArticles(artData);
@@ -21,7 +25,7 @@ const ArticleGallery: React.FC = () => {
       setLoading(false);
     };
     loadContent();
-  }, []);
+  }, [limit]);
 
   const filteredArticles = selectedPillar === 'all' 
     ? articles 
@@ -55,28 +59,40 @@ const ArticleGallery: React.FC = () => {
         </div>
 
         {loading ? (
-          <div className="py-20 text-center text-gray-400 font-medium">Carregando galeria...</div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="aspect-[16/10] rounded-3xl bg-gray-50 animate-pulse"></div>
+            ))}
+          </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {filteredArticles.map(article => (
               <div key={article.id} className="group cursor-pointer">
-                <div className="aspect-[16/10] rounded-3xl overflow-hidden mb-6 bg-gray-100">
-                  <img 
-                    src={article.imageUrl} 
-                    alt={article.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                </div>
-                <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">
-                  {pillars.find(p => p.id === article.pillarId)?.title}
-                </p>
-                <h3 className="text-2xl font-bold mb-3 group-hover:text-blue-600 transition-colors line-clamp-2">{article.title}</h3>
-                <p className="text-gray-500 leading-relaxed mb-4 line-clamp-2">
-                  {article.excerpt}
-                </p>
-                <a href={`#/artigo/${article.id}`} className="apple-link font-semibold">Ler artigo completo</a>
+                <a href={`#/artigo/${article.id}`}>
+                  <div className="aspect-[16/10] rounded-3xl overflow-hidden mb-6 bg-gray-100 shadow-sm">
+                    <img 
+                      src={article.imageUrl} 
+                      alt={article.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                  </div>
+                  <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">
+                    {pillars.find(p => p.id === article.pillarId)?.title}
+                  </p>
+                  <h3 className="text-2xl font-bold mb-3 group-hover:text-blue-600 transition-colors line-clamp-2">{article.title}</h3>
+                  <p className="text-gray-500 leading-relaxed mb-4 line-clamp-2">
+                    {article.excerpt}
+                  </p>
+                  <span className="apple-link font-semibold">Ler artigo completo</span>
+                </a>
               </div>
             ))}
+          </div>
+        )}
+        
+        {limit < 10 && (
+          <div className="mt-16 text-center">
+            <a href="#/artigos" className="bg-[#f5f5f7] px-8 py-4 rounded-full font-bold hover:bg-gray-200 transition-colors">Ver Biblioteca Completa</a>
           </div>
         )}
       </div>

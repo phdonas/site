@@ -3,6 +3,9 @@ import { MOCK_ARTICLES, MOCK_COURSES, MOCK_BOOKS, MOCK_RESOURCES, PILLARS } from
 import { Article, Course, Book, Resource, Pillar, PillarId } from '../types';
 import { WP_CONFIG } from '../config/wp-config';
 
+// Cache simples em memória para evitar loading excessivo
+let cachedArticles: Article[] = [];
+
 const CATEGORY_MAP: Record<string, PillarId> = {
   'artigos': 'prof-paulo',
   'prof-paulo': 'prof-paulo',
@@ -48,60 +51,54 @@ const mapWPPostToArticle = (post: any): Article => {
   };
 };
 
-/**
- * Motor de busca ultra-resiliente
- */
 const secureFetch = async (endpoint: string) => {
   const baseUrl = `${WP_CONFIG.BASE_URL}${endpoint}`;
   
-  // Estratégia 1: Direta
+  // Estratégia ultra-rápida: AllOrigins Raw
   try {
-    const res = await fetch(baseUrl);
+    const res = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(baseUrl)}`);
     if (res.ok) return await res.json();
-  } catch (e) { console.warn("Fetch direto falhou."); }
+  } catch (e) { 
+    console.warn("Proxy AllOrigins falhou, tentando CorsProxy...");
+  }
 
-  // Estratégia 2: AllOrigins GET (Encapsulado - mais chance de passar por firewalls)
-  try {
-    const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(baseUrl)}`);
-    if (res.ok) {
-      const data = await res.json();
-      // O AllOrigins retorna o conteúdo em string dentro de .contents
-      const content = JSON.parse(data.contents);
-      return content;
-    }
-  } catch (e) { console.warn("AllOrigins encapsulado falhou."); }
-
-  // Estratégia 3: CorsProxy.io
   try {
     const res = await fetch(`https://corsproxy.io/?${encodeURIComponent(baseUrl)}`);
     if (res.ok) return await res.json();
-  } catch (e) { console.warn("CorsProxy falhou."); }
-
-  throw new Error("API_UNREACHABLE");
+  } catch (e) {
+    throw new Error("API_OFFLINE");
+  }
 };
 
 export const DataService = {
   async testConnection(): Promise<boolean> {
     try {
       const data = await secureFetch('/posts?per_page=1');
-      return Array.isArray(data) && data.length > 0;
-    } catch {
-      return false;
-    }
+      return Array.isArray(data);
+    } catch { return false; }
   },
 
-  async getArticles(): Promise<Article[]> {
+  async getArticles(limit = 12): Promise<Article[]> {
     try {
-      const posts = await secureFetch(`${WP_CONFIG.ENDPOINTS.POSTS}?_embed&per_page=12`);
-      return Array.isArray(posts) ? posts.map(mapWPPostToArticle) : MOCK_ARTICLES;
+      const posts = await secureFetch(`${WP_CONFIG.ENDPOINTS.POSTS}?_embed&per_page=${limit}`);
+      if (Array.isArray(posts)) {
+        const mapped = posts.map(mapWPPostToArticle);
+        // Atualiza o cache local para abertura instantânea
+        mapped.forEach(art => {
+          if (!cachedArticles.find(c => c.id === art.id)) cachedArticles.push(art);
+        });
+        return mapped;
+      }
+      return MOCK_ARTICLES;
     } catch (error) {
       return MOCK_ARTICLES;
     }
   },
 
-  async getVideos(): Promise<any[]> {
+  async getVideos(limit = 4): Promise<any[]> {
     try {
-      const posts = await secureFetch(`${WP_CONFIG.ENDPOINTS.POSTS}?_embed&per_page=40`);
+      // Pedimos um pouco mais para garantir que filtramos os que têm a categoria vídeo
+      const posts = await secureFetch(`${WP_CONFIG.ENDPOINTS.POSTS}?_embed&per_page=20`);
       if (!Array.isArray(posts)) return [];
       
       return posts
@@ -109,6 +106,7 @@ export const DataService = {
           const terms = p._embedded?.['wp:term']?.[0] || [];
           return terms.some((t: any) => t.slug === 'videos');
         })
+        .slice(0, limit) // Limitamos aqui para ser ultra-rápido na Home
         .map((p: any) => ({
           id: p.id,
           title: p.title.rendered,
@@ -121,9 +119,17 @@ export const DataService = {
   },
 
   async getArticleById(id: string): Promise<Article | undefined> {
+    // Primeiro tenta o cache local (instantâneo)
+    const cached = cachedArticles.find(a => a.id === id);
+    if (cached) return cached;
+
     try {
       const post = await secureFetch(`${WP_CONFIG.ENDPOINTS.POSTS}/${id}?_embed`);
-      if (post && post.id) return mapWPPostToArticle(post);
+      if (post && post.id) {
+        const mapped = mapWPPostToArticle(post);
+        cachedArticles.push(mapped);
+        return mapped;
+      }
     } catch (error) {
       return MOCK_ARTICLES.find(a => a.id === id);
     }

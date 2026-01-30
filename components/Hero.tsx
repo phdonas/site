@@ -14,7 +14,7 @@ const Hero: React.FC = () => {
         </p>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
           <a 
-            href="#/servicos" 
+            href="#/pilares" 
             className="bg-blue-600 text-white px-8 py-3 rounded-full text-lg font-medium hover:bg-blue-700 transition-all transform hover:scale-105"
           >
             Conheça os Pilares

@@ -6,6 +6,36 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>PH Donassolo | Hub de Conteúdo</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            typography: {
+              DEFAULT: {
+                css: {
+                  maxWidth: '75ch',
+                  color: '#1d1d1f',
+                  lineHeight: '1.6',
+                  'h1, h2, h3, h4': {
+                    color: '#1d1d1f',
+                    fontWeight: '700',
+                    letterSpacing: '-0.025em',
+                  },
+                  a: {
+                    color: '#0066cc',
+                    textDecoration: 'none',
+                    fontWeight: '600',
+                    '&:hover': {
+                      textDecoration: 'underline',
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      }
+    </script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
       body {
@@ -34,24 +64,46 @@
         transform: scale(1.01);
       }
       
-      /* Estilos para o Player de Vídeo do WordPress */
+      /* WordPress Gutenberg Content Formatting */
+      .wp-content-render img {
+        border-radius: 1.5rem;
+        margin: 2rem auto;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+      }
+      .wp-content-render .aligncenter {
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        text-align: center;
+      }
+      .wp-content-render figure {
+        margin: 2rem 0;
+      }
+      .wp-content-render figcaption {
+        text-align: center;
+        font-size: 0.875rem;
+        color: #86868b;
+        margin-top: 0.75rem;
+      }
+      .wp-content-render blockquote {
+        border-left: 4px solid #0066cc;
+        padding-left: 1.5rem;
+        font-style: italic;
+        font-size: 1.25rem;
+        color: #424245;
+        margin: 2.5rem 0;
+      }
+      .wp-content-render p {
+        margin-bottom: 1.5rem;
+      }
+      
+      /* Player de Vídeo */
       .wp-video-container iframe, 
-      .wp-video-container video, 
-      .wp-video-container embed, 
-      .wp-video-container object {
+      .wp-video-container video {
         width: 100% !important;
-        height: 100% !important;
+        height: auto !important;
         aspect-ratio: 16 / 9;
-        border-radius: 1rem;
-      }
-      .wp-video-container {
-        width: 100%;
-        max-width: 100%;
-      }
-      /* Ajuste para Gutenberg blocks */
-      .wp-block-video, .wp-block-embed {
-        margin: 0 !important;
-        width: 100% !important;
+        border-radius: 1.5rem;
       }
     </style>
   <script type="importmap">

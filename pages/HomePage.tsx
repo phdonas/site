@@ -6,16 +6,19 @@ import ArticleGallery from '../components/ArticleGallery';
 import ServicesSection from '../components/ServicesSection';
 import LeadForm from '../components/LeadForm';
 import { DataService } from '../services/dataService';
-import { X } from 'lucide-react';
+import { X, Play } from 'lucide-react';
 
 const HomePage: React.FC = () => {
   const [videos, setVideos] = useState<any[]>([]);
   const [selectedVideo, setSelectedVideo] = useState<any | null>(null);
+  const [loadingVideos, setLoadingVideos] = useState(true);
 
   useEffect(() => {
     const loadVideos = async () => {
-      const data = await DataService.getVideos();
+      setLoadingVideos(true);
+      const data = await DataService.getVideos(4); // Apenas 4 vídeos para rapidez extrema
       setVideos(data);
+      setLoadingVideos(false);
     };
     loadVideos();
   }, []);
@@ -29,13 +32,22 @@ const HomePage: React.FC = () => {
       {/* Dynamic Short Videos Section */}
       <section className="py-24 px-6 bg-black text-white overflow-hidden">
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-4 tracking-tight">Aulas Curtas & Insights</h2>
-            <p className="text-gray-400 text-lg font-medium">Conteúdo rápido para quem busca evolução constante.</p>
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
+            <div className="max-w-xl">
+              <h2 className="text-4xl md:text-5xl font-bold mb-4 tracking-tight">Aulas Curtas & Insights</h2>
+              <p className="text-gray-400 text-lg font-medium">Conteúdo visual direto ao ponto para sua evolução.</p>
+            </div>
+            <a href="#/artigos" className="text-blue-500 font-bold flex items-center gap-2 hover:underline">
+              Ver todos os vídeos <Play size={16} />
+            </a>
           </div>
           
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {videos.length > 0 ? videos.map((video) => (
+            {loadingVideos ? (
+              [...Array(4)].map((_, i) => (
+                <div key={i} className="aspect-[9/16] bg-gray-900 rounded-[32px] animate-pulse"></div>
+              ))
+            ) : videos.length > 0 ? videos.map((video) => (
               <div 
                 key={video.id} 
                 onClick={() => setSelectedVideo(video)}
@@ -57,7 +69,7 @@ const HomePage: React.FC = () => {
               </div>
             )) : (
               <div className="col-span-full py-20 text-center text-gray-500 font-medium">
-                Carregando vídeos...
+                Publique posts no seu WP com a categoria 'videos' para vê-los aqui.
               </div>
             )}
           </div>
@@ -68,31 +80,28 @@ const HomePage: React.FC = () => {
       {selectedVideo && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 md:p-10">
           <div 
-            className="absolute inset-0 bg-black/90 backdrop-blur-2xl" 
+            className="absolute inset-0 bg-black/95 backdrop-blur-2xl" 
             onClick={() => setSelectedVideo(null)}
           ></div>
-          <div className="relative w-full max-w-4xl bg-black rounded-3xl overflow-hidden shadow-2xl border border-white/10 animate-in fade-in zoom-in duration-300">
+          <div className="relative w-full max-w-4xl bg-[#1c1c1e] rounded-[40px] overflow-hidden shadow-2xl border border-white/10 animate-in fade-in zoom-in duration-300">
             <button 
               onClick={() => setSelectedVideo(null)}
               className="absolute top-6 right-6 z-10 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition-colors"
             >
               <X size={24} />
             </button>
-            <div className="p-6 md:p-10">
-              <h3 className="text-xl font-bold mb-6 pr-12">{selectedVideo.title}</h3>
+            <div className="p-6 md:p-12">
+              <h3 className="text-2xl font-bold mb-8 pr-12">{selectedVideo.title}</h3>
               <div 
-                className="wp-video-container aspect-video rounded-2xl overflow-hidden bg-gray-900 flex items-center justify-center"
+                className="wp-video-container aspect-video rounded-3xl overflow-hidden bg-black flex items-center justify-center"
                 dangerouslySetInnerHTML={{ __html: selectedVideo.content }}
               />
-              <div className="mt-6 text-gray-400 text-sm">
-                Dica: Se o vídeo não carregar, verifique se ele está publicado como post no WordPress com a categoria 'videos'.
-              </div>
             </div>
           </div>
         </div>
       )}
 
-      <ArticleGallery />
+      <ArticleGallery limit={4} />
       <LeadForm />
     </main>
   );
