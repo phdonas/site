@@ -3,25 +3,22 @@ import { MOCK_ARTICLES, MOCK_COURSES, MOCK_BOOKS, MOCK_RESOURCES, PILLARS } from
 import { Article, Course, Book, Resource, Pillar, PillarId } from '../types';
 import { WP_CONFIG } from '../config/wp-config';
 
-// Cache simples em memória para evitar loading excessivo
-let cachedArticles: Article[] = [];
+// Cache em memória + LocalStorage para persistência entre sessões
+const CACHE_KEY = 'phd_articles_cache';
+let cachedArticles: Article[] = JSON.parse(localStorage.getItem(CACHE_KEY) || '[]');
+
+const saveCache = () => {
+  localStorage.setItem(CACHE_KEY, JSON.stringify(cachedArticles));
+};
 
 const CATEGORY_MAP: Record<string, PillarId> = {
   'artigos': 'prof-paulo',
   'prof-paulo': 'prof-paulo',
   'prof-paulo-donassolo': 'prof-paulo',
   'lideranca': 'prof-paulo',
-  'metricas-indicadores': 'prof-paulo',
-  'processos-vendas': 'prof-paulo',
-  'treinamento-desenvolvimento': 'prof-paulo',
   'consultor-imobiliario': 'consultoria-imobiliaria',
-  'negociacao-imoveis': 'consultoria-imobiliaria',
-  'prospeccao-imobiliario': 'consultoria-imobiliaria',
   '4050-ou-mais': '4050oumais',
-  '4050-ou-mais-2': '4050oumais',
-  'longevidade': '4050oumais',
-  'academia-do-gas': 'academia-do-gas',
-  'gas': 'academia-do-gas'
+  'academia-do-gas': 'academia-do-gas'
 };
 
 const mapCategoryToPillarId = (wpTerms: any[]): PillarId => {
@@ -37,12 +34,11 @@ const mapWPPostToArticle = (post: any): Article => {
   const imageUrl = post._embedded?.['wp:featuredmedia']?.[0]?.source_url || 
                    'https://images.unsplash.com/photo-1501504905252-473c47e087f8?auto=format&fit=crop&q=80&w=1200';
   const wpCategories = post._embedded?.['wp:term']?.[0] || [];
-  const pillarId = mapCategoryToPillarId(wpCategories);
-
+  
   return {
     id: post.id.toString(),
     title: post.title.rendered,
-    pillarId: pillarId,
+    pillarId: mapCategoryToPillarId(wpCategories),
     category: wpCategories[0]?.name || 'Geral', 
     excerpt: post.excerpt?.rendered?.replace(/<[^>]*>?/gm, '').substring(0, 160) + '...' || '',
     content: post.content?.rendered || '',
@@ -53,20 +49,12 @@ const mapWPPostToArticle = (post: any): Article => {
 
 const secureFetch = async (endpoint: string) => {
   const baseUrl = `${WP_CONFIG.BASE_URL}${endpoint}`;
-  
-  // Estratégia ultra-rápida: AllOrigins Raw
   try {
     const res = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(baseUrl)}`);
     if (res.ok) return await res.json();
-  } catch (e) { 
-    console.warn("Proxy AllOrigins falhou, tentando CorsProxy...");
-  }
-
-  try {
-    const res = await fetch(`https://corsproxy.io/?${encodeURIComponent(baseUrl)}`);
-    if (res.ok) return await res.json();
   } catch (e) {
-    throw new Error("API_OFFLINE");
+    console.warn("API Error, using fallback.");
+    throw e;
   }
 };
 
@@ -83,43 +71,48 @@ export const DataService = {
       const posts = await secureFetch(`${WP_CONFIG.ENDPOINTS.POSTS}?_embed&per_page=${limit}`);
       if (Array.isArray(posts)) {
         const mapped = posts.map(mapWPPostToArticle);
-        // Atualiza o cache local para abertura instantânea
         mapped.forEach(art => {
           if (!cachedArticles.find(c => c.id === art.id)) cachedArticles.push(art);
         });
+        saveCache();
         return mapped;
       }
       return MOCK_ARTICLES;
-    } catch (error) {
-      return MOCK_ARTICLES;
-    }
+    } catch { return MOCK_ARTICLES; }
+  },
+
+  async getArticlesByPillar(pillarId: PillarId, limit = 3): Promise<Article[]> {
+    // Tenta primeiro no cache local para velocidade instantânea
+    const local = cachedArticles.filter(a => a.pillarId === pillarId).slice(0, limit);
+    if (local.length >= limit) return local;
+
+    try {
+      // Se não tem no cache, busca na API (via slug de categoria se necessário)
+      const articles = await this.getArticles(30);
+      return articles.filter(a => a.pillarId === pillarId).slice(0, limit);
+    } catch { return []; }
   },
 
   async getVideos(limit = 4): Promise<any[]> {
     try {
-      // Pedimos um pouco mais para garantir que filtramos os que têm a categoria vídeo
       const posts = await secureFetch(`${WP_CONFIG.ENDPOINTS.POSTS}?_embed&per_page=20`);
       if (!Array.isArray(posts)) return [];
-      
       return posts
         .filter((p: any) => {
           const terms = p._embedded?.['wp:term']?.[0] || [];
           return terms.some((t: any) => t.slug === 'videos');
         })
-        .slice(0, limit) // Limitamos aqui para ser ultra-rápido na Home
+        .slice(0, limit)
         .map((p: any) => ({
           id: p.id,
           title: p.title.rendered,
           content: p.content.rendered,
           thumb: p._embedded?.['wp:featuredmedia']?.[0]?.source_url || 'https://images.unsplash.com/photo-1492619334760-22c0217e33ff?auto=format&fit=crop&q=80&w=400'
         }));
-    } catch (error) {
-      return [];
-    }
+    } catch { return []; }
   },
 
   async getArticleById(id: string): Promise<Article | undefined> {
-    // Primeiro tenta o cache local (instantâneo)
     const cached = cachedArticles.find(a => a.id === id);
     if (cached) return cached;
 
@@ -128,12 +121,10 @@ export const DataService = {
       if (post && post.id) {
         const mapped = mapWPPostToArticle(post);
         cachedArticles.push(mapped);
+        saveCache();
         return mapped;
       }
-    } catch (error) {
-      return MOCK_ARTICLES.find(a => a.id === id);
-    }
-    return MOCK_ARTICLES.find(a => a.id === id);
+    } catch { return MOCK_ARTICLES.find(a => a.id === id); }
   },
 
   async getCourses(): Promise<Course[]> { return MOCK_COURSES; },

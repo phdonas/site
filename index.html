@@ -21,14 +21,6 @@
                     fontWeight: '700',
                     letterSpacing: '-0.025em',
                   },
-                  a: {
-                    color: '#0066cc',
-                    textDecoration: 'none',
-                    fontWeight: '600',
-                    '&:hover': {
-                      textDecoration: 'underline',
-                    },
-                  },
                 },
               },
             },
@@ -52,9 +44,39 @@
         color: #0066cc;
         transition: color 0.3s ease;
       }
-      .apple-link:hover {
-        text-decoration: underline;
+      .apple-link:hover { text-decoration: underline; }
+      
+      /* Fidelidade WP Gutenberg */
+      .wp-content-render {
+        font-size: 1.15rem;
+        line-height: 1.8;
       }
+      .wp-content-render p { margin-bottom: 1.8rem; }
+      .wp-content-render img {
+        border-radius: 1.5rem;
+        height: auto;
+        max-width: 100%;
+        margin: 2.5rem auto;
+        display: block;
+      }
+      .wp-content-render .wp-block-image { margin: 3rem 0; }
+      .wp-content-render .wp-block-image.aligncenter { text-align: center; }
+      .wp-content-render blockquote {
+        border-left: 4px solid #0066cc;
+        padding: 1rem 0 1rem 2rem;
+        font-style: italic;
+        font-size: 1.5rem;
+        color: #424245;
+        margin: 3rem 0;
+        background: #f5f5f7;
+        border-radius: 0 1.5rem 1.5rem 0;
+      }
+      .wp-content-render ul, .wp-content-render ol {
+        margin: 2rem 0;
+        padding-left: 2rem;
+      }
+      .wp-content-render li { margin-bottom: 0.8rem; }
+      
       .card-shadow {
         box-shadow: 0 4px 24px rgba(0,0,0,0.04);
         transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -63,47 +85,12 @@
         box-shadow: 0 12px 48px rgba(0,0,0,0.08);
         transform: scale(1.01);
       }
-      
-      /* WordPress Gutenberg Content Formatting */
-      .wp-content-render img {
-        border-radius: 1.5rem;
-        margin: 2rem auto;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-      }
-      .wp-content-render .aligncenter {
-        display: block;
-        margin-left: auto;
-        margin-right: auto;
-        text-align: center;
-      }
-      .wp-content-render figure {
-        margin: 2rem 0;
-      }
-      .wp-content-render figcaption {
-        text-align: center;
-        font-size: 0.875rem;
-        color: #86868b;
-        margin-top: 0.75rem;
-      }
-      .wp-content-render blockquote {
-        border-left: 4px solid #0066cc;
-        padding-left: 1.5rem;
-        font-style: italic;
-        font-size: 1.25rem;
-        color: #424245;
-        margin: 2.5rem 0;
-      }
-      .wp-content-render p {
-        margin-bottom: 1.5rem;
-      }
-      
-      /* Player de Vídeo */
-      .wp-video-container iframe, 
-      .wp-video-container video {
+      .wp-video-container iframe {
         width: 100% !important;
         height: auto !important;
         aspect-ratio: 16 / 9;
         border-radius: 1.5rem;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.2);
       }
     </style>
   <script type="importmap">
