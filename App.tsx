@@ -17,14 +17,18 @@ import NotFoundPage from './pages/NotFoundPage';
 import AIChat from './components/AIChat';
 import WhatsAppButton from './components/WhatsAppButton';
 import { SITE_CONFIG } from './config/site-config';
+import { DataService } from './services/dataService';
 
 const App: React.FC = () => {
   const [currentHash, setCurrentHash] = useState(window.location.hash || '#/');
 
   useEffect(() => {
+    // Warm-up: Começa a carregar dados do WordPress assim que o app abre
+    DataService.getArticles(10);
+    DataService.getVideos(4);
+
     const handleHashChange = () => {
       setCurrentHash(window.location.hash || '#/');
-      // Se não for uma navegação de âncora dentro da mesma página de pilares, sobe para o topo
       if (!window.location.hash.includes('#/pilares#')) {
         window.scrollTo(0, 0);
       }
@@ -34,7 +38,6 @@ const App: React.FC = () => {
   }, []);
 
   const renderContent = () => {
-    // 1. Rotas Dinâmicas com Prefixo
     if (currentHash.startsWith('#/artigo/')) {
       const articleId = currentHash.replace('#/artigo/', '');
       return <ArticleDetailPage articleId={articleId} />;
@@ -43,13 +46,10 @@ const App: React.FC = () => {
       const courseId = currentHash.replace('#/curso/', '');
       return <CourseDetailPage courseId={courseId} />;
     }
-    
-    // 2. Rota de Pilares (Suporta âncoras para não dar 404)
     if (currentHash.startsWith('#/pilares')) {
       return <PillarsPage />;
     }
 
-    // 3. Rotas Estáticas Exatas
     switch (currentHash) {
       case '#/': 
       case '#': 

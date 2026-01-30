@@ -11,8 +11,8 @@ export const PILLARS: Pillar[] = [
   {
     id: 'prof-paulo',
     title: 'Prof. Paulo',
-    description: 'Educação e mentoria acadêmica de alta performance para profissionais modernos.',
-    longDescription: 'Como mentor e professor, Paulo Donassolo aplica metodologias ativas para transformar a carreira de educadores e profissionais que buscam excelência técnica e didática.',
+    description: 'Educação e mentoria acadêmica e profissional de alta performance para profissionais modernos.',
+    longDescription: 'Como mentor e professor, Paulo Donassolo aplica metodologias ativas para transformar o trabalho de profissionais que buscam a excelência. Gestores e Profissionais de Vendas.',
     imageUrl: 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&q=80&w=1200',
     icon: 'User',
     accentColor: '#0071e3',
@@ -20,9 +20,9 @@ export const PILLARS: Pillar[] = [
   },
   {
     id: 'consultoria-imobiliaria',
-    title: 'Consultor Imobiliário',
-    description: 'Estratégias de investimento e curadoria imobiliária com foco em rentabilidade.',
-    longDescription: 'A consultoria imobiliária de Paulo Donassolo vai além da simples transação. Envolve análise macroeconômica, curadoria de ativos e estratégias de saída para investidores.',
+    title: 'Sou Consultor Imobiliário',
+    description: 'Curadoria de Conteúdos para Profissionais que atuam no Mercado Imobiliário.',
+    longDescription: 'Conteúdos sobre Gestão de Consultores, Negociação, Profissionalização e outros assuntos importantes para Consultores e Gestores. O objetivo é transformar a forma como Vendedores e Compradores atuam no mercado.',
     imageUrl: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&q=80&w=1200',
     icon: 'Home',
     accentColor: '#ac39ff',
@@ -32,7 +32,7 @@ export const PILLARS: Pillar[] = [
     id: '4050oumais',
     title: '4050oumais',
     description: 'Longevidade produtiva e novos horizontes para quem está no auge da experiência.',
-    longDescription: 'O projeto 4050oumais é um movimento para ressignificar a maturidade no mercado de trabalho. Paulo ensina como profissionais experientes podem se manter relevantes.',
+    longDescription: 'O projeto 4050oumais é um movimento para ressignificar a maturidade no mercado de trabalho. Paulo discute assuntos sobre como profissionais experientes podem se manter relevantes.',
     imageUrl: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&q=80&w=1200',
     icon: 'TrendingUp',
     accentColor: '#ff3030',
@@ -41,8 +41,8 @@ export const PILLARS: Pillar[] = [
   {
     id: 'academia-do-gas',
     title: 'Academia do Gás',
-    description: 'Treinamento especializado para o setor de energia e GLP.',
-    longDescription: 'Referência no setor de energia, a Academia do Gás oferece treinamentos técnicos, operacionais e de gestão para revendedores de GLP.',
+    description: 'Conteúdos e Treinamentos especializado para Empreendedores e Gestores de Revendas.',
+    longDescription: 'O Prof. Paulo H. Donassolo e a Academia do Gás oferecem treinamentos e cursos sobre Gestão para revendedores de GLP. Profissionalismo, Qualidade e Rentabilidade para as Revendas.',
     imageUrl: 'https://images.unsplash.com/photo-1581094288338-2314dddb7ecc?auto=format&fit=crop&q=80&w=1200',
     icon: 'Zap',
     accentColor: '#f56300',
@@ -57,22 +57,22 @@ export const PILLARS: Pillar[] = [
 export const MOCK_COURSES: Course[] = [
   { 
     id: 'c1', 
-    name: 'Master em Investimento Imobiliário', 
-    description: 'O guia definitivo para quem deseja construir um portfólio sólido.',
-    longDescription: 'Aprenda a ler o mercado como um profissional e proteja seu patrimônio.',
+    name: 'Descomplicando o DRE', 
+    description: 'O guia definitivo para quem deseja usar esta fundamental para avaliar a saúde da sua empresa.',
+    longDescription: 'Aprenda a construir, analisar e utilizar o DRE para rentabilizar o seu negócio.',
     imageUrl: 'https://images.unsplash.com/photo-1460472178825-e51c062365d3?auto=format&fit=crop&q=80&w=800',
-    category: 'Imobiliário',
-    salesUrl: 'https://hotmart.com/pt-br/marketplace/produtos/exemplo',
+    category: 'Educação',
+    salesUrl: '//https://www.udemy.com/course/descomplicando-o-dre/',
     videos: []
   },
   { 
     id: 'c2', 
-    name: 'Metodologia Prof. Paulo', 
-    description: 'Transforme seu conhecimento em aulas que engajam.',
-    longDescription: 'Aprenda as técnicas didáticas e de oratória que transformaram Paulo Donassolo.',
+    name: 'Negociação para Vendas: IA+Ferramentas', 
+    description: 'Técnicas de Negociação aplicadas às Vendas',
+    longDescription: 'Aprenda as técnicas de negociação consolidadasa e com o uso da IA para escalar suas negociações e vendas.',
     imageUrl: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&q=80&w=800',
     category: 'Educação',
-    salesUrl: 'https://hotmart.com/pt-br/marketplace/produtos/exemplo',
+    salesUrl: 'https://www.udemy.com/course/negociacao-para-vendas-tecnicas-ia-professor/',
     videos: []
   }
 ];

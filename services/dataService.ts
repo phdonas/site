@@ -1,16 +1,25 @@
 
 import { MOCK_ARTICLES, MOCK_COURSES, MOCK_RESOURCES, PILLARS } from '../constants';
 import { Article, Course, Resource, Pillar, PillarId } from '../types';
-import { WP_CONFIG } from '../config/wp-config';
 
-const CACHE_KEY_ARTICLES = 'phd_articles_cache_v6';
-const CACHE_KEY_VIDEOS = 'phd_videos_cache_v6';
+const CACHE_KEY_ARTICLES = 'phd_articles_cache_v7';
+const CACHE_KEY_VIDEOS = 'phd_videos_cache_v7';
+const CACHE_EXPIRATION = 1000 * 60 * 30; // 30 minutos
 
+// Recupera cache inicial síncrono para velocidade instantânea
 let cachedArticles: Article[] = JSON.parse(localStorage.getItem(CACHE_KEY_ARTICLES) || '[]');
 let cachedVideos: any[] = JSON.parse(localStorage.getItem(CACHE_KEY_VIDEOS) || '[]');
 
-const saveArticlesCache = () => localStorage.setItem(CACHE_KEY_ARTICLES, JSON.stringify(cachedArticles));
-const saveVideosCache = () => localStorage.setItem(CACHE_KEY_VIDEOS, JSON.stringify(cachedVideos));
+const saveArticlesCache = (data: Article[]) => {
+  cachedArticles = data;
+  localStorage.setItem(CACHE_KEY_ARTICLES, JSON.stringify(data));
+  localStorage.setItem(CACHE_KEY_ARTICLES + '_time', Date.now().toString());
+};
+
+const saveVideosCache = (data: any[]) => {
+  cachedVideos = data;
+  localStorage.setItem(CACHE_KEY_VIDEOS, JSON.stringify(data));
+};
 
 const CATEGORY_MAP: Record<string, PillarId> = {
   'artigos': 'prof-paulo',
@@ -57,7 +66,7 @@ const mapWPPostToArticle = (post: any): Article => {
   };
 };
 
-const fetchWithTimeout = async (url: string, options: any = {}, timeout = 8000) => {
+const fetchWithTimeout = async (url: string, options: any = {}, timeout = 5000) => {
   const controller = new AbortController();
   const id = setTimeout(() => controller.abort(), timeout);
   try {
@@ -70,127 +79,105 @@ const fetchWithTimeout = async (url: string, options: any = {}, timeout = 8000) 
   }
 };
 
-/**
- * Função de Fetch de Alta Disponibilidade
- */
 const secureFetch = async (endpoint: string) => {
   const domain = 'phdonassolo.com';
+  const targetUrl = `https://${domain}/wp-json/wp/v2${endpoint}`;
   
-  // Lista de variações de URL para contornar problemas de permalinks e redirecionamentos na Hostgator
-  const urlVariations = [
-    // Padrão limpo (depende de mod_rewrite)
-    `https://${domain}/wp-json/wp/v2${endpoint}`,
-    `https://www.${domain}/wp-json/wp/v2${endpoint}`,
-    // Método rest_route (Fallback universal para quando permalinks falham)
-    `https://${domain}/index.php?rest_route=/wp/v2${endpoint}`,
-    `https://www.${domain}/index.php?rest_route=/wp/v2${endpoint}`
+  // Estratégia multicanal para Hostgator
+  const strategies = [
+    async () => {
+      const res = await fetchWithTimeout(targetUrl);
+      if (res.ok) return await res.json();
+      throw new Error('Direct failed');
+    },
+    async () => {
+      const res = await fetchWithTimeout(`https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}&t=${Date.now()}`);
+      const wrapper = await res.json();
+      return typeof wrapper.contents === 'string' ? JSON.parse(wrapper.contents) : wrapper.contents;
+    }
   ];
 
-  for (const targetUrl of urlVariations) {
-    const strategies = [
-      // 1. Direto
-      async () => {
-        const res = await fetchWithTimeout(targetUrl, { mode: 'cors' });
-        if (res.ok) return await res.json();
-        throw new Error(`Direct failed: ${res.status}`);
-      },
-      // 2. Proxy: Corsproxy.io
-      async () => {
-        const res = await fetchWithTimeout(`https://corsproxy.io/?${encodeURIComponent(targetUrl)}`);
-        if (res.ok) return await res.json();
-        throw new Error(`Proxy 1 failed`);
-      },
-      // 3. Proxy: AllOrigins
-      async () => {
-        const res = await fetchWithTimeout(`https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}&t=${Date.now()}`);
-        if (res.ok) {
-          const wrapper = await res.json();
-          const content = typeof wrapper.contents === 'string' ? JSON.parse(wrapper.contents) : wrapper.contents;
-          if (content) return content;
-        }
-        throw new Error(`Proxy 2 failed`);
-      }
-    ];
-
-    for (const strategy of strategies) {
-      try {
-        const data = await strategy();
-        if (data && (Array.isArray(data) || typeof data === 'object')) {
-          console.debug(`Sucesso com a URL: ${targetUrl}`);
-          return data;
-        }
-      } catch (e) {
-        // Silencioso, tenta a próxima estratégia
-      }
-    }
+  for (const strategy of strategies) {
+    try {
+      const data = await strategy();
+      if (data) return data;
+    } catch (e) {}
   }
-
-  throw new Error('Falha crítica de conexão. WordPress inacessível via API padrão ou Proxy.');
+  throw new Error('Connection failed');
 };
 
 export const DataService = {
   async testConnection(): Promise<boolean> {
     try {
       const data = await secureFetch('/posts?per_page=1');
-      return Array.isArray(data);
-    } catch (e) { 
-      return false; 
-    }
+      return !!data;
+    } catch (e) { return false; }
   },
 
+  // PERFORMANCE: Retorna cache imediatamente e atualiza no fundo
   async getArticles(limit = 12): Promise<Article[]> {
-    try {
-      const posts = await secureFetch(`/posts?_embed&per_page=${limit}`);
-      if (Array.isArray(posts)) {
-        const mapped = posts.map(mapWPPostToArticle);
-        cachedArticles = mapped;
-        saveArticlesCache();
-        return mapped;
-      }
-    } catch (err) {
-      console.error("DataService: Erro ao buscar artigos, usando fallback.");
+    const fetchNewData = async () => {
+      try {
+        const posts = await secureFetch(`/posts?_embed&per_page=${limit}`);
+        if (Array.isArray(posts)) {
+          const mapped = posts.map(mapWPPostToArticle);
+          saveArticlesCache(mapped);
+          return mapped;
+        }
+      } catch (e) {}
+      return cachedArticles;
+    };
+
+    // Se temos cache, dispara atualização silenciosa e retorna o cache agora
+    if (cachedArticles.length > 0) {
+      fetchNewData(); // Background sync
+      return cachedArticles.slice(0, limit);
     }
-    return cachedArticles.length > 0 ? cachedArticles.slice(0, limit) : MOCK_ARTICLES;
+
+    return await fetchNewData();
   },
 
   async getVideos(limit = 4): Promise<any[]> {
-    try {
-      // Tentamos buscar posts que contenham iframes (vídeos)
-      const posts = await secureFetch(`/posts?_embed&per_page=20`);
-      if (Array.isArray(posts)) {
-        const mapped = posts
-          .filter(p => p.content.rendered.includes('<iframe'))
-          .map(p => ({
-            id: p.id,
-            title: p.title.rendered,
-            content: sanitizeWPContent(p.content.rendered),
-            thumb: p._embedded?.['wp:featuredmedia']?.[0]?.source_url || 'https://images.unsplash.com/photo-1492619334760-22c0217e33ff?auto=format&fit=crop&q=80&w=400'
-          }));
-        if (mapped.length > 0) {
-          cachedVideos = mapped;
-          saveVideosCache();
+    const fetchVideos = async () => {
+      try {
+        const posts = await secureFetch(`/posts?_embed&per_page=15`);
+        if (Array.isArray(posts)) {
+          const mapped = posts
+            .filter(p => p.content.rendered.includes('<iframe'))
+            .map(p => ({
+              id: p.id,
+              title: p.title.rendered,
+              content: sanitizeWPContent(p.content.rendered),
+              thumb: p._embedded?.['wp:featuredmedia']?.[0]?.source_url || 'https://images.unsplash.com/photo-1492619334760-22c0217e33ff?auto=format&fit=crop&q=80&w=400'
+            }));
+          saveVideosCache(mapped);
           return mapped.slice(0, limit);
         }
-      }
-    } catch (err) {
-      console.error("DataService: Erro ao buscar vídeos, usando fallback.");
+      } catch (e) {}
+      return cachedVideos;
+    };
+
+    if (cachedVideos.length > 0) {
+      fetchVideos();
+      return cachedVideos.slice(0, limit);
     }
-    return cachedVideos.length > 0 ? cachedVideos.slice(0, limit) : [];
+    return await fetchVideos();
   },
 
   async getArticleById(id: string): Promise<Article | undefined> {
-    const cached = cachedArticles.find(a => a.id === id);
+    const local = cachedArticles.find(a => a.id === id);
+    if (local) return local;
+
     try {
       const post = await secureFetch(`/posts/${id}?_embed`);
-      if (post && post.id) return mapWPPostToArticle(post);
-    } catch (err) {
-      console.warn("DataService: Artigo individual falhou, tentando cache.");
+      return mapWPPostToArticle(post);
+    } catch (e) {
+      return local;
     }
-    return cached;
   },
 
   async getArticlesByPillar(pillarId: PillarId, limit = 3): Promise<Article[]> {
-    const arts = await this.getArticles(20);
+    const arts = cachedArticles.length > 0 ? cachedArticles : await this.getArticles(20);
     return arts.filter(a => a.pillarId === pillarId).slice(0, limit);
   },
 
