@@ -1,14 +1,31 @@
 
-import React, { useState } from 'react';
-import { MOCK_ARTICLES, PILLARS } from '../constants';
-import { PillarId } from '../types';
+import React, { useState, useEffect } from 'react';
+import { DataService } from '../services/dataService';
+import { Article, Pillar, PillarId } from '../types';
 
 const ArticleGallery: React.FC = () => {
   const [selectedPillar, setSelectedPillar] = useState<PillarId | 'all'>('all');
+  const [articles, setArticles] = useState<Article[]>([]);
+  const [pillars, setPillars] = useState<Pillar[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadContent = async () => {
+      setLoading(true);
+      const [artData, pilData] = await Promise.all([
+        DataService.getArticles(),
+        DataService.getPillars()
+      ]);
+      setArticles(artData);
+      setPillars(pilData);
+      setLoading(false);
+    };
+    loadContent();
+  }, []);
 
   const filteredArticles = selectedPillar === 'all' 
-    ? MOCK_ARTICLES 
-    : MOCK_ARTICLES.filter(a => a.pillarId === selectedPillar);
+    ? articles 
+    : articles.filter(a => a.pillarId === selectedPillar);
 
   return (
     <section className="py-24 px-6 bg-white">
@@ -25,7 +42,7 @@ const ArticleGallery: React.FC = () => {
             >
               Todos
             </button>
-            {PILLARS.map(p => (
+            {pillars.map(p => (
               <button 
                 key={p.id}
                 onClick={() => setSelectedPillar(p.id)}
@@ -37,27 +54,31 @@ const ArticleGallery: React.FC = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {filteredArticles.map(article => (
-            <div key={article.id} className="group cursor-pointer">
-              <div className="aspect-[16/10] rounded-3xl overflow-hidden mb-6 bg-gray-100">
-                <img 
-                  src={article.imageUrl} 
-                  alt={article.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                />
+        {loading ? (
+          <div className="py-20 text-center text-gray-400 font-medium">Carregando galeria...</div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {filteredArticles.map(article => (
+              <div key={article.id} className="group cursor-pointer">
+                <div className="aspect-[16/10] rounded-3xl overflow-hidden mb-6 bg-gray-100">
+                  <img 
+                    src={article.imageUrl} 
+                    alt={article.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                </div>
+                <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">
+                  {pillars.find(p => p.id === article.pillarId)?.title}
+                </p>
+                <h3 className="text-2xl font-bold mb-3 group-hover:text-blue-600 transition-colors line-clamp-2">{article.title}</h3>
+                <p className="text-gray-500 leading-relaxed mb-4 line-clamp-2">
+                  {article.excerpt}
+                </p>
+                <a href={`#/artigo/${article.id}`} className="apple-link font-semibold">Ler artigo completo</a>
               </div>
-              <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">
-                {PILLARS.find(p => p.id === article.pillarId)?.title}
-              </p>
-              <h3 className="text-2xl font-bold mb-3 group-hover:text-blue-600 transition-colors">{article.title}</h3>
-              <p className="text-gray-500 leading-relaxed mb-4 line-clamp-2">
-                {article.excerpt}
-              </p>
-              <a href={`#/artigo/${article.id}`} className="apple-link font-semibold">Ler artigo completo</a>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );
