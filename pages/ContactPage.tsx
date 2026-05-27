@@ -26,14 +26,31 @@ const ContactPage = ({ initialMessage = '' }: ContactPageProps) => {
     setStatus('idle');
 
     try {
-      const formDataToSend = new FormData();
-      formDataToSend.append('name', formData.name);
-      formDataToSend.append('email', formData.email);
-      formDataToSend.append('phone', formData.phone);
-      formDataToSend.append('message', formData.message);
+      const params = new URLSearchParams();
+      params.append('unm', formData.name);
+      params.append('uem', formData.email);
+      params.append('utel', formData.phone);
+      params.append('umsg', formData.message);
 
-      const response = await fetch('/send-email.php', { method: 'POST', body: formDataToSend });
-      const result = await response.json();
+      const response = await fetch('./form-handler.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Accept': 'application/json'
+        },
+        body: params.toString()
+      });
+
+      const text = await response.text();
+      let result;
+      
+      try {
+        result = JSON.parse(text);
+      } catch (err) {
+        console.error('Resposta não-JSON do servidor:', text);
+        setStatus('error');
+        return;
+      }
 
       if (result.success) {
         setStatus('success');
