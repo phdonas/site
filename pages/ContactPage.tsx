@@ -1,101 +1,128 @@
+import React, { useState, useEffect } from 'react';
 
-import React, { useState } from 'react';
-import { Mail, MessageCircle, ArrowRight, Send } from 'lucide-react';
-import { SITE_CONFIG } from '../config/site-config';
+interface ContactPageProps {
+  initialMessage?: string;
+}
 
-const ContactPage: React.FC = () => {
-  const [submitted, setSubmitted] = useState(false);
+const ContactPage = ({ initialMessage = '' }: ContactPageProps) => {
+  const [formData, setFormData] = useState({ name: '', email: '', phone: '', message: initialMessage });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setSubmitted(true);
+  useEffect(() => {
+    if (initialMessage) {
+      setFormData(prev => ({ ...prev, message: initialMessage }));
+    }
+  }, [initialMessage]);
+
+  const [loading, setLoading] = useState(false);
+  const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle');
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  if (submitted) {
-    return (
-      <main className="pt-24 min-h-screen flex items-center justify-center bg-white px-6 text-center">
-        <div className="max-w-md animate-in zoom-in duration-500">
-          <div className="w-20 h-20 bg-green-50 text-green-500 rounded-full flex items-center justify-center mx-auto mb-8 shadow-sm">
-            <Send size={32} />
-          </div>
-          <h1 className="text-4xl font-bold mb-4 tracking-tight">Mensagem Recebida.</h1>
-          <p className="text-xl text-gray-500 mb-8 font-medium">Obrigado! Nossa equipe entrará em contato em até 24 horas.</p>
-          <button onClick={() => setSubmitted(false)} className="text-blue-600 font-bold text-lg hover:underline decoration-2 underline-offset-4">
-            Enviar outra mensagem
-          </button>
-        </div>
-      </main>
-    );
-  }
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setStatus('idle');
+
+    try {
+      const formDataToSend = new FormData();
+      formDataToSend.append('name', formData.name);
+      formDataToSend.append('email', formData.email);
+      formDataToSend.append('phone', formData.phone);
+      formDataToSend.append('message', formData.message);
+
+      const response = await fetch('/send-email.php', { method: 'POST', body: formDataToSend });
+      const result = await response.json();
+
+      if (result.success) {
+        setStatus('success');
+        setFormData({ name: '', email: '', phone: '', message: '' });
+      } else {
+        setStatus('error');
+      }
+    } catch (error) {
+      console.error('Erro:', error);
+      setStatus('error');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <main className="pt-24 min-h-screen bg-white">
-      <div className="max-w-6xl mx-auto px-6 py-20">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-20">
+    <div className="min-h-screen bg-white">
+      <div className="max-w-7xl mx-auto px-6 py-20">
+        <h1 className="text-5xl font-bold text-center mb-6">Entre em Contato</h1>
+        <p className="text-xl text-gray-600 text-center max-w-2xl mx-auto mb-16">
+          Tem alguma dúvida? Preencha o formulário abaixo.
+        </p>
+
+        <div className="grid md:grid-cols-2 gap-12">
           <div>
-            <h1 className="text-6xl font-bold tracking-tight mb-8">Fale conosco.</h1>
-            <p className="text-2xl text-gray-500 font-medium mb-12 leading-relaxed">
-              Dúvidas sobre cursos, consultoria ou parcerias? Nossa equipe está pronta para ajudar você.
-            </p>
-            <div className="space-y-10">
-              <div className="flex items-start gap-6 group">
-                <div className="w-14 h-14 bg-gray-50 rounded-2xl flex items-center justify-center text-gray-400 group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors shadow-sm">
-                  <Mail size={24} />
-                </div>
+            <h2 className="text-3xl font-bold mb-8">Informações</h2>
+            <div className="space-y-6">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">📧</div>
                 <div>
-                  <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">E-mail Corporativo</p>
-                  <a href={`mailto:${SITE_CONFIG.email_contato}`} className="text-xl font-bold text-[#1d1d1f] hover:text-blue-600 transition-colors">
-                    {SITE_CONFIG.email_contato}
-                  </a>
+                  <h3 className="font-semibold mb-1">Email</h3>
+                  <a href="mailto:paulo@phdonassolo.com" className="text-blue-600">paulo@phdonassolo.com</a>
                 </div>
               </div>
-              <div className="flex items-start gap-6 group">
-                <div className="w-14 h-14 bg-gray-50 rounded-2xl flex items-center justify-center text-gray-400 group-hover:bg-green-50 group-hover:text-green-600 transition-colors shadow-sm">
-                  <MessageCircle size={24} />
-                </div>
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">📱</div>
                 <div>
-                  <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">WhatsApp Direto</p>
-                  <p className="text-xl font-bold text-[#1d1d1f] leading-tight">
-                    Acesse o botão <span className="text-blue-600">Assistente</span> no canto da tela para iniciar uma conversa imediata.
-                  </p>
+                  <h3 className="font-semibold mb-1">WhatsApp</h3>
+                  <a href="https://wa.me/351910298213" className="text-green-600">+351 910 298 213</a>
                 </div>
               </div>
             </div>
           </div>
-          <div className="bg-[#f5f5f7] rounded-[48px] p-8 md:p-12 border border-gray-100/50 shadow-sm">
+
+          <div className="bg-white rounded-2xl shadow-lg p-8">
+            <h2 className="text-2xl font-bold mb-6">Envie sua Mensagem</h2>
             <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 px-1">Nome</label>
-                  <input type="text" required placeholder="Ex: Paulo Silva" className="w-full px-6 py-4 bg-white rounded-2xl outline-none focus:ring-2 focus:ring-blue-500 border border-transparent focus:border-blue-200 transition-all font-medium" />
-                </div>
-                <div>
-                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 px-1">E-mail</label>
-                  <input type="email" required placeholder="seu@email.com" className="w-full px-6 py-4 bg-white rounded-2xl outline-none focus:ring-2 focus:ring-blue-500 border border-transparent focus:border-blue-200 transition-all font-medium" />
-                </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Nome Completo *</label>
+                <input type="text" name="name" required value={formData.name} onChange={handleChange}
+                  className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500" />
               </div>
               <div>
-                <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 px-1">Assunto de Interesse</label>
-                <select className="w-full px-6 py-4 bg-white rounded-2xl outline-none focus:ring-2 focus:ring-blue-500 border border-transparent focus:border-blue-200 transition-all font-medium appearance-none cursor-pointer">
-                  <option>Consultoria Imobiliária</option>
-                  <option>Mentoria Individual</option>
-                  <option>Cursos Online</option>
-                  <option>Academia do Gás</option>
-                  <option>Outros</option>
-                </select>
+                <label className="block text-sm font-medium mb-2">Email *</label>
+                <input type="email" name="email" required value={formData.email} onChange={handleChange}
+                  className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500" />
               </div>
               <div>
-                <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 px-1">Sua Mensagem</label>
-                <textarea rows={4} required placeholder="Como podemos impulsionar seu projeto hoje?" className="w-full px-6 py-4 bg-white rounded-2xl outline-none focus:ring-2 focus:ring-blue-500 border border-transparent focus:border-blue-200 transition-all font-medium resize-none"></textarea>
+                <label className="block text-sm font-medium mb-2">Telefone</label>
+                <input type="tel" name="phone" value={formData.phone} onChange={handleChange}
+                  className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500" />
               </div>
-              <button type="submit" className="w-full bg-blue-600 text-white py-5 rounded-2xl text-lg font-bold hover:bg-blue-700 shadow-xl shadow-blue-500/10 transition-all flex items-center justify-center gap-2 group">
-                Enviar Mensagem <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+              <div>
+                <label className="block text-sm font-medium mb-2">Mensagem *</label>
+                <textarea name="message" required rows={5} value={formData.message} onChange={handleChange}
+                  className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 resize-none" />
+              </div>
+
+              {status === 'success' && (
+                <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                  <p className="text-green-800 font-medium">✅ Mensagem enviada com sucesso!</p>
+                </div>
+              )}
+
+              {status === 'error' && (
+                <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+                  <p className="text-red-800 font-medium">❌ Erro ao enviar. Tente novamente.</p>
+                </div>
+              )}
+
+              <button type="submit" disabled={loading}
+                className="w-full bg-blue-600 text-white py-4 rounded-lg font-semibold hover:bg-blue-700 disabled:bg-gray-400">
+                {loading ? 'Enviando...' : 'Enviar Mensagem'}
               </button>
             </form>
           </div>
         </div>
       </div>
-    </main>
+    </div>
   );
 };
 

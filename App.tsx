@@ -10,21 +10,25 @@ import ServicesPage from './pages/ServicesPage.tsx';
 import DownloadsPage from './pages/DownloadsPage.tsx';
 import ContactPage from './pages/ContactPage.tsx';
 import PillarsPage from './pages/PillarsPage.tsx';
+import TrilhasPage from './pages/TrilhasPage.tsx';
 import CoursesBooksPage from './pages/CoursesBooksPage.tsx';
 import PrivacyPage from './pages/PrivacyPage.tsx';
+import TermsPage from './pages/TermsPage.tsx';
 import NotFoundPage from './pages/NotFoundPage.tsx';
-import AIChat from './components/AIChat.tsx';
 import WhatsAppButton from './components/WhatsAppButton.tsx';
 import { SITE_CONFIG } from './config/site-config.ts';
 import { DataService } from './services/dataService.ts';
+import DynamicLPPage from './pages/DynamicLPPage.tsx';
+import AreaAlunoEmBreve from './pages/AreaAlunoEmBreve.tsx';
+import MentoriaPage from './pages/MentoriaPage.jsx';
 
-const App: React.FC = () => {
+const App = () => {
   const [currentHash, setCurrentHash] = useState(window.location.hash || '#/');
 
   useEffect(() => {
     // Warm-up data
-    DataService.getArticles(10);
-    DataService.getVideos(4);
+    DataService.getArticles(10).catch(() => { });
+    DataService.getVideos(4).catch(() => { });
 
     const handleHashChange = () => {
       setCurrentHash(window.location.hash || '#/');
@@ -36,31 +40,58 @@ const App: React.FC = () => {
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
-  const renderContent = () => {
-    if (currentHash.startsWith('#/artigo/')) {
-      const articleId = currentHash.split('/artigo/')[1];
-      if (articleId) return <ArticleDetailPage articleId={articleId} />;
+  // Helper para extrair parâmetros da URL
+  const getUrlParams = (hash: string) => {
+    const [path, queryString] = hash.split('?');
+    const params: Record<string, string> = {};
+
+    if (queryString) {
+      queryString.split('&').forEach(param => {
+        const [key, value] = param.split('=');
+        if (key && value) {
+          params[key] = decodeURIComponent(value);
+        }
+      });
     }
-    
-    if (currentHash.startsWith('#/curso/')) {
-      const courseId = currentHash.split('/curso/')[1];
+
+    return { path, params };
+  };
+
+  const renderContent = () => {
+    const { path, params } = getUrlParams(currentHash);
+
+    if (path.startsWith('#/artigo/')) {
+      const articleId = path.split('/artigo/')[1];
+      if (articleId) return <ArticleDetailPage articleId={articleId} activePillar={params.from} />;
+    }
+
+    if (path.startsWith('#/curso/')) {
+      const courseId = path.split('/curso/')[1];
       if (courseId) return <CourseDetailPage courseId={courseId} />;
     }
 
-    switch (currentHash) {
-      case '#/': 
-      case '#': 
+    if (path.startsWith('#/lp/')) {
+      return <DynamicLPPage />;
+    }
+
+    switch (path) {
+      case '#/':
+      case '#':
       case '': return <HomePage />;
       case '#/login': return <LoginPage />;
       case '#/admin': return <AdminPage />;
-      case '#/artigos': return <ArticlesPage />;
+      case '#/artigos': return <ArticlesPage initialPillar={params.pilar} />;
       case '#/servicos': return <ServicesPage />;
       case '#/downloads': return <DownloadsPage />;
-      case '#/contato': return <ContactPage />;
+      case '#/contato': return <ContactPage initialMessage={params.mensagem || params.msg} />;
+      case '#/trilhas': return <TrilhasPage />;
       case '#/livros': return <CoursesBooksPage />;
       case '#/privacidade': return <PrivacyPage />;
-      default: 
-        if (currentHash.startsWith('#/pilares')) return <PillarsPage />;
+      case '#/termos': return <TermsPage />;
+      case '#/area-aluno': return <AreaAlunoEmBreve />;
+      case '#/mentoria': return <MentoriaPage />;
+      default:
+        if (path.startsWith('#/pilares')) return <PillarsPage />;
         return <NotFoundPage />;
     }
   };
@@ -69,8 +100,7 @@ const App: React.FC = () => {
     <div className="min-h-screen flex flex-col">
       <Navbar />
       <div className="flex-1">{renderContent()}</div>
-      
-      <AIChat />
+
       <WhatsAppButton />
 
       <footer className="py-24 px-6 bg-[#f5f5f7] border-t border-gray-200">
@@ -104,8 +134,9 @@ const App: React.FC = () => {
             <div>
               <h4 className="font-bold text-[10px] uppercase text-gray-400 mb-8 tracking-[0.2em]">Legal</h4>
               <ul className="text-sm space-y-5 text-gray-600 font-medium">
+                <li><a href="#/termos" className="hover:text-blue-600 transition-colors">Termos de Uso</a></li>
                 <li><a href="#/privacidade" className="hover:text-blue-600 transition-colors">Privacidade</a></li>
-                <li><a href="#/login" className="hover:text-blue-600 transition-colors">Área do Aluno</a></li>
+                <li><a href="#/area-aluno" className="hover:text-blue-600 transition-colors">Área do Aluno</a></li>
               </ul>
             </div>
           </div>
