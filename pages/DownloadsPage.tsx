@@ -1,12 +1,13 @@
-
 import React, { useState, useEffect } from 'react';
 import { DataService } from '../services/dataService';
 import { Resource } from '../types';
-import { Download, FileText, FileSpreadsheet, FileBox } from 'lucide-react';
+import { Download, FileText, FileSpreadsheet, FileBox, ExternalLink } from 'lucide-react';
+import { useSiteConfig } from '../contexts/SiteConfigContext';
 
 const DownloadsPage: React.FC = () => {
   const [resources, setResources] = useState<Resource[]>([]);
   const [loading, setLoading] = useState(true);
+  const { config } = useSiteConfig();
 
   useEffect(() => {
     const loadData = async () => {
@@ -25,6 +26,7 @@ const DownloadsPage: React.FC = () => {
       case 'EXCEL': return <FileSpreadsheet className="text-green-600" size={24} />;
       case 'PDF': return <FileText className="text-red-500" size={24} />;
       case 'WORD': return <FileText className="text-blue-600" size={24} />;
+      case 'LINK': return <ExternalLink className="text-purple-600" size={24} />;
       default: return <FileBox className="text-gray-400" size={24} />;
     }
   };
@@ -33,9 +35,9 @@ const DownloadsPage: React.FC = () => {
     <main className="pt-24 min-h-screen bg-white">
       <div className="max-w-6xl mx-auto px-6 pb-20">
         <header className="mb-20">
-          <h1 className="text-6xl font-bold tracking-tight mb-4">Materiais Auxiliares</h1>
+          <h1 className="text-6xl font-bold tracking-tight mb-4">{config.pages?.downloads?.title || "Ferramentas e Materiais"}</h1>
           <p className="text-2xl text-gray-500 font-medium max-w-2xl">
-            Simuladores, e-books e guias práticos desenvolvidos para apoiar seu crescimento.
+            {config.pages?.downloads?.subtitle || "Simuladores, e-books, ferramentas interativas e guias práticos desenvolvidos para apoiar seu crescimento."}
           </p>
         </header>
 
@@ -59,9 +61,10 @@ const DownloadsPage: React.FC = () => {
                       </div>
                       <h4 className="text-xl font-bold mb-2 pr-10">{resource.name}</h4>
                       <p className="text-sm text-gray-500 mb-6 font-medium">Formato: {resource.type}</p>
-                      <button className="flex items-center gap-2 text-blue-600 font-bold hover:underline">
-                        <Download size={18} /> Baixar agora
-                      </button>
+                      <a href={`#/lp/${resource.id}`} className="inline-flex items-center gap-2 text-blue-600 font-bold hover:underline">
+                        {resource.type === 'LINK' ? <ExternalLink size={18} /> : <Download size={18} />} 
+                        {resource.type === 'LINK' ? 'Acessar ferramenta' : 'Baixar agora'}
+                      </a>
                     </div>
                   ))}
                 </div>

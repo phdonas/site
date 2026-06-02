@@ -1,25 +1,25 @@
-
 import React, { useState } from 'react';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../services/firebase';
 
 const LoginPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     
-    // Simulação de login com credencial admin
-    setTimeout(() => {
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      window.location.hash = '#/admin';
+    } catch (error: any) {
+      console.error(error);
+      alert('Email ou senha inválidos. Tente novamente.');
+    } finally {
       setLoading(false);
-      if (email === 'admin@phdonassolo.com' && password === 'Inter1909@fim') {
-        localStorage.setItem('phd_session', 'admin');
-        window.location.hash = '#/admin';
-      } else {
-        alert('Sistema de Área do Aluno em desenvolvimento. Credenciais administrativas: admin@phdonassolo.com / admin');
-      }
-    }, 1200);
+    }
   };
 
   return (
@@ -64,7 +64,7 @@ const LoginPage: React.FC = () => {
             <a href="#" className="text-sm font-medium text-blue-600 hover:underline">Esqueceu a senha?</a>
             <div className="h-[1px] bg-gray-100 w-full my-2"></div>
             <p className="text-xs text-gray-400 font-medium italic">
-              Dica: use email 'admin@phdonassolo.com' e senha 'admin' para acessar o painel administrativo.
+              Dica: use email para acessar o painel administrativo.
             </p>
           </div>
         </div>

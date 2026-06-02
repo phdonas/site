@@ -1,8 +1,8 @@
-
 import React, { useState, useEffect } from 'react';
 import { DataService } from '../services/dataService';
 import { Article, Pillar, PillarId } from '../types';
 import { Search, ArrowRight } from 'lucide-react';
+import { useSiteConfig } from '../contexts/SiteConfigContext';
 
 const ArticlesPage: React.FC = () => {
   const [selectedPillar, setSelectedPillar] = useState<PillarId | 'all'>('all');
@@ -10,6 +10,7 @@ const ArticlesPage: React.FC = () => {
   const [articles, setArticles] = useState<Article[]>([]);
   const [pillars, setPillars] = useState<Pillar[]>([]);
   const [loading, setLoading] = useState(true);
+  const { config } = useSiteConfig();
 
   useEffect(() => {
     const loadData = async () => {
@@ -36,9 +37,9 @@ const ArticlesPage: React.FC = () => {
     <main className="pt-24 min-h-screen bg-white">
       <div className="max-w-6xl mx-auto px-6 pb-20">
         <header className="mb-16">
-          <h1 className="text-6xl font-bold tracking-tight mb-4">Biblioteca de Ideias</h1>
+          <h1 className="text-6xl font-bold tracking-tight mb-4">{config.pages?.articles?.title || "Artigos & Insights"}</h1>
           <p className="text-2xl text-gray-500 font-medium max-w-2xl">
-            Exploração profunda sobre nossos pilares de conteúdo, mentoria e mercado.
+            {config.pages?.articles?.subtitle || "Exploração profunda sobre nossos pilares de conteúdo, mentoria e mercado."}
           </p>
         </header>
 

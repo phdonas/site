@@ -1,0 +1,1626 @@
+
+ÁREA DO ALUNO
+Blueprint Completo de Implementação
+phdonassolo.com  |  Prof. Paulo Henrique Donassolo
+VERSÃO 5.2  |  MARÇO 2026
+Documento único consolidado — substitui todas as versões anteriores
+
+◆  41 tabelas + biblioteca de conteúdo intercambiável · Quiz · Tipos de aula · Notas · Notificações · Cupons · Revisão espaçada · PHD Ramp · Buscador IA no catálogo · Regras de segurança · Mapa de prioridades P1–P5 · CLAUDE.md v5.2  ◆
+
+
+
+0. Como Usar Este Documento
+Este é o documento único de referência do projeto Área do Aluno. Substitui todas as versões anteriores.
+
+Parte
+Seções
+Quem executa
+Quando
+PARTE A — Configurações manuais
+Seções 1 a 6
+Você
+Semanas 1–2 (antes de ligar o Claude Code)
+PARTE B — Banco de dados
+Seção 7
+Claude Code
+Semana 3, primeiro passo
+PARTE C — Código e módulos
+Seções 8 a 11
+Claude Code
+Semanas 3–9, sequência de prompts
+PARTE D — Deploy e operação
+Seções 12 a 16
+Você + Claude Code
+Uso recorrente pós-lançamento
+PARTE E — Mapa de prioridades
+Seção 17
+Referência
+Consultar antes de cada sprint
+
+Sistema de prioridades
+Cada funcionalidade neste blueprint tem uma prioridade explícita:
+
+P1 — CRÍTICO
+Implementar ANTES da primeira linha de código. São regras que previnem bugs graves documentados em projetos similares.
+
+P2 — ALTA
+Implementar nos 60 dias. Fazem parte do MVP e do roadmap principal.
+
+P3 — MÉDIA
+Implementar junto com o módulo correspondente se o custo for baixo; caso contrário, logo após o lançamento.
+
+P4 — PÓS-LANÇAMENTO
+Implementar após validação com usuários reais. Requerem dados históricos ou massa crítica de alunos.
+
+P5 — LONGO PRAZO
+Roadmap de médio prazo. Alta complexidade ou dependência de infraestrutura que ainda não existe.
+
+Ícones usados:  🔑 Você faz · 🤖 Claude Code faz · ⚠️ Risco · ✅ Validação · 📁 Armazenamento · 🆕 Novo v5.2 · 🔒 Segurança
+
+
+
+1. Arquitetura Geral — Mapa do Sistema
+Componente
+O que é e onde fica
+phdonassolo.com
+Site atual. Continua no HostGator. Única alteração: botão &apos;Área do Aluno&apos; no Header
+alunos.phdonassolo.com
+Área do Aluno. Next.js 15 + TypeScript na Vercel (gratuito)
+Supabase
+PostgreSQL + Auth + Storage. 44 tabelas + pgvector para Coach IA (pós-60 dias)
+HostGator /simuladores/
+Simuladores HTML existentes e novos. Protegidos por token PHP
+YouTube não-listado
+Vídeos das aulas. Gratuito e ilimitado. Incorporados via ID
+AWS SES / PHDMail
+E-mails automáticos transacionais e campanhas
+Mercado Pago
+Pagamentos avulsos + assinaturas (Pix, Cartão, Boleto)
+Claude API
+Ferramentas SaaS + Simuladores + Buscador do catálogo + Coach IA
+GitHub (privado)
+Código-fonte. Deploy automático na Vercel a cada git push
+
+Mapa de armazenamento
+Tipo
+Exemplo
+Onde fica
+Como o aluno acessa
+PDFs e planilhas
+Checklist Onboarding.pdf
+Supabase Storage
+Link temporário 60min
+Simuladores HTML
+calculo-preco.html
+HostGator /simuladores/
+Link protegido token PHP
+Ferramentas SaaS com IA
+PHD Ramp
+GitHub → Vercel (código)
+Página protegida /ferramentas/slug
+Vídeos das aulas
+Aula 03 — JBP
+YouTube não-listado
+Embed via youtube_id
+Thumbnails de cursos
+capa-negociacao.jpg
+Supabase Storage
+URL pública permanente
+Landing pages
+lp/jbp-checklist
+HostGator /lp/
+Acesso público
+
+
+
+2. Identidade Visual — Design Tokens
+Antes de criar qualquer componente, o Claude Code lê o site atual e gera lib/design-tokens.ts. Este arquivo é a única fonte de verdade visual do projeto.
+
+🤖  PROMPT — GERAR DESIGN TOKENS (Semana 2, antes de qualquer código de UI)
+&quot;Leia os arquivos em /site-referencia/ (index.html e style.css do site phdonassolo.com). Extraia: (1) Paleta de cores completa com nomes semânticos. (2) Tipografia: famílias, tamanhos, pesos. (3) Espaçamentos padrão. (4) Raios de borda. (5) Sombras. Gere lib/design-tokens.ts como objeto TypeScript exportado. Todos os componentes da plataforma devem importar exclusivamente deste arquivo. NUNCA use valores de cor ou fonte hardcodados em componentes.&quot;
+
+
+
+3. Claude Code — Configuração do Agente
+3.1 Instalação
+Instale o Claude Code globalmente: npm install -g @anthropic-ai/claude-code
+Inicie em qualquer pasta do projeto: claude
+✅  Validação: prompt interativo do Claude Code com o caminho da pasta = funcionando.
+
+3.2 Arquivo CLAUDE.md — Contexto Permanente (v5.2)
+Crie na raiz da pasta area-do-aluno/. O Claude Code lê automaticamente em toda sessão.
+
+# CLAUDE.md — Área do Aluno PHDonassolo v5.2
+
+## Projeto
+Plataforma de ensino do Prof. Paulo Henrique Donassolo
+URL: alunos.phdonassolo.com | Site referência visual: phdonassolo.com
+
+## Stack
+- Frontend: Next.js 15 + TypeScript + Tailwind CSS + shadcn/ui
+- Backend/BaaS: Supabase (PostgreSQL + Auth + Storage + pgvector)
+- Pagamentos: Mercado Pago (Checkout Pro + Assinaturas Preapproval)
+- IA Ferramentas simples: claude-haiku-4-5 | IA Simuladores: claude-sonnet-4-6
+- Deploy: Vercel (automático via GitHub push) | E-mail: AWS SES
+- Leads: Google Sheets via Service Account
+
+## Módulos do Projeto
+M1: Auth e Perfil | M2: Catálogo + Player + Trilhas | M3: Materiais + Simuladores HTML
+M4: Pagamentos + Planos + Convites + Certificados | M5: Quiz e Avaliações
+M6: Dashboard Admin | M7: Comunidade | M8: E-mails + CRON | M9: Ferramentas SaaS
+M10: Simuladores Roleplay IA | M11: Coach IA 24/7 (pós-60d) | M12: Diagnóstico (pós-60d)
+
+## ══ REGRAS ABSOLUTAS ══
+
+### Segurança — P1 CRÍTICO (implementar antes de qualquer código)
+- Rate limiting APENAS em /api/* — NUNCA em rotas de páginas, assets, CSS ou JS
+  (aplicar em todas as rotas derruba o site: 1 visita dispara 15-20 requisições de assets)
+- /admin/login deve ficar FORA do Route Group (protected) para evitar loop infinito
+  Estrutura correta: /app/(auth)/login | /app/(protected)/admin/...
+- Slugs são SEMPRE ASCII lowercase sem acentos e sem caracteres especiais
+  CORRETO: &apos;gestao-comercial&apos; | ERRADO: &apos;gestão-comercial&apos; (quebra 55+ links internos)
+- Validar senha em TODO endpoint de autenticação — nunca verificar apenas o e-mail
+- NUNCA expor ANTHROPIC_API_KEY no frontend — sempre via /api/
+- Verificar vencimento do plano em TODA rota protegida de conteúdo
+- Assinatura da plataforma (planos_acesso tipo=plataforma) tem prioridade sobre matrícula
+
+### Identidade visual e código
+- NUNCA hardcodar cores — sempre lib/design-tokens.ts
+- NUNCA hardcodar pilares — sempre buscar da tabela pilares
+- Mobile-first: componente funciona em 375px antes de desktop
+- Simuladores HTML ficam no HostGator — link protegido com token PHP
+- PDFs exclusivos: Supabase Storage com signed URLs de 60min
+
+### Glossário — USAR SEMPRE ESTES TERMOS
+- Módulo = agrupamento de aulas. NUNCA &apos;seção&apos;, &apos;unidade&apos; ou &apos;capítulo&apos;
+- Ferramenta = tool SaaS com output direto (formulário→texto). Salva em ferramenta_resultados
+- Simulador = roleplay conversacional multi-turno. Salva em simulacoes
+- Biblioteca = tabelas modulos/aulas com curso_id NULL + tabelas cursos_modulos/modulos_aulas
+
+## 44 Tabelas do Banco
+Perfil:      profiles, pilares, profiles_pilares
+Cursos:      cursos, cursos_pilares, modulos, aulas, cursos_modulos, modulos_aulas
+Materiais:   materiais, materiais_pilares, materiais_cursos, aulas_materiais
+Acesso:      matriculas, progresso_aulas, planos_acesso, assinaturas_plataforma, convites
+Pagamento:   pedidos, precos_planos, cupons
+Avaliações:  avaliacoes_cursos
+Quiz:        quizzes, quiz_perguntas, quiz_alternativas, quiz_respostas
+Ferramentas: ferramentas, uso_ferramentas, simulacoes, ferramenta_resultados
+Comunidade:  comunidade_grupos, grupos_membros, comunidade_posts,
+             comunidade_comentarios, post_curtidas
+Aprendizado: notas_aluno, notificacoes
+Certificados: certificados, leads
+Engajamento: metas_aluno, diagnosticos, planos_indicacao, roi_treinamento
+Auditoria:   admin_log
+
+## Variáveis de Ambiente (.env.local)
+NEXT_PUBLIC_SUPABASE_URL= | NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY= | NEXT_PUBLIC_MP_PUBLIC_KEY=
+MP_ACCESS_TOKEN= | ANTHROPIC_API_KEY=
+NEXT_PUBLIC_SITE_URL=https://alunos.phdonassolo.com
+AWS_SES_REGION=us-east-1 | AWS_ACCESS_KEY_ID= | AWS_SECRET_ACCESS_KEY=
+SIMULADOR_TOKEN_SECRET=&lt;string aleatória 32 chars&gt;
+GOOGLE_SHEETS_LEADS_ID=&lt;ID da planilha Google&gt;
+GOOGLE_SERVICE_ACCOUNT_KEY=&lt;JSON da service account&gt;
+
+
+
+4. Repositórios GitHub — Referências de Arquitetura
+Repositório
+Extrair deste repositório
+adrianhajdin/saas-app
+Estrutura geral, rotas protegidas, dashboard, pagamentos, organização de componentes
+oompas/open-lms
+Player YouTube + controle de progresso + sidebar de módulos e aulas
+KolbySisk/next-supabase-stripe-starter
+Middleware de auth, RLS no Supabase, webhook (adaptar Stripe → Mercado Pago)
+
+🤖  PROMPT — ANÁLISE DE REPOSITÓRIOS (Semana 2, antes de criar o projeto)
+&quot;Analise os repositórios abaixo como referência de arquitetura. Extraia padrões e adapte ao stack deste projeto (Next.js 15 + Supabase + Mercado Pago + Claude API): (1) adrianhajdin/saas-app: rotas protegidas, componentes de auth, layout dashboard, integração de pagamento. (2) oompas/open-lms: player com progresso, sidebar de aulas com status. (3) KolbySisk/next-supabase-stripe-starter: middleware, webhook handler, RLS. ATENÇÃO: os repositórios informam &apos;como fazer&apos;. O CLAUDE.md informa &apos;o que fazer&apos;. Decisões de schema no CLAUDE.md sempre prevalecem sobre padrões inferidos dos repositórios.&quot;
+
+
+
+5. Configurações Manuais — Você Faz nas Semanas 1 e 2
+5.1 GitHub
+Acesse github.com → New Repository → nome: area-do-aluno → Private → Create. Clique &apos;Code&apos; → copie a URL SSH. No terminal: git clone [url] &amp;&amp; cd area-do-aluno
+
+5.2 Supabase
+Acesse supabase.com → New Project → nome: phdonassolo-lms → região: South America (São Paulo) → senha forte → Create. Copie as chaves em Project Settings → API.
+✅  Na aba &apos;Table Editor&apos; deve aparecer &apos;No tables found&apos;.
+
+5.3 Vercel
+Acesse vercel.com → Sign Up com GitHub → Add New Project → selecione area-do-aluno → Framework: Next.js → adicione todas as variáveis de ambiente do CLAUDE.md → Deploy → Settings → Domains → alunos.phdonassolo.com
+
+5.4 HostGator — DNS
+Campo
+Valor
+Type
+CNAME
+Name
+alunos
+Value
+cname.vercel-dns.com (fornecido pela Vercel)
+TTL
+3600
+
+5.5 Mercado Pago
+Credenciais → copie Public Key (NEXT_PUBLIC_MP_PUBLIC_KEY) e Access Token (MP_ACCESS_TOKEN). Configure Webhooks → URL: https://alunos.phdonassolo.com/api/webhooks/mercadopago → Pagamentos + Planos + Assinaturas.
+
+5.6 Anthropic
+platform.anthropic.com → Settings → API Keys → Create Key → nomeie: area-do-aluno-prod. Em Billing → Spend Limits: configure USD 50/mês e alerta em USD 30.
+⚠️  A API para automaticamente ao atingir o limite. Configure ANTES de publicar qualquer ferramenta SaaS.
+
+5.7 Google Service Account (para Leads → Google Sheets)
+console.cloud.google.com → novo projeto → ativar Google Sheets API → Credenciais → Service Account → criar chave JSON. Compartilhe a planilha Google Sheets com o e-mail da service account.
+
+
+
+6. Proteção dos Simuladores HTML — Token PHP
+🔒  Sem esta proteção, qualquer pessoa que souber a URL direta acessa o simulador sem estar logada.
+
+Como funciona
+1. Aluno clica &apos;Abrir Simulador&apos; → plataforma gera JWT de 15 min. 2. URL enviada: phdonassolo.com/simuladores/arquivo.html?token=xyz. 3. token-check.php valida antes de exibir. 4. Sem token válido → redirect para login.
+
+6.1 Crie token-check.php no HostGator
+&lt;?php
+// /public_html/simuladores/token-check.php
+$secret = &apos;SEU_SECRET_AQUI&apos;; // mesmo valor de SIMULADOR_TOKEN_SECRET no Vercel
+$token = $_GET[&apos;token&apos;] ?? &apos;&apos;;
+if (empty($token)) {
+  header(&apos;Location: https://alunos.phdonassolo.com/login&apos;); exit;
+}
+$parts = explode(&apos;.&apos;, $token);
+if (count($parts) !== 3) {
+  header(&apos;Location: https://alunos.phdonassolo.com/login&apos;); exit;
+}
+$payload = json_decode(base64_decode(strtr($parts[1], &apos;-_&apos;, &apos;+/&apos;)), true);
+$sig = hash_hmac(&apos;sha256&apos;, $parts[0].&apos;.&apos;.$parts[1], $secret, true);
+$expected = rtrim(strtr(base64_encode($sig), &apos;+/&apos;, &apos;-_&apos;), &apos;=&apos;);
+if ($parts[2] !== $expected || $payload[&apos;exp&apos;] &lt; time()) {
+  header(&apos;Location: https://alunos.phdonassolo.com/login&apos;); exit;
+}
+// Token válido — continua exibindo o simulador
+?&gt;
+
+6.2 Adicione no início de cada simulador HTML
+&lt;?php require_once &apos;token-check.php&apos;; ?&gt;
+
+
+
+7. Banco de Dados — Schema Completo (44 Tabelas)
+7.1 Visão geral
+Grupo
+Tabelas
+v5.2
+Perfil
+profiles, pilares, profiles_pilares
+—
+Cursos
+cursos, cursos_pilares, modulos, aulas
++ campos tipo, conteudo_html, status, etc.
+Biblioteca
+cursos_modulos, modulos_aulas
+🆕 P2 — módulos/aulas reutilizáveis entre cursos
+Materiais
+materiais, materiais_pilares, materiais_cursos, aulas_materiais
+—
+Acesso
+matriculas, progresso_aulas, planos_acesso, assinaturas_plataforma, convites
+—
+Pagamento
+pedidos, precos_planos, cupons
+—
+Avaliação
+avaliacoes_cursos
+—
+Quiz
+quizzes, quiz_perguntas, quiz_alternativas, quiz_respostas
+—
+Ferramentas
+ferramentas, uso_ferramentas, simulacoes, ferramenta_resultados
+—
+Comunidade
+comunidade_grupos, grupos_membros, comunidade_posts, comunidade_comentarios, post_curtidas
+—
+Aprendizado
+notas_aluno, notificacoes
+—
+Certificados
+certificados, leads
+—
+Engajamento
+metas_aluno, diagnosticos, planos_indicacao, roi_treinamento
+—
+Auditoria
+admin_log
+—
+
+🤖  PROMPT — CRIAR O BANCO (Semana 3, primeiro prompt ao Claude Code)
+&quot;Crie o schema completo do banco de dados no Supabase. Execute o SQL abaixo em sequência — são 44 tabelas. Após criar todas as tabelas, habilite Row Level Security e crie as políticas da seção 7.3. Confirme listando as tabelas criadas.&quot;
+
+7.2 SQL Completo — 44 Tabelas
+-- ════════════════════════════════════════
+-- GRUPO 1: PERFIL E PILARES
+-- ════════════════════════════════════════
+CREATE TABLE profiles (
+  id UUID REFERENCES auth.users(id) PRIMARY KEY,
+  email TEXT NOT NULL, nome TEXT NOT NULL, foto_url TEXT,
+  papel TEXT DEFAULT &apos;aluno&apos; CHECK (papel IN (&apos;aluno&apos;,&apos;admin&apos;)),
+  bio TEXT, linkedin TEXT,
+  lgpd_aceito_em TIMESTAMPTZ, lgpd_versao TEXT,
+  cadastro TIMESTAMPTZ DEFAULT NOW(), ultimo_acesso TIMESTAMPTZ
+);
+CREATE TABLE pilares (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  nome TEXT NOT NULL UNIQUE, slug TEXT NOT NULL UNIQUE,
+  descricao TEXT, ativo BOOLEAN DEFAULT TRUE, ordem INTEGER DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE TABLE profiles_pilares (
+  profile_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
+  pilar_id UUID REFERENCES pilares(id) ON DELETE CASCADE,
+  PRIMARY KEY (profile_id, pilar_id)
+);
+
+-- ════════════════════════════════════════
+-- GRUPO 2: CURSOS
+-- ════════════════════════════════════════
+CREATE TABLE cursos (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  titulo TEXT NOT NULL, slug TEXT UNIQUE NOT NULL,
+  descricao TEXT, thumbnail TEXT,
+  video_apresentacao_id TEXT,
+  o_que_voce_vai_aprender JSONB,
+  para_quem_e_este_curso JSONB,
+  requisitos JSONB,
+  nivel TEXT DEFAULT &apos;todos&apos; CHECK (nivel IN (&apos;iniciante&apos;,&apos;intermediario&apos;,&apos;avancado&apos;,&apos;todos&apos;)),
+  idioma TEXT DEFAULT &apos;pt-BR&apos;,
+  carga_h INTEGER DEFAULT 0,
+  atualizado_em TIMESTAMPTZ,
+  preco NUMERIC(10,2) DEFAULT 0,
+  preco_promo NUMERIC(10,2),
+  preco_promo_ate TIMESTAMPTZ,
+  proximo_curso_id UUID REFERENCES cursos(id),
+  status TEXT DEFAULT &apos;rascunho&apos; CHECK (status IN (&apos;rascunho&apos;,&apos;publicado&apos;,&apos;arquivado&apos;)),
+  codigo_editorial TEXT,  -- ex: &apos;PHD_015&apos; — ponte com planilha editorial
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE TABLE cursos_pilares (
+  curso_id UUID REFERENCES cursos(id) ON DELETE CASCADE,
+  pilar_id UUID REFERENCES pilares(id) ON DELETE CASCADE,
+  PRIMARY KEY (curso_id, pilar_id)
+);
+
+-- ════════════════════════════════════════
+-- GRUPO 3: MÓDULOS (com suporte a biblioteca)
+-- ════════════════════════════════════════
+-- curso_id NULL = módulo na biblioteca (reutilizável entre cursos)
+-- Módulo vinculado diretamente a 1 curso: usar curso_id normal
+-- Módulo reutilizado em N cursos: curso_id NULL + tabela cursos_modulos
+-- GLOSSÁRIO: Módulo = agrupamento de aulas. NUNCA &apos;seção&apos; ou &apos;capítulo&apos;.
+CREATE TABLE modulos (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  curso_id UUID REFERENCES cursos(id) ON DELETE CASCADE,  -- NULL = biblioteca
+  titulo TEXT NOT NULL,
+  descricao TEXT,
+  conteudo_html TEXT,
+  ordem INTEGER NOT NULL DEFAULT 0,
+  status TEXT DEFAULT &apos;publicado&apos; CHECK (status IN (&apos;rascunho&apos;,&apos;publicado&apos;)),
+  codigo_editorial TEXT  -- ponte com planilha editorial
+);
+
+-- Vínculo módulo da biblioteca ↔ cursos (com ordem independente por curso)
+-- Permite que &apos;Técnicas de Negociação&apos; apareça no curso A na posição 3
+-- e no curso B na posição 5, sem duplicar o conteúdo
+CREATE TABLE cursos_modulos (
+  curso_id UUID REFERENCES cursos(id) ON DELETE CASCADE,
+  modulo_id UUID REFERENCES modulos(id) ON DELETE CASCADE,
+  ordem INTEGER NOT NULL,
+  PRIMARY KEY (curso_id, modulo_id)
+);
+
+-- ════════════════════════════════════════
+-- GRUPO 4: AULAS (com suporte a biblioteca)
+-- ════════════════════════════════════════
+-- tipo define o componente renderizado pelo player:
+-- &apos;video&apos;    → youtube_id (YouTube IFrame API)
+-- &apos;texto&apos;    → conteudo_html (rich text)
+-- &apos;quiz&apos;     → tabela quizzes
+-- &apos;download&apos; → aulas_materiais
+-- &apos;link&apos;     → link_externo (nova aba)
+-- &apos;live&apos;     → link_externo + data_live
+CREATE TABLE aulas (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  modulo_id UUID REFERENCES modulos(id) ON DELETE CASCADE,  -- NULL = biblioteca
+  titulo TEXT NOT NULL,
+  tipo TEXT DEFAULT &apos;video&apos; CHECK (tipo IN (&apos;video&apos;,&apos;texto&apos;,&apos;quiz&apos;,&apos;download&apos;,&apos;link&apos;,&apos;live&apos;)),
+  ordem INTEGER NOT NULL DEFAULT 0,
+  youtube_id TEXT,
+  conteudo_html TEXT,
+  link_externo TEXT,
+  data_live TIMESTAMPTZ,
+  duracao_min INTEGER DEFAULT 0,
+  pergunta_reflexao TEXT,
+  transcricao TEXT,
+  transcricao_json JSONB,  -- [{start_s, text}] para sincronização
+  gratuita BOOLEAN DEFAULT FALSE,
+  status TEXT DEFAULT &apos;publicado&apos; CHECK (status IN (&apos;rascunho&apos;,&apos;publicado&apos;)),
+  codigo_editorial TEXT  -- ponte com planilha editorial (ex: &apos;PHD_015&apos;)
+);
+
+-- Vínculo aula da biblioteca ↔ módulos (com ordem independente por módulo)
+CREATE TABLE modulos_aulas (
+  modulo_id UUID REFERENCES modulos(id) ON DELETE CASCADE,
+  aula_id UUID REFERENCES aulas(id) ON DELETE CASCADE,
+  ordem INTEGER NOT NULL,
+  PRIMARY KEY (modulo_id, aula_id)
+);
+
+-- ════════════════════════════════════════
+-- GRUPO 5: MATERIAIS
+-- ════════════════════════════════════════
+CREATE TABLE materiais (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  titulo TEXT NOT NULL, descricao TEXT,
+  tipo TEXT CHECK (tipo IN (&apos;pdf&apos;,&apos;xlsx&apos;,&apos;pptx&apos;,&apos;docx&apos;,&apos;simulador&apos;,&apos;link&apos;,&apos;zip&apos;)),
+  tipo_acesso TEXT DEFAULT &apos;curso&apos; CHECK (
+    tipo_acesso IN (&apos;todos&apos;,&apos;pilar&apos;,&apos;curso&apos;,&apos;combinado&apos;)),
+  storage_path TEXT,
+  url_externa TEXT,
+  gratuito BOOLEAN DEFAULT FALSE,
+  codigo_editorial TEXT,  -- ponte com planilha editorial
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE TABLE materiais_pilares (
+  material_id UUID REFERENCES materiais(id) ON DELETE CASCADE,
+  pilar_id UUID REFERENCES pilares(id) ON DELETE CASCADE,
+  PRIMARY KEY (material_id, pilar_id)
+);
+CREATE TABLE materiais_cursos (
+  material_id UUID REFERENCES materiais(id) ON DELETE CASCADE,
+  curso_id UUID REFERENCES cursos(id) ON DELETE CASCADE,
+  PRIMARY KEY (material_id, curso_id)
+);
+CREATE TABLE aulas_materiais (
+  aula_id UUID REFERENCES aulas(id) ON DELETE CASCADE,
+  material_id UUID REFERENCES materiais(id) ON DELETE CASCADE,
+  ordem INTEGER DEFAULT 0,
+  PRIMARY KEY (aula_id, material_id)
+);
+
+-- ════════════════════════════════════════
+-- GRUPO 6: MATRÍCULAS E ACESSO
+-- ════════════════════════════════════════
+CREATE TABLE matriculas (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES profiles(id),
+  curso_id UUID REFERENCES cursos(id),
+  origem TEXT DEFAULT &apos;plataforma&apos; CHECK (
+    origem IN (&apos;plataforma&apos;,&apos;hotmart&apos;,&apos;udemy&apos;,&apos;espm&apos;,&apos;unisinos&apos;,&apos;in-company&apos;,&apos;convite&apos;,&apos;manual&apos;)),
+  status TEXT DEFAULT &apos;ativo&apos; CHECK (status IN (&apos;ativo&apos;,&apos;concluido&apos;,&apos;suspenso&apos;)),
+  progresso INTEGER DEFAULT 0,
+  matriculado_em TIMESTAMPTZ DEFAULT NOW(), concluido_em TIMESTAMPTZ,
+  UNIQUE(user_id, curso_id)
+);
+CREATE TABLE progresso_aulas (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES profiles(id),
+  aula_id UUID REFERENCES aulas(id),
+  concluida BOOLEAN DEFAULT FALSE,
+  posicao_s INTEGER DEFAULT 0,
+  proxima_revisao DATE,
+  intervalo_revisao_dias INT DEFAULT 1,
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(user_id, aula_id)
+);
+CREATE TABLE planos_acesso (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES profiles(id),
+  tipo TEXT CHECK (tipo IN (&apos;curso&apos;,&apos;plataforma&apos;)),
+  curso_id UUID REFERENCES cursos(id),
+  pedido_id UUID,
+  inicio TIMESTAMPTZ DEFAULT NOW(),
+  vencimento TIMESTAMPTZ,
+  ativo BOOLEAN DEFAULT TRUE,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE TABLE assinaturas_plataforma (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES profiles(id),
+  plano_acesso_id UUID REFERENCES planos_acesso(id),
+  gateway_id TEXT,
+  ciclo TEXT CHECK (ciclo IN (&apos;mensal&apos;,&apos;anual&apos;)),
+  valor_ciclo NUMERIC(10,2),
+  status TEXT DEFAULT &apos;ativo&apos; CHECK (status IN (&apos;ativo&apos;,&apos;cancelado&apos;,&apos;suspenso&apos;)),
+  proximo_vencimento TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE TABLE convites (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  email TEXT NOT NULL,
+  curso_id UUID REFERENCES cursos(id),
+  plano_tipo TEXT DEFAULT &apos;90dias&apos; CHECK (plano_tipo IN (&apos;90dias&apos;,&apos;1ano&apos;,&apos;vitalicio&apos;)),
+  origem TEXT,
+  status TEXT DEFAULT &apos;pendente&apos; CHECK (status IN (&apos;pendente&apos;,&apos;aceito&apos;,&apos;expirado&apos;)),
+  token TEXT UNIQUE DEFAULT encode(gen_random_bytes(16),&apos;hex&apos;),
+  criado_em TIMESTAMPTZ DEFAULT NOW(), aceito_em TIMESTAMPTZ,
+  expira_em TIMESTAMPTZ DEFAULT NOW() + INTERVAL &apos;90 days&apos;
+);
+
+-- ════════════════════════════════════════
+-- GRUPO 7: PAGAMENTOS
+-- ════════════════════════════════════════
+CREATE TABLE pedidos (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES profiles(id),
+  curso_id UUID REFERENCES cursos(id),
+  cupom_id UUID,
+  tipo_plano TEXT CHECK (tipo_plano IN (
+    &apos;90dias&apos;,&apos;1ano&apos;,&apos;vitalicio&apos;,&apos;plataforma_anual&apos;,&apos;plataforma_vitalicia&apos;)),
+  valor NUMERIC(10,2) NOT NULL,
+  desconto NUMERIC(10,2) DEFAULT 0,
+  status TEXT DEFAULT &apos;pendente&apos; CHECK (status IN (
+    &apos;pendente&apos;,&apos;aprovado&apos;,&apos;cancelado&apos;,&apos;reembolsado&apos;)),
+  gateway_id TEXT, metodo TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE TABLE precos_planos (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  curso_id UUID REFERENCES cursos(id),
+  tipo_plano TEXT NOT NULL CHECK (tipo_plano IN (
+    &apos;90dias&apos;,&apos;1ano&apos;,&apos;vitalicio&apos;,&apos;plataforma_anual&apos;,&apos;plataforma_vitalicia&apos;)),
+  preco NUMERIC(10,2) NOT NULL,
+  ativo BOOLEAN DEFAULT TRUE,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE TABLE cupons (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  codigo TEXT UNIQUE NOT NULL,
+  desconto_pct NUMERIC(5,2), desconto_fixo NUMERIC(10,2),
+  curso_id UUID REFERENCES cursos(id),
+  valido_ate TIMESTAMPTZ,
+  usos_max INTEGER, usos_atual INTEGER DEFAULT 0,
+  ativo BOOLEAN DEFAULT TRUE,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+ALTER TABLE planos_acesso ADD CONSTRAINT fk_planos_pedido
+  FOREIGN KEY (pedido_id) REFERENCES pedidos(id);
+ALTER TABLE pedidos ADD CONSTRAINT fk_pedidos_cupom
+  FOREIGN KEY (cupom_id) REFERENCES cupons(id);
+
+-- ════════════════════════════════════════
+-- GRUPO 8: AVALIAÇÃO DO CURSO
+-- ════════════════════════════════════════
+CREATE TABLE avaliacoes_cursos (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES profiles(id),
+  curso_id UUID REFERENCES cursos(id),
+  nota INTEGER CHECK (nota BETWEEN 1 AND 5),
+  comentario TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(user_id, curso_id)
+);
+
+-- ════════════════════════════════════════
+-- GRUPO 9: QUIZ
+-- ════════════════════════════════════════
+CREATE TABLE quizzes (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  aula_id UUID REFERENCES aulas(id) ON DELETE CASCADE,
+  modulo_id UUID REFERENCES modulos(id) ON DELETE CASCADE,
+  titulo TEXT NOT NULL, instrucoes TEXT,
+  nota_minima INTEGER DEFAULT 70,
+  tentativas_max INTEGER DEFAULT 0,
+  tempo_max_min INTEGER,
+  mostrar_gabarito BOOLEAN DEFAULT TRUE
+);
+CREATE TABLE quiz_perguntas (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  quiz_id UUID REFERENCES quizzes(id) ON DELETE CASCADE,
+  enunciado TEXT NOT NULL,
+  tipo TEXT DEFAULT &apos;multipla&apos; CHECK (tipo IN (&apos;multipla&apos;,&apos;verdadeiro_falso&apos;)),
+  explicacao TEXT, ordem INTEGER NOT NULL
+);
+CREATE TABLE quiz_alternativas (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  pergunta_id UUID REFERENCES quiz_perguntas(id) ON DELETE CASCADE,
+  texto TEXT NOT NULL, correta BOOLEAN DEFAULT FALSE, ordem INTEGER NOT NULL
+);
+CREATE TABLE quiz_respostas (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES profiles(id),
+  quiz_id UUID REFERENCES quizzes(id),
+  respostas_json JSONB,
+  pontuacao INTEGER, aprovado BOOLEAN,
+  tentativa INTEGER DEFAULT 1,
+  respondido_em TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ════════════════════════════════════════
+-- GRUPO 10: FERRAMENTAS SaaS
+-- ════════════════════════════════════════
+CREATE TABLE ferramentas (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  nome TEXT NOT NULL, slug TEXT UNIQUE NOT NULL,
+  descricao TEXT,
+  categoria TEXT,
+  usa_ia BOOLEAN DEFAULT TRUE,
+  modelo_claude TEXT DEFAULT &apos;claude-haiku-4-5&apos;,
+  prompt_sistema TEXT,
+  limite_uso_mes INTEGER DEFAULT 3,  -- 999 = ilimitado
+  ativa BOOLEAN DEFAULT TRUE
+);
+CREATE TABLE uso_ferramentas (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES profiles(id),
+  ferramenta_id UUID REFERENCES ferramentas(id),
+  tokens_input INTEGER DEFAULT 0, tokens_output INTEGER DEFAULT 0,
+  custo_usd NUMERIC(10,6) DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE TABLE simulacoes (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES profiles(id),
+  ferramenta_id UUID REFERENCES ferramentas(id),
+  tipo TEXT,
+  historico JSONB, pontuacao INT, feedback TEXT, duracao_s INT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE OR REPLACE FUNCTION limpar_simulacoes_antigas() RETURNS TRIGGER AS $$
+BEGIN
+  DELETE FROM simulacoes WHERE id IN (
+    SELECT id FROM simulacoes
+    WHERE user_id=NEW.user_id AND ferramenta_id=NEW.ferramenta_id
+    ORDER BY created_at DESC OFFSET 10);
+  RETURN NEW; END; $$ LANGUAGE plpgsql;
+CREATE TRIGGER trg_limpar_simulacoes AFTER INSERT ON simulacoes
+FOR EACH ROW EXECUTE FUNCTION limpar_simulacoes_antigas();
+CREATE TABLE ferramenta_resultados (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES profiles(id),
+  ferramenta_id UUID REFERENCES ferramentas(id),
+  input_json JSONB, output_text TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE OR REPLACE FUNCTION limpar_resultados_antigos() RETURNS TRIGGER AS $$
+BEGIN
+  DELETE FROM ferramenta_resultados WHERE id IN (
+    SELECT id FROM ferramenta_resultados
+    WHERE user_id=NEW.user_id AND ferramenta_id=NEW.ferramenta_id
+    ORDER BY created_at DESC OFFSET 5);
+  RETURN NEW; END; $$ LANGUAGE plpgsql;
+CREATE TRIGGER trg_limpar_resultados AFTER INSERT ON ferramenta_resultados
+FOR EACH ROW EXECUTE FUNCTION limpar_resultados_antigos();
+
+-- ════════════════════════════════════════
+-- GRUPOS 11-15: COMUNIDADE, APRENDIZADO,
+-- CERTIFICADOS, ENGAJAMENTO, AUDITORIA
+-- ════════════════════════════════════════
+CREATE TABLE comunidade_grupos (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  nome TEXT NOT NULL, slug TEXT UNIQUE NOT NULL,
+  curso_id UUID REFERENCES cursos(id),
+  tipo TEXT DEFAULT &apos;curso&apos; CHECK (tipo IN (&apos;curso&apos;,&apos;geral&apos;,&apos;pilar&apos;)),
+  ordem INTEGER DEFAULT 0
+);
+CREATE TABLE grupos_membros (
+  grupo_id UUID REFERENCES comunidade_grupos(id) ON DELETE CASCADE,
+  user_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
+  entrou_em TIMESTAMPTZ DEFAULT NOW(),
+  PRIMARY KEY (grupo_id, user_id)
+);
+CREATE TABLE comunidade_posts (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  grupo_id UUID REFERENCES comunidade_grupos(id),
+  user_id UUID REFERENCES profiles(id),
+  conteudo TEXT NOT NULL, fixado BOOLEAN DEFAULT FALSE,
+  tipo TEXT DEFAULT &apos;post&apos; CHECK (tipo IN (&apos;post&apos;,&apos;aviso&apos;,&apos;caso&apos;,&apos;desafio&apos;)),
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE TABLE comunidade_comentarios (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  post_id UUID REFERENCES comunidade_posts(id) ON DELETE CASCADE,
+  user_id UUID REFERENCES profiles(id),
+  conteudo TEXT NOT NULL, created_at TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE TABLE post_curtidas (
+  post_id UUID REFERENCES comunidade_posts(id) ON DELETE CASCADE,
+  user_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  PRIMARY KEY (post_id, user_id)
+);
+CREATE TABLE notas_aluno (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES profiles(id),
+  aula_id UUID REFERENCES aulas(id),
+  conteudo TEXT NOT NULL,
+  tipo TEXT DEFAULT &apos;nota&apos; CHECK (tipo IN (&apos;nota&apos;,&apos;reflexao&apos;)),
+  created_at TIMESTAMPTZ DEFAULT NOW(), updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE TABLE notificacoes (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES profiles(id),
+  tipo TEXT NOT NULL,
+  titulo TEXT NOT NULL, corpo TEXT, link TEXT,
+  lida BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE TABLE certificados (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES profiles(id),
+  curso_id UUID REFERENCES cursos(id),
+  modulo_id UUID REFERENCES modulos(id),
+  codigo TEXT UNIQUE DEFAULT encode(gen_random_bytes(8),&apos;hex&apos;),
+  emitido_em TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(user_id, curso_id)
+);
+CREATE TABLE leads (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  nome TEXT NOT NULL, email TEXT NOT NULL,
+  material_id UUID REFERENCES materiais(id),
+  origem_lp TEXT, created_at TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE TABLE metas_aluno (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  matricula_id UUID REFERENCES matriculas(id),
+  meta TEXT NOT NULL, progresso INT DEFAULT 0,
+  concluida BOOLEAN DEFAULT FALSE,
+  ultimo_checkin_em TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE TABLE diagnosticos (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES profiles(id),
+  curso_id UUID REFERENCES cursos(id),
+  perfil_resultado JSONB, lacunas JSONB,
+  trilha_recomendada TEXT, created_at TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE TABLE planos_indicacao (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES profiles(id),
+  codigo TEXT UNIQUE, conversoes INT DEFAULT 0,
+  creditos_r NUMERIC(10,2) DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE TABLE roi_treinamento (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  matricula_id UUID REFERENCES matriculas(id),
+  kpi_nome TEXT, valor_antes NUMERIC, valor_depois NUMERIC,
+  data_antes TIMESTAMPTZ, data_depois TIMESTAMPTZ
+);
+CREATE TABLE admin_log (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  admin_id UUID REFERENCES profiles(id),
+  acao TEXT NOT NULL, tabela TEXT, registro_id UUID,
+  detalhes JSONB, created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ════════════════════════════════════════
+-- FUNÇÃO: VERIFICAÇÃO DE ACESSO
+-- ════════════════════════════════════════
+CREATE OR REPLACE FUNCTION tem_acesso_curso(p_user_id UUID, p_curso_id UUID)
+RETURNS BOOLEAN AS $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM planos_acesso
+    WHERE user_id=p_user_id AND tipo=&apos;plataforma&apos; AND ativo=TRUE
+    AND (vencimento IS NULL OR vencimento&gt;NOW())) THEN RETURN TRUE; END IF;
+  IF EXISTS (SELECT 1 FROM planos_acesso
+    WHERE user_id=p_user_id AND tipo=&apos;curso&apos; AND curso_id=p_curso_id AND ativo=TRUE
+    AND (vencimento IS NULL OR vencimento&gt;NOW())) THEN RETURN TRUE; END IF;
+  IF EXISTS (SELECT 1 FROM matriculas
+    WHERE user_id=p_user_id AND curso_id=p_curso_id AND status=&apos;ativo&apos;)
+    THEN RETURN TRUE; END IF;
+  RETURN FALSE;
+END; $$ LANGUAGE plpgsql SECURITY DEFINER;
+
+7.3 Políticas RLS
+🤖  PROMPT — RLS (após criar as 44 tabelas)
+&quot;Habilite Row Level Security em todas as 44 tabelas. Políticas: (1) profiles, notas_aluno, metas_aluno, diagnosticos, planos_indicacao, roi_treinamento, ferramenta_resultados: RW apenas próprio registro. (2) matriculas, progresso_aulas, planos_acesso, assinaturas_plataforma, uso_ferramentas, simulacoes, quiz_respostas, notificacoes: READ apenas próprio. (3) cursos, pilares, ferramentas, quizzes: todos leem publicados/ativos; admin gerencia todos. (4) aulas: todos leem aulas publicadas de módulos publicados; admin lê todas. (5) materiais: lógica verificar_acesso_material() — gratuito=true OR pilar em materiais_pilares∩profiles_pilares OR tem_acesso_curso() para cursos em materiais_cursos. (6) comunidade_posts/comentarios: membros do grupo leem; criador edita o próprio; admin edita todos. (7) post_curtidas, grupos_membros: aluno gerencia os próprios. (8) convites: admin gerencia todos; aluno lê apenas com seu e-mail. (9) admin_log: apenas admins leem. (10) avaliacoes_cursos: todos leem; aluno insere/edita a própria. (11) precos_planos, cupons: todos leem ativos; admin gerencia. (12) cursos_modulos, modulos_aulas: seguem lógica das tabelas pai.&quot;
+
+🆕  BIBLIOTECA DE CONTEÚDO INTERCAMBIÁVEL (P2): Para criar um módulo reutilizável, cadastre com curso_id=NULL no admin. Para vinculá-lo a um curso, use /admin/cursos/[slug]/editar → &apos;Adicionar módulo da biblioteca&apos;. O vínculo fica em cursos_modulos com a ordem definida por curso. A mesma lógica se aplica a aulas via modulos_aulas.
+
+
+
+8. Estrutura do Projeto Next.js 15
+🤖  PROMPT — CRIAR O PROJETO
+&quot;Crie um projeto Next.js 15 com TypeScript, Tailwind CSS e shadcn/ui. Use App Router. Instale: @supabase/ssr, @supabase/supabase-js, mercadopago, @anthropic-ai/sdk, @aws-sdk/client-ses, react-hook-form, zod, lucide-react, recharts, date-fns, jose. Antes de criar qualquer componente, leia /site-referencia/ e gere lib/design-tokens.ts com a identidade visual extraída. REGRA P1: Estrutura de rotas OBRIGATÓRIA para evitar loop de autenticação: /app/(auth)/login e /app/(auth)/cadastro ficam FORA do Route Group protegido. /app/(protected)/aluno/* e /app/(protected)/admin/* ficam dentro. Crie a estrutura de pastas abaixo.&quot;
+
+area-do-aluno/
+├── CLAUDE.md                        ← lido automaticamente pelo Claude Code
+├── site-referencia/                 ← index.html e style.css do site atual
+├── app/
+│   ├── (auth)/                      ← FORA do grupo protegido (sem verificação)
+│   │   ├── login/page.tsx
+│   │   ├── cadastro/page.tsx
+│   │   └── auth/confirm/route.ts
+│   ├── (protected)/                 ← Route Group protegido pelo middleware
+│   │   ├── aluno/
+│   │   │   ├── dashboard/page.tsx
+│   │   │   ├── cursos/
+│   │   │   │   ├── page.tsx         ← catálogo + buscador IA
+│   │   │   │   └── [slug]/
+│   │   │   │       ├── page.tsx     ← página do curso
+│   │   │   │       └── aula/[id]/page.tsx
+│   │   │   ├── materiais/page.tsx
+│   │   │   ├── comunidade/[slug]/page.tsx
+│   │   │   ├── ferramentas/[slug]/page.tsx
+│   │   │   ├── simuladores/[tipo]/page.tsx
+│   │   │   └── perfil/page.tsx
+│   │   └── admin/
+│   │       ├── page.tsx             ← KPIs
+│   │       ├── alunos/page.tsx
+│   │       ├── cursos/
+│   │       │   ├── page.tsx
+│   │       │   └── [slug]/editar/page.tsx  ← editor hierárquico
+│   │       ├── materiais/page.tsx
+│   │       ├── biblioteca/page.tsx   ← módulos e aulas reutilizáveis
+│   │       ├── pilares/page.tsx
+│   │       ├── planos/page.tsx
+│   │       ├── cupons/page.tsx
+│   │       ├── convites/page.tsx
+│   │       ├── ferramentas/page.tsx
+│   │       ├── custos-ia/page.tsx
+│   │       ├── configuracoes/page.tsx
+│   │       ├── saude/page.tsx        ← health check rotas críticas (P3)
+│   │       └── log/page.tsx
+│   ├── certificados/[codigo]/page.tsx  ← público
+│   ├── api/
+│   │   ├── webhooks/mercadopago/route.ts
+│   │   ├── pagamentos/criar-preferencia/route.ts
+│   │   ├── cupons/validar/route.ts
+│   │   ├── ferramentas/[slug]/route.ts
+│   │   ├── catalogo/buscar/route.ts  ← buscador IA (P3)
+│   │   ├── simulacoes/analisar/route.ts
+│   │   ├── simuladores/token/route.ts
+│   │   ├── storage/signed-url/route.ts
+│   │   ├── leads/registrar/route.ts
+│   │   └── saude/check/route.ts      ← health check (P3)
+│   ├── layout.tsx
+│   └── page.tsx
+├── lib/
+│   ├── design-tokens.ts             ← EXTRAÍDO DO SITE ATUAL
+│   ├── supabase/client.ts + server.ts
+│   ├── mercadopago.ts
+│   ├── anthropic.ts                 ← calcCusto + modelPricing
+│   ├── email.ts
+│   └── token.ts                     ← JWT para simuladores HTML
+├── middleware.ts                    ← protege (protected)/* + rate limit /api/*
+└── types/database.types.ts
+
+🔒  REGRA P1 — Rate limiting: aplicar EXCLUSIVAMENTE em rotas /api/*. Aplicar em rotas de páginas derruba o site (1 visita dispara 15-20 requisições de assets). Limite recomendado: 120 req/min por IP em /api/*. Use middleware.ts para esta lógica.
+
+
+
+9. Módulos M1 a M8 — Prompts para o Claude Code
+Passe estes prompts em sequência. Valide cada módulo antes de avançar.
+
+🤖  MÓDULO 1 — Autenticação, Perfil e Pilares
+&quot;Implemente autenticação com Supabase Auth. REGRA P1 OBRIGATÓRIA: /login e /cadastro ficam em /app/(auth)/ FORA do Route Group (protected). Se ficarem dentro, ocorre loop infinito de redirecionamento. (1) /login com email+senha e Google. (2) /cadastro: nome, email, senha; aceite LGPD salvando lgpd_aceito_em e lgpd_versao; após cadastro, tela de seleção de pilares buscados da tabela pilares (NUNCA hardcodar). (3) Middleware em (protected)/*: verificar sessão + em rotas de conteúdo chamar tem_acesso_curso(). (4) /perfil: edição de nome, foto, bio, LinkedIn e pilares. (5) Modal ADI na primeira abertura de curso matriculado — metas sem limite de 3.&quot;
+
+🤖  MÓDULO 2 — Catálogo, Player e Buscador IA (P3)
+&quot;Implemente o módulo de cursos. (1) /aluno/cursos: grid de cards. Filtro por pilar buscado da tabela pilares. Preço: buscar em precos_planos (ativo=TRUE); se preco_promo_ate&gt;NOW() exibir promocional. Nota média calculada de avaliacoes_cursos. BUSCADOR IA (P3): campo de texto livre no topo — ex: &apos;sou consultor imobiliário iniciante&apos;. Ao submeter, chamar /api/catalogo/buscar que envia a descrição ao claude-haiku-4-5 com o catálogo de cursos publicados e retorna os 3 mais relevantes com justificativa. (2) /cursos/[slug]: seções o_que_voce_vai_aprender, para_quem_e_este_curso, requisitos; trailer se video_apresentacao_id preenchido; avaliações; seletor de plano. Campo de cupom → /api/cupons/validar. (3) /cursos/[slug]/aula/[id]: verificar tem_acesso_curso(). Player condicional por tipo de aula. YouTube: seekTo(posicao_s) ao carregar, controles de velocidade 0.75x/1x/1.25x/1.5x/2x, salvar posicao_s a cada 30s. Modal de reflexão ao concluir se pergunta_reflexao preenchida. SM-2 em proxima_revisao. Ao atingir 100%: certificado + modal de avaliação + upsell.&quot;
+
+🤖  MÓDULO 3 — Materiais, PDFs e Simuladores HTML
+&quot;Implemente /aluno/materiais. Visibilidade: gratuito=true → todos. pilar em materiais_pilares ∩ profiles_pilares do aluno → logados. tem_acesso_curso() para cursos em materiais_cursos → matriculados. Download: signed URL 60min. Simulador: JWT 15min → [url_externa]?token=[jwt]. Material gratuito: captura nome+email → leads com origem_lp → SES + Google Sheets. Na página da aula: exibir materiais de aulas_materiais inline abaixo do player.&quot;
+
+🤖  MÓDULO 4 — Pagamentos, Planos, Cupons, Convites e Certificados
+&quot;PAGAMENTOS: /api/pagamentos/criar-preferencia — buscar preço em precos_planos; validar cupom se informado; calcular vencimento (90d/365d/NULL). CUPONS: /admin/cupons CRUD. /api/cupons/validar retorna desconto. CONVITES: /admin/convites com import CSV (email,curso_id,plano_tipo,origem). Cadastro por convite: /cadastro?token=[token] — bloquear e-mail diferente; criar matrícula origem=convite + plano_acesso. CERTIFICADOS: ao atingir 100%, gerar PDF com: nome do aluno, nome do curso, carga horária, matriculado_em, concluido_em, logo do professor (configurável), assinatura digital (configurável), QR Code → /certificados/[codigo]. Enviar por e-mail. Modal de avaliação (1-5 estrelas + comentário opcional) → avaliacoes_cursos.&quot;
+
+🤖  MÓDULO 5 — Quiz e Avaliações
+&quot;Player de aula tipo=&apos;quiz&apos;: carregar quiz vinculado à aula. Verificar tentativas_max (0=ilimitado). Cronômetro se tempo_max_min preenchido. Perguntas uma a uma. Ao submeter: salvar quiz_respostas, calcular pontuacao, determinar aprovado (&gt;=nota_minima). Se mostrar_gabarito=TRUE: exibir acertos/erros + campo explicacao. Aula tipo=&apos;quiz&apos;: concluída apenas se aprovado=TRUE. Admin /admin/quizzes: CRUD completo com editor de perguntas.&quot;
+
+🤖  MÓDULO 6 — Dashboard Admin com Biblioteca de Conteúdo
+&quot;(1) KPIs: recharts. (2) /admin/cursos/[slug]/editar: EDITOR HIERÁRQUICO — duas colunas: esquerda=módulos com drag-and-drop de ordem; direita=aulas do módulo selecionado com drag-and-drop. Botão &apos;Adicionar módulo&apos;: (a) Novo módulo; (b) Módulo da biblioteca (lista cursos_modulos com curso_id NULL). Botão &apos;Adicionar aula&apos;: (a) Nova aula; (b) Aula da biblioteca. Drawer de edição de aula por tipo. Preview como aluno. CRUD de materiais da aula via aulas_materiais. (3) /admin/biblioteca: listar módulos e aulas com curso_id/modulo_id NULL; criar/editar/excluir; ver em quais cursos estão vinculados. (4) /admin/materiais CRUD. (5) /admin/pilares CRUD drag-and-drop. (6) /admin/planos: tabela precos_planos por curso. (7) /admin/cupons CRUD. (8) /admin/convites CSV. (9) /admin/configuracoes: logo URL, assinatura URL, e-mails. (10) /admin/custos-ia. (11) /admin/log: admin_log com filtros. Toda ação destrutiva: snapshot em admin_log.&quot;
+
+🤖  MÓDULO 7 — Comunidade e Notificações In-App
+&quot;(1) /aluno/comunidade: lista grupos. Botão Entrar/Sair (grupos_membros). Feed com tipos. Curtidas via post_curtidas. (2) Header global: ícone de sino com badge COUNT notificacoes lida=FALSE. Drawer com lista + &apos;Marcar todas como lidas&apos;. (3) Admin: fixar e excluir posts.&quot;
+
+🤖  MÓDULO 8 — E-mails, CRON e Engajamento
+&quot;E-mails via AWS SES + notificacao in-app para: cadastro, matrícula, vencimento 7 dias, vencimento hoje, novo material no curso, certificado emitido, convite externo, material gratuito. CRON segunda 8h: inatividade 7 dias, progresso&lt;10% e matrícula&gt;14 dias, check-in de metas (ultimo_checkin&gt;7 dias), revisão espaçada (proxima_revisao=TODAY()).&quot;
+
+
+
+10. Módulos M9 a M12 — IA
+⚠️  Antes de qualquer módulo de IA: limite USD 50 em platform.anthropic.com → Billing → Spend Limits. limite_uso_mes=999 = ilimitado. Ferramentas (formulário→texto) salvam em ferramenta_resultados. Simuladores (roleplay multi-turno) salvam em simulacoes.
+
+// lib/anthropic.ts
+export const modelPricing = {
+  &apos;claude-haiku-4-5&apos;:  { input: 0.80, output: 4.00 },
+  &apos;claude-sonnet-4-6&apos;: { input: 3.00, output: 15.00 },
+};
+export const calcCusto = (modelo, i, o) =&gt;
+  (i/1_000_000 * modelPricing[modelo].input) + (o/1_000_000 * modelPricing[modelo].output);
+
+🤖  DASHBOARD DO ALUNO — /aluno/dashboard (junto com M2)
+&quot;Seções: (1) MEUS CURSOS: progresso % + progresso por módulo calculado dinamicamente + retomada da última posição (posicao_s&gt;0) + alerta vencimento 7 dias + badge &apos;Certificado disponível&apos;. (2) METAS ADI: checkbox + botão adicionar. (3) REVISAR HOJE: aulas com proxima_revisao&lt;=TODAY(). (4) FERRAMENTAS RECENTES: últimas 3 de uso_ferramentas. (5) PRÓXIMOS PASSOS: proximo_curso_id ou aleatório mesmo pilar. (6) Banner renovação se plano vencido.&quot;
+
+🤖  MÓDULO 9A — Base de Ferramentas
+&quot;(1) /aluno/ferramentas: catálogo com filtro por categoria. Usos no mês vs limite. (2) /api/ferramentas/[slug]: verificar limite; streaming; salvar uso + ferramenta_resultados (trigger limpa &gt;5). (3) /aluno/ferramentas/[slug]/historico: últimas 5 de ferramenta_resultados.&quot;
+
+🤖  MÓDULO 9B — PHD Ramp (P2 — REQ-16)
+&quot;Crie /aluno/ferramentas/phd-ramp. Formulário: cargo, setor, tamanho da equipe, produto/serviço, principal desafio no onboarding. INSERT ferramentas: nome=&apos;PHD Ramp&apos;, slug=&apos;phd-ramp&apos;, categoria=&apos;Gestao Comercial&apos;, usa_ia=TRUE, modelo=&apos;claude-haiku-4-5&apos;, limite_uso_mes=3, prompt_sistema=&apos;Você é o Prof. Paulo Donassolo. Crie um Plano de Ramp Up de Vendedor completo. Inclua: semana 1 (imersão, produto e ICP), semana 2 (processo e objeções), semana 3 (campo), semana 4 (negociações independentes), KPIs por semana, scripts de feedback semanal. Português brasileiro, exemplos de PMEs. Markdown com títulos e tabelas.&apos;&quot;
+
+🤖  MÓDULO 9C — Matriz de Objeções (P2 — REQ-11)
+&quot;Crie /aluno/ferramentas/matriz-objecoes. Formulário: produto_servico, segmento (select de pilares ativos), objecoes_conhecidas. INSERT: nome=&apos;Matriz de Objeções&apos;, slug=&apos;matriz-objecoes&apos;, categoria=&apos;Negociacao&apos;, usa_ia=TRUE, modelo=&apos;claude-haiku-4-5&apos;, limite_uso_mes=3, prompt=&apos;Você é o Prof. Paulo Donassolo. 12-15 objeções reais. Para cada: Nome, Contexto, Resposta recomendada, Argumento de valor, Pergunta de reversão. Tabela Markdown.&apos; Botão &apos;Baixar PDF&apos; via window.print().&quot;
+
+🤖  MÓDULO 9D — Construtor de Argumentário (P2 — REQ-17)
+&quot;Crie /aluno/ferramentas/argumentario. Formulário: produto_servico, publico_alvo, diferenciais, tom (Formal/Consultivo/Direto/Relacional). INSERT: nome=&apos;Construtor de Argumentário&apos;, slug=&apos;argumentario&apos;, categoria=&apos;Comunicacao&apos;, usa_ia=TRUE, modelo=&apos;claude-haiku-4-5&apos;, limite_uso_mes=3, prompt=&apos;Crie 5 formatos: Elevator Pitch 60 palavras, Apresentação AIDA 5 parágrafos, E-mail de Prospecção assunto+corpo+CTA, Mensagem WhatsApp 3 linhas, Post LinkedIn 200 palavras.&apos; Cards com botão de copiar.&quot;
+
+🤖  MÓDULO 9E — Mapeador de Perfil de Negociação (P2 — REQ-19)
+&quot;20 perguntas situacionais. INSERT: nome=&apos;Mapeador de Perfil de Negociação&apos;, slug=&apos;perfil-negociacao&apos;, categoria=&apos;Negociacao&apos;, usa_ia=TRUE, modelo=&apos;claude-sonnet-4-6&apos;, limite_uso_mes=2, prompt=&apos;Analise 20 respostas. Retorne APENAS JSON: perfil_predominante, pontuacao_5_dimensoes {Competitivo/Colaborativo/Evitativo/Acomodativo/Compromissador: 0-100}, forcas[3], riscos[3], situacoes_forte[2], situacoes_cuidado[2], plano_desenvolvimento[2 parágrafos], indice_confianca{valor:0-100, descricao}.&apos; Gráfico radar recharts + relatório. Salvar em ferramenta_resultados.&quot;
+
+🤖  MÓDULO 10 — Simulador de Negociação (P2 — REQ-09)
+&quot;INSERT: nome=&apos;Simulador de Negociação&apos;, slug=&apos;sim-negociacao&apos;, categoria=&apos;Negociacao&apos;, usa_ia=TRUE, modelo=&apos;claude-sonnet-4-6&apos;, limite_uso_mes=5. Configuração: perfil do cliente, contexto, produto, dificuldade. Chat com streaming. Botão &apos;Finalizar&apos;: /api/simulacoes/analisar → pontuacao + feedback 6 dimensões (Identificação Necessidades, Manejo Objeções, Argumentação, Escuta Ativa, Fechamento, Índice de Confiança). Radar 6 dimensões + PDF via window.print(). /aluno/simuladores/historico: últimas 10 por ferramenta.&quot;
+
+🤖  MÓDULO 11 — Coach IA 24/7 (P4 — pós-lançamento)
+&quot;Requer transcrições preenchidas em aulas.transcricao. INSERT: nome=&apos;Coach de IA&apos;, slug=&apos;coach-ia&apos;, categoria=&apos;Aprendizado&apos;, usa_ia=TRUE, modelo=&apos;claude-haiku-4-5&apos;, limite_uso_mes=30. RAG: pgvector em aula_embeddings. Responde apenas com base nos cursos com tem_acesso_curso()=TRUE. Admin: botão &apos;Processar Transcrições para IA&apos; → embeddings em chunks de 500 palavras.&quot;
+
+🤖  MÓDULO 12 — Diagnóstico de Entrada (P4 — pós-lançamento)
+&quot;15 perguntas após matrícula e antes da 1ª aula. INSERT: nome=&apos;Diagnóstico de Entrada&apos;, slug=&apos;diagnostico-entrada&apos;, modelo=&apos;claude-sonnet-4-6&apos;, limite_uso_mes=3. JSON: perfil_atual, lacunas, trilha_recomendada, meta_sugerida. Salvar em diagnosticos. Pré-preencher ADI antes de redirecionar para trilha.&quot;
+
+
+
+11. Integração com phdonassolo.com
+⚠️  ÚNICA alteração no site principal. .htaccess com /go de afiliados deve ser preservado. Deploy: npm run build → upload APENAS index.html e assets/ via cPanel.
+
+🤖  PROMPT — BOTÃO ÁREA DO ALUNO
+&quot;No arquivo de navegação do site phdonassolo.com (Header.tsx ou similar), adicione APENAS um botão/link &apos;Área do Aluno&apos; apontando para https://alunos.phdonassolo.com. Destaque visual usando lib/design-tokens.ts. Posição: canto direito do menu em desktop, menu hambúrguer em mobile. NÃO altere nenhuma outra parte do Header. NÃO altere o .htaccess. NÃO remova rotas existentes.&quot;
+
+
+
+12. Roadmap de 60 Dias
+⚠️  1 a 2 horas por dia de acompanhamento. Claude Code executa, mas precisa de direcionamento e validação a cada módulo.
+
+S
+Bloco
+O que acontece
+Responsável
+Resultado verificável
+S1
+Fundação
+GitHub + Supabase (São Paulo) + Vercel + DNS + chaves API (Mercado Pago, Anthropic, Google Service Account)
+Você
+alunos.phdonassolo.com resolve para a Vercel
+S2
+Fundação
+site-referencia/ + CLAUDE.md v5.2 + Claude Code + design-tokens.ts + análise repositórios
+Você + Claude Code
+design-tokens.ts gerado. 44 tabelas criadas
+S3
+MVP Core
+Schema 44 tabelas + RLS + M1 (Auth com Route Groups corretos, pilares dinâmicos, ADI)
+Claude Code
+Login sem loop. Pilares do banco. ADI ativo
+S4
+MVP Core
+M2 (Catálogo+player+buscador IA) + M4 (Pagamentos+planos+cupons+convites+certificado)
+Claude Code
+Compra cria plano com prazo. Cupom funciona. Certificado PDF com QR
+S5
+Materiais
+M3 (Materiais por pilar/curso/combinado + token simuladores + leads Google Sheets)
+Claude Code
+Simulador protegido. Lead na planilha com origem
+S6
+Admin
+M6 (Admin completo com biblioteca de conteúdo + editor hierárquico) + botão site principal
+Claude Code + Você
+Biblioteca funciona. Admin gerencia pilares e planos
+S7
+Comunidade
+M5 (Quiz) + M7 (Comunidade+notificações) + M8 (E-mails+CRON+revisão) + dashboard
+Claude Code
+Quiz funciona. Sino com badge. CRON revisão espaçada ativo
+S8
+Ferramentas IA
+M9 completo: PHD Ramp + Matriz Objeções + Argumentário + Perfil Negociação
+Claude Code
+4 ferramentas. Histórico de 5 resultados. Limites respeitados
+S9
+Simulador + Launch
+M10 (Simulador Negociação) + testes checklist 36 itens + health check
+Claude Code + Você
+36/36 aprovados. Primeiros alunos na plataforma
+
+✅  PÓS-60 DIAS: M11 Coach IA RAG + M12 Diagnóstico + Simuladores Atendimento e JBP + Relatório B2B + Dashboard métricas avançado + Importação editorial da planilha
+
+
+
+13. Custos — Desenvolvimento e Operação
+Bloco
+Estimativa
+Observação
+S1-S2 — Fundação
+R$ 0
+Você executa. Zero tokens Claude Code
+S3-S4 — MVP Core
+USD 18–25 (~R$ 95–130)
+Schema + auth + catálogo + pagamentos
+S5-S6 — Materiais e Admin
+USD 13–20 (~R$ 70–105)
+CRUD admin + biblioteca + proteção JWT
+S7 — Quiz + Comunidade + E-mails
+USD 8–12 (~R$ 42–65)
+Quiz, grupos, CRON, buscador IA
+S8 — Ferramentas SaaS IA
+USD 10–15 (~R$ 53–80)
+4 ferramentas + Claude API + limites
+S9 — Simulador + testes
+USD 12–18 (~R$ 65–95)
+Simulador + iterações de correção
+TOTAL
+USD 61–90 (~R$ 325–475)
+Inclui iterações e testes
+
+Serviço
+Custo
+Condição
+HostGator
+R$ 0 adicional
+Já pago. Simuladores HTML permanecem aqui
+Vercel Hobby
+R$ 0
+Até 100GB banda/mês gratuito
+Supabase Free
+R$ 0
+Até 50k alunos/mês, 500MB banco, 1GB storage
+Supabase Pro
+USD 25/mês (~R$ 130)
+Somente ao ultrapassar os limites free
+AWS SES
+~R$ 2–10/mês
+R$ 0,40 por 1.000 e-mails
+Claude API (ferramentas)
+~USD 5–30/mês (~R$ 26–160)
+Depende do volume. Limite USD 50 configurado
+Mercado Pago
+3,49–4,99% por venda
+Sem mensalidade fixa
+TOTAL FIXO MENSAL
+&lt; R$ 50/mês
+Antes da comissão do Mercado Pago
+
+
+
+14. Ritos de Deploy e Atualização
+14.1 Rito de deploy da Área do Aluno
+Descreva a mudança para o Claude Code
+Claude Code edita os arquivos necessários
+Claude Code: git add . &amp;&amp; git commit -m &apos;descricao&apos; &amp;&amp; git push
+Vercel publica automaticamente em 2–3 minutos
+Acesse /admin/saude para verificar as rotas críticas (P3)
+Acesse alunos.phdonassolo.com para validar visualmente
+
+14.2 Rito de publicar novo simulador HTML
+Crie ou atualize o arquivo .html do simulador
+Adicione na primeira linha: &lt;?php require_once &apos;token-check.php&apos;; ?&gt;
+HostGator cPanel → File Manager → public_html/simuladores/ → upload
+Em /admin/materiais: tipo=&apos;simulador&apos;, url_externa=&apos;https://phdonassolo.com/simuladores/nome.html&apos;, vincule ao curso
+Teste: clicar &apos;Abrir Simulador&apos; → abre no HostGator. URL direta → redireciona para login
+
+14.3 Rito de adicionar curso com módulos da biblioteca
+Em /admin/cursos: criar novo curso com dados básicos
+Em /admin/cursos/[slug]/editar: &apos;Adicionar módulo&apos; → &apos;Da biblioteca&apos;
+Selecionar módulo existente → definir ordem no curso
+Para aulas novas no módulo: &apos;Adicionar aula&apos; → tipo → youtube_id ou conteudo_html
+Publicar curso → testar acesso como aluno via &apos;Preview como aluno&apos;
+
+14.4 Rito de atualização do site principal (phdonassolo.com)
+⚠️  NÃO muda em relação ao processo atual.
+Alterações no código React localmente
+npm run build
+HostGator cPanel → File Manager → upload APENAS de: index.html e pasta assets/
+NUNCA sobrescrever: .htaccess, wordpress/, lp/, simuladores/
+
+
+
+15. Checklist de Validação Final — 36 Itens
+Bloco 1 — Infraestrutura (S2)
+Item
+Como validar
+S
+DNS e SSL
+alunos.phdonassolo.com carrega com cadeado verde
+2
+Identidade visual
+Comparar lado a lado — fontes e cores idênticas ao phdonassolo.com
+2
+Login Google
+Entrar com Google → autorizar → logado
+3
+Login e-mail + LGPD
+Cadastrar → lgpd_aceito_em salvo em profiles
+3
+
+Bloco 2 — Segurança P1 (S3)
+Item
+Como validar
+S
+Login SEM loop infinito
+/admin/login carrega sem redirecionar para si mesmo
+3
+Rate limit só em /api/*
+Abrir /cursos → 20 assets carregam sem erro 429
+3
+Slug sem acento
+Criar curso &apos;Gestão Comercial&apos; → slug gerado &apos;gestao-comercial&apos;
+3
+Senha obrigatória no login
+Tentar acessar com email válido sem senha → bloqueado
+3
+
+Bloco 3 — Pilares, Perfil e Módulos (S3)
+Item
+Como validar
+S
+Pilares pelo admin
+/admin/pilares → criar → aparecer no cadastro
+3
+Múltiplos pilares no aluno
+Cadastrar com 2 pilares → profiles_pilares com 2 registros
+3
+Catálogo filtrado
+Aluno pilar X → cursos do pilar pré-filtrados
+3
+Aula tipo texto
+Criar aula tipo=&apos;texto&apos; → player exibe HTML sem vídeo
+3
+Aula tipo live
+Criar tipo=&apos;live&apos; → exibe data_live e botão de acesso
+3
+Status rascunho
+Aula rascunho → invisível para aluno, visível no admin
+3
+
+Bloco 4 — Player, Notas e Revisão (S4)
+Item
+Como validar
+S
+Retomada de vídeo
+Assistir 2min → sair → voltar → vídeo retoma do segundo salvo
+4
+Controle de velocidade
+Botão 1.5x → playback muda visivelmente
+4
+Pergunta de reflexão
+Aula com pergunta → modal ao concluir → nota tipo=&apos;reflexao&apos; salva
+4
+Revisão espaçada
+Concluir aula → proxima_revisao = hoje+1d
+4
+&apos;Revisar hoje&apos; no dashboard
+Forçar proxima_revisao=hoje → aparece no dashboard
+4
+Progresso por módulo
+Sidebar exibe &apos;2/5 aulas&apos; por módulo
+4
+
+Bloco 5 — Planos, Cupons e Certificados (S4)
+Item
+Como validar
+S
+Preço de precos_planos
+Editar preço no admin → LP atualiza sem redeploy
+4
+Cupom percentual
+Cupom 20% → desconto correto no checkout
+4
+Cupom expirado → erro
+Cupom vencido → mensagem clara
+4
+Plano 90 dias
+Comprar → vencimento=hoje+90d
+4
+Acesso vencido → bloqueio
+Vencimento ontem → aula bloqueia → redireciona renovação
+4
+Convite e-mail errado
+Cadastrar com e-mail diferente do convite → bloqueado
+4
+Certificado completo
+PDF com logo, assinatura, QR, datas início/conclusão
+4
+
+Bloco 6 — Biblioteca, Materiais e Quiz (S5–S7)
+Item
+Como validar
+S
+Módulo da biblioteca em 2 cursos
+Módulo biblioteca → vincular a curso A e curso B → aparece nos dois
+6
+Atualizar módulo compartilhado
+Editar título do módulo biblioteca → título atualiza nos dois cursos
+6
+Material por pilar
+Aluno pilar X vê material pilar X, não vê pilar Y
+5
+Material dentro da aula
+aulas_materiais preenchido → arquivo abaixo do player na aula
+5
+Lead para Google Sheets
+Baixar material gratuito → linha na planilha com origem_lp
+5
+Quiz: aula concluída só se aprovado
+Reprovar quiz → aula não marcada concluída
+7
+Quiz: gabarito com explicação
+Responder → acertos/erros + campo explicacao exibido
+7
+
+Bloco 7 — Comunidade, Notificações e Ferramentas IA (S7–S9)
+Item
+Como validar
+S
+Curtida em post
+Curtir → contagem +1. Descurtir → -1
+7
+Notificação in-app
+Ação trigger → sino com badge → drawer mostra notificação
+7
+PHD Ramp
+Preencher → plano streaming → salvo em ferramenta_resultados
+8
+Histórico de ferramenta
+5 resultados → gerar 6º → mais antigo some
+8
+Buscador IA no catálogo
+&apos;sou consultor imobiliário&apos; → 3 cursos sugeridos com justificativa
+8
+Simulador de Negociação
+Configurar → simular → radar 6 dimensões → download PDF
+9
+Histórico de simulações
+10 simulações → adicionar 11ª → mais antiga some
+9
+Admin log
+Cancelar acesso → registro em admin_log com snapshot
+9
+Mobile 375px
+Sem scroll horizontal em todas as telas
+9
+Site principal intacto
+phdonassolo.com OK. .htaccess preservado. /go ativos
+9
+
+
+
+16. Mapa de Requisitos — 43 Funcionalidades
+Implementados nos 60 dias (P2)
+REQ
+Funcionalidade
+Módulo
+Semana
+REQ-02
+Trilhas por perfil profissional
+M2
+S3–S4
+REQ-04
+Certificado com QR e verificação pública
+M4
+S4
+REQ-07
+ADI — Agenda de Desenvolvimento Individual
+M1
+S3
+REQ-24
+Detecção de risco de evasão
+M8
+S7
+REQ-29
+Desafio Semanal na Comunidade
+M7
+S7
+REQ-27
+Feed de Casos Reais
+M7
+S7
+REQ-42
+Upsell inteligente pós-conclusão
+M2
+S4
+REQ-16
+PHD Ramp
+M9
+S8
+REQ-11
+Gerador de Matriz de Objeções
+M9
+S8
+REQ-17
+Construtor de Argumentário
+M9
+S8
+REQ-19
+Mapeador de Perfil de Negociação
+M9
+S8
+REQ-09
+Simulador de Negociação: O Cliente Difícil
+M10
+S9
+REQ-43
+Índice de Confiança do Vendedor
+M9+M10
+S8–S9
+
+Pós-60 dias (P4 e P5)
+REQ
+Funcionalidade
+Prioridade
+Motivo do prazo
+REQ-23
+Coach de IA 24/7 (RAG)
+P4
+Requer transcrições preenchidas
+REQ-22
+Diagnóstico de Entrada
+P4
+Calibrar com feedback real de alunos
+REQ-10
+Simulador de Atendimento
+P4
+Arquitetura pronta no M10
+REQ-13
+Simulador de JBP
+P4
+Idem REQ-10
+REQ-38
+Planos em tiers
+P4
+Validar pricing com alunos reais
+REQ-34
+Relatório para gestores B2B
+P4
+Depende de clientes corporativos
+REQ-40
+Turmas fechadas corporativas
+P4
+Mesma lógica B2B
+REQ-37
+ROI de Treinamento
+P4
+Requer dados históricos
+REQ-03
+Microlearning e revisão avançada
+P5
+Dados acumulados 3+ meses
+REQ-33
+Mapa de competências visual
+P5
+Múltiplos diagnósticos no tempo
+REQ-05
+Estudo em dupla
+P5
+Massa crítica de alunos simultâneos
+
+
+
+17. Mapa Completo de Prioridades — P1 a P5
+Referência consolidada de todas as funcionalidades, decisões e regras com sua prioridade explícita. Consultar antes de cada sprint.
+
+P1 — CRÍTICO: Implementar ANTES da primeira linha de código
+🔒  Estas regras previnem os 3 bugs mais comuns em projetos LMS construídos rapidamente. Documentados em produção real (projeto Brasil GEO, março 2026).
+
+Regra
+Onde aplicar
+O que acontece se ignorar
+Rate limiting APENAS em /api/*
+middleware.ts
+1 visita dispara 15-20 requisições de assets. Site fica inacessível para todos os usuários. Erro 429 em vez de HTML.
+/admin/login FORA do Route Group protegido
+/app/(auth)/login — NUNCA dentro de (protected)
+Layout verifica sessão → redireciona para login → herda layout → loop infinito. Painel admin inacessível.
+Slugs sempre ASCII sem acentos
+Toda criação de slug no código e no admin
+Script de correção de acentos quebra URLs. 55+ links internos quebrados simultaneamente.
+Validar senha em todo endpoint de auth
+Todos os /api/auth/*
+Atacante com e-mail do admin acessa o sistema sem senha (vulnerabilidade crítica de bypass).
+ANTHROPIC_API_KEY apenas no servidor
+/api/* nunca no frontend
+Chave exposta no bundle JS. Qualquer pessoa pode usar sua cota da API.
+tem_acesso_curso() em toda rota de conteúdo
+middleware e /api/cursos/*
+Aluno com plano vencido continua acessando conteúdo pago.
+
+P2 — ALTA: Implementar nos 60 dias (MVP)
+Funcionalidade
+Módulo
+Semana
+Observação
+Schema 44 tabelas + RLS
+Banco
+S3
+Base de tudo. Não começar código sem o banco validado
+Biblioteca de módulos (cursos_modulos, modulos_aulas)
+Banco
+S3
+Evita duplicação de conteúdo. Custo zero se feito agora, alto se feito depois
+Autenticação + pilares dinâmicos
+M1
+S3
+Pilares NUNCA hardcodados
+Player com tipos de aula (vídeo/texto/quiz/download/link/live)
+M2
+S4
+Cada tipo renderiza componente diferente. Definir no schema evita retrabalho
+Retomada de vídeo (seekTo + salvar a cada 30s)
+M2
+S4
+Experiência básica esperada por qualquer aluno
+Pergunta de reflexão ao concluir aula
+M2
+S4
+Andragogia: adulto aprende melhor com reflexão imediata
+Revisão espaçada (SM-2 simplificado)
+M2
+S4
+Diferencial competitivo. Dados preparados no schema. Custo de implementação baixo
+Pagamentos + precos_planos configuráveis
+M4
+S4
+Preços editáveis sem redeploy
+Cupons de desconto
+M4
+S4
+Ferramenta de vendas essencial
+Convites com import CSV
+M4
+S4
+Para migração de alunos Hotmart/Udemy/ESPM
+Certificado PDF com QR + campos configuráveis
+M4
+S4
+Logo e assinatura configuráveis no admin
+Materiais com lógica gratuito/pilar/curso/combinado
+M3
+S5
+Controle granular de acesso
+Biblioteca de conteúdo no admin
+M6
+S6
+CRUD de módulos/aulas com curso_id NULL + vinculação
+Editor hierárquico com drag-and-drop
+M6
+S6
+Gestão de cursos sem código
+Preview como aluno
+M6
+S6
+Validar antes de publicar
+Quiz com gabarito e explicação por pergunta
+M5
+S7
+Avaliação formativa — adultos precisam de feedback imediato
+Notificações in-app (sino + badge)
+M7
+S7
+Engajamento sem depender só de e-mail
+CRON de revisão espaçada
+M8
+S7
+E-mail &apos;Hora de revisar: [aula]&apos; baseado em proxima_revisao
+PHD Ramp
+M9
+S8
+Ferramenta mais relevante para o público de gestores
+Matriz de Objeções
+M9
+S8
+Alta demanda do público comercial
+Construtor de Argumentário
+M9
+S8
+Alta demanda do público comercial
+Mapeador de Perfil de Negociação
+M9
+S8
+Diferencial — Índice de Confiança
+Simulador de Negociação
+M10
+S9
+Simulador flagship. Base para os demais
+admin_log — auditoria de ações destrutivas
+M6
+S6
+Rastreabilidade. Baixo custo, alto valor operacional
+
+P3 — MÉDIA: Implementar junto com o módulo correspondente se custo for baixo
+Funcionalidade
+Módulo
+Observação
+Buscador IA no catálogo de cursos
+M2
+Campo de linguagem natural → haiku-4-5 → 3 sugestões. ~$0,001/busca. Implementar junto com /aluno/cursos
+Rota /admin/saude para health check pós-deploy
+M6
+Testa rotas críticas após cada push. ~50 linhas. Previne bugs silenciosos em produção
+CSRF via validação Origin/Referer em endpoints admin
+M6
+Proteção padrão. Implementar junto com as rotas /admin/api/*
+Rate limiter em Redis (Upstash) em vez de memória
+M1
+Rate limiter em memória reseta a cada deploy serverless = ineficaz. Migrar para Upstash Redis no M1
+Notas do aluno + exportar PDF do curso
+M2
+Painel colapsável na aula. Export via window.print(). Andragogia: anotação contextual
+Avaliação do curso (estrelas + comentário)
+M4
+Modal após certificado. Aparece na página de vendas do curso
+post_curtidas na comunidade
+M7
+Engajamento. 1 tabela já no schema
+Check-in de metas no CRON
+M8
+E-mail semanal &apos;Como estão suas metas?&apos; → metas_aluno.ultimo_checkin_em
+codigo_editorial nos campos (cursos, modulos, aulas, materiais)
+Banco
+Ponte com planilha de planejamento editorial. Campo simples, custo zero
+Histórico de resultados de ferramentas
+M9
+Últimas 5 por ferramenta em ferramenta_resultados. Já no schema, incluir na UI
+Trailer do curso (video_apresentacao_id)
+M2
+YouTube embed na página do curso. 1 campo, alto impacto visual na conversão
+
+P4 — PÓS-LANÇAMENTO: Após validação com usuários reais
+Funcionalidade
+Módulo
+Por que esperar
+Coach IA 24/7 com RAG
+M11
+Requer transcrições de aulas preenchidas + pipeline de embeddings pgvector
+Diagnóstico de Entrada
+M12
+Calibrar perguntas com base em feedback real de alunos
+Simulador de Atendimento
+M10 extensão
+Arquitetura pronta no M10 — adicionar novo tipo é rápido pós-lançamento
+Simulador de JBP
+M10 extensão
+Idem Simulador de Atendimento
+Importação editorial da planilha
+Admin
+Botão &apos;Importar como aula&apos; — ligar codigo_editorial da planilha a aulas do banco
+Dashboard de métricas avançado
+Admin
+Alunos ativos 7d, taxa de abandono por aula, ferramentas mais usadas, custo IA acumulado
+ROI de Treinamento
+M engajamento
+Requer dados históricos antes/depois para ser significativo
+Relatório para gestores B2B
+Novo módulo
+Depende de ter clientes corporativos para desenvolver com feedback real
+Turmas fechadas corporativas
+Novo módulo
+Mesma lógica de turmas B2B — validar demanda antes de construir
+Planos de assinatura em tiers
+M4 extensão
+Validar pricing com base de alunos real antes de definir os tiers
+
+P5 — LONGO PRAZO: Médio prazo, alta complexidade
+Funcionalidade
+Complexidade
+Dependência
+Microlearning e revisão espaçada visual (REQ-03)
+Média
+Dados históricos de revisão acumulados por 3+ meses
+Mapa de competências visual
+Alta
+Múltiplos diagnósticos por aluno ao longo do tempo
+Estudo em dupla / pares de aprendizado
+Alta
+Massa crítica de alunos simultâneos online
+Transcricao_json com timestamps (legendas sincronizadas)
+Alta
+Requer processo de geração de timestamps por aula
+Pipeline de cross-posting editorial (Blog→LP→E-mail→Post)
+Alta
+Integração com WordPress + múltiplos canais. Planilha atual é mais eficiente por ora
+GEO / llms.txt para citabilidade em IAs
+Média
+Criar /llms.txt descrevendo cursos e o professor para que ChatGPT/Gemini citem corretamente
+
+
+
+Prof. Paulo Henrique Donassolo  |  phdonassolo.com  |  Blueprint Área do Aluno v5.2  |  Março 2026

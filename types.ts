@@ -9,7 +9,16 @@ export interface Article {
   excerpt: string;
   content: string;
   date: string;
+  publishDate?: string;
   imageUrl: string;
+}
+
+export interface Video {
+  id: string;
+  title: string;
+  url: string;
+  thumb: string;
+  publishDate?: string;
 }
 
 export interface Pillar {
@@ -26,8 +35,8 @@ export interface Pillar {
 export interface Resource {
   id: string;
   name: string;
-  category: 'Planilhas' | 'E-books' | 'Guias' | 'Checklists';
-  type: 'PDF' | 'EXCEL' | 'WORD';
+  category: 'Planilhas' | 'E-books' | 'Guias' | 'Checklists' | 'Ferramentas';
+  type: 'PDF' | 'EXCEL' | 'WORD' | 'LINK';
   size: string;
   url: string;
 }

@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Precificação de Gás</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const { useState, useMemo } = React;
+
+        // Ícones SVG
+        const Icons = {
+            Calculator: () => <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>,
+            DollarSign: ({className = "w-5 h-5"}) => <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>,
+            TrendingUp: ({className = "w-5 h-5"}) => <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>,
+            BarChart3: ({className = "w-5 h-5"}) => <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>,
+            Package: ({className = "w-5 h-5"}) => <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>,
+            Target: ({className = "w-5 h-5"}) => <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" strokeWidth={2}/><circle cx="12" cy="12" r="6" strokeWidth={2}/><circle cx="12" cy="12" r="2" fill="currentColor"/></svg>,
+            Percent: ({className = "w-5 h-5"}) => <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>,
+            AlertCircle: ({className = "w-3 h-3"}) => <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>,
+            Info: ({className = "w-6 h-6"}) => <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+        };
+
+        function SimuladorPrecificacaoGas() {
+          const [produtoSelecionado, setProdutoSelecionado] = useState('P13');
+          const [modoCalculo, setModoCalculo] = useState('preco');
+          const [participacaoFaturamento, setParticipacaoFaturamento] = useState({ P13: 50, P45: 35, AGUA: 15 });
+          const [custosFixosBase, setCustosFixosBase] = useState({
+            aluguel: 5000, salarios: 15000, despesasAdm: 3000, marketing: 2000,
+            outrosAdministrativos: 1500, outrosLogisticos: 2500, outros: 1000
+          });
+          const [produtos, setProdutos] = useState({
+            P13: { nome: 'Gás P13', volumeMensal: 500, precoAtual: 95, precoMinConcorrencia: 85, precoMaxConcorrencia: 105,
+              nomeEmpresa: '', responsavel: '', custosVariaveis: { aquisicao: 55, frete: 3, entrega: 5, comissoes: 2, impostos: 8, outros: 1.5 }},
+            P45: { nome: 'Gás P45', volumeMensal: 200, precoAtual: 320, precoMinConcorrencia: 300, precoMaxConcorrencia: 350,
+              nomeEmpresa: '', responsavel: '', custosVariaveis: { aquisicao: 180, frete: 8, entrega: 12, comissoes: 6, impostos: 28, outros: 4 }},
+            AGUA: { nome: 'Água 20L', volumeMensal: 800, precoAtual: 18, precoMinConcorrencia: 15, precoMaxConcorrencia: 22,
+              nomeEmpresa: '', responsavel: '', custosVariaveis: { aquisicao: 8, frete: 1, entrega: 2, comissoes: 0.5, impostos: 1.5, outros: 0.5 }}
+          });
+          const [valorInput, setValorInput] = useState(115);
+          const [precoSimulacao, setPrecoSimulacao] = useState(95);
+          const [mostrarResultados, setMostrarResultados] = useState(false);
+
+          const produtoAtual = produtos[produtoSelecionado];
+          const custosFixosCalculados = useMemo(() => {
+            const resultado = {};
+            const participacao = participacaoFaturamento[produtoSelecionado] / 100;
+            Object.keys(custosFixosBase).forEach(campo => { resultado[campo] = custosFixosBase[campo] * participacao; });
+            return resultado;
+          }, [custosFixosBase, participacaoFaturamento, produtoSelecionado]);
+
+          const calculos = useMemo(() => {
+            const totalCustosFixos = Object.values(custosFixosBase).reduce((a, b) => a + b, 0);
+            const custoFixoProduto = Object.values(custosFixosCalculados).reduce((a, b) => a + b, 0);
+            const custoFixoUnitario = custoFixoProduto / produtoAtual.volumeMensal;
+            const custoVariavelUnitario = Object.values(produtoAtual.custosVariaveis).reduce((a, b) => a + b, 0);
+            const custoTotalUnitario = custoFixoUnitario + custoVariavelUnitario;
+            
+            let precoSugerido, margemSugerida;
+            if (modoCalculo === 'margem') {
+              margemSugerida = valorInput;
+              precoSugerido = custoTotalUnitario / (1 - margemSugerida / 100);
+            } else {
+              precoSugerido = valorInput;
+              margemSugerida = ((precoSugerido - custoTotalUnitario) / precoSugerido) * 100;
+            }
+
+            const custoVariavelTotal = custoVariavelUnitario * produtoAtual.volumeMensal;
+            const margemContribuicaoReal = precoSugerido - custoVariavelUnitario;
+            const margemContribuicaoRealPerc = (margemContribuicaoReal / precoSugerido) * 100;
+            const valorContribuicaoTotal = margemContribuicaoReal * produtoAtual.volumeMensal;
+            const lucroComRateio = (precoSugerido * produtoAtual.volumeMensal) - custoVariavelTotal - custoFixoProduto;
+            const margemLucroComRateio = (lucroComRateio / (precoSugerido * produtoAtual.volumeMensal)) * 100;
+            const lucroPorBotijaoComRateio = lucroComRateio / produtoAtual.volumeMensal;
+            const pontoEquilibrioComRateio = custoFixoProduto / margemContribuicaoReal;
+            const pontoEquilibrioComRateioValor = pontoEquilibrioComRateio * precoSugerido;
+            const volumeVsPEQRateio = produtoAtual.volumeMensal >= pontoEquilibrioComRateio;
+            const folgaSegurancaRateio = produtoAtual.volumeMensal - pontoEquilibrioComRateio;
+            const contribuicaoParaFixos = valorContribuicaoTotal;
+            const percCoberturaCustosFixos = (contribuicaoParaFixos / totalCustosFixos) * 100;
+            const pontoEquilibrioEmpresa = totalCustosFixos / margemContribuicaoReal;
+            const pontoEquilibrioEmpresaValor = pontoEquilibrioEmpresa * precoSugerido;
+            const custoVariavelSemImpostos = custoVariavelUnitario - produtoAtual.custosVariaveis.impostos;
+            const percentualImpostos = (produtoAtual.custosVariaveis.impostos / precoSugerido) * 100;
+            const receitaSimulacao = precoSimulacao * produtoAtual.volumeMensal;
+            const margemContribuicaoSimulacao = precoSimulacao - custoVariavelUnitario;
+            const lucroSimulacao = receitaSimulacao - custoVariavelTotal - custoFixoProduto;
+            const margemLucroSimulacao = (lucroSimulacao / receitaSimulacao) * 100;
+            const pontoEquilibrioSimulacao = custoFixoProduto / margemContribuicaoSimulacao;
+            const contribuicaoSimulacao = margemContribuicaoSimulacao * produtoAtual.volumeMensal;
+
+            return { totalCustosFixos, custoFixoProduto, custoFixoUnitario, custoVariavelUnitario, custoVariavelSemImpostos,
+              custoTotalUnitario, precoSugerido, margemSugerida, lucroComRateio, margemLucroComRateio, lucroPorBotijaoComRateio,
+              pontoEquilibrioComRateio, pontoEquilibrioComRateioValor, volumeVsPEQRateio, folgaSegurancaRateio, margemContribuicaoReal,
+              margemContribuicaoRealPerc, valorContribuicaoTotal, contribuicaoParaFixos, percCoberturaCustosFixos, pontoEquilibrioEmpresa,
+              pontoEquilibrioEmpresaValor, percentualImpostos, receitaSimulacao, margemContribuicaoSimulacao, lucroSimulacao,
+              margemLucroSimulacao, pontoEquilibrioSimulacao, contribuicaoSimulacao };
+          }, [custosFixosBase, custosFixosCalculados, produtoAtual, modoCalculo, valorInput, precoSimulacao, produtoSelecionado]);
+
+          const formatCurrency = (value) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+          const formatPercent = (value) => `${value.toFixed(2)}%`;
+          const getPosicionamento = (preco) => {
+            const { precoMinConcorrencia, precoMaxConcorrencia } = produtoAtual;
+            const diffMin = ((preco - precoMinConcorrencia) / precoMinConcorrencia) * 100;
+            const diffMax = ((preco - precoMaxConcorrencia) / precoMaxConcorrencia) * 100;
+            return { diffMin, diffMax };
+          };
+          const calcularPosicaoSlider = (preco) => {
+            const { precoMinConcorrencia, precoMaxConcorrencia } = produtoAtual;
+            const posicao = ((preco - precoMinConcorrencia) / (precoMaxConcorrencia - precoMinConcorrencia)) * 100;
+            return Math.max(0, Math.min(100, posicao));
+          };
+
+          const labelsFixos = {
+            aluguel: 'Aluguel', salarios: 'Salários + Encargos', despesasAdm: 'Despesas Administrativas',
+            marketing: 'Marketing', outrosAdministrativos: 'Outros Administrativos', outrosLogisticos: 'Outros Logísticos', outros: 'Outros'
+          };
+          const labelsVariaveis = {
+            aquisicao: 'Custo de Aquisição', frete: 'Frete', entrega: 'Custo de Entrega',
+            comissoes: 'Comissão de Venda', impostos: 'Impostos sobre Venda', outros: 'Outros'
+          };
+
+          if (mostrarResultados) {
+            const pos = getPosicionamento(calculos.precoSugerido);
+            
+            return (
+              <div className="min-h-screen bg-gray-100 p-6">
+                <div className="max-w-6xl mx-auto">
+                  <div className="mb-6 flex items-center justify-between">
+                    <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+                      <Icons.BarChart3 className="w-7 h-7 text-blue-600" />
+                      Resultados da Simulação
+                    </h2>
+                    <button onClick={() => setMostrarResultados(false)}
+                      className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-medium transition-colors">
+                      ← Voltar
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div className="bg-white rounded-lg shadow p-6 border-l-4 border-orange-500">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Icons.TrendingUp className="w-4 h-4 text-orange-500" />
+                        <p className="text-sm text-gray-600 font-medium">PREÇO SUGERIDO</p>
+                      </div>
+                      <p className="text-3xl font-bold text-orange-600">{formatCurrency(calculos.precoSugerido)}</p>
+                    </div>
+
+                    <div className="bg-white rounded-lg shadow p-6 border-l-4 border-blue-500">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Icons.Percent className="w-4 h-4 text-blue-500" />
+                        <p className="text-sm text-gray-600 font-medium">MARGEM DE LUCRO</p>
+                      </div>
+                      <p className="text-3xl font-bold text-blue-600">{formatPercent(calculos.margemSugerida)}</p>
+                      <p className="text-xs text-gray-500 mt-1">Com rateio de custos fixos</p>
+                    </div>
+
+                    <div className="bg-white rounded-lg shadow p-6 border-l-4 border-green-500">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Icons.DollarSign className="w-4 h-4 text-green-500" />
+                        <p className="text-sm text-gray-600 font-medium">LUCRO MENSAL</p>
+                      </div>
+                      <p className="text-3xl font-bold text-green-600">{formatCurrency(calculos.lucroComRateio)}</p>
+                      <p className="text-xs text-gray-500 mt-1">Com rateio de custos fixos</p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div className="bg-white rounded-lg shadow p-5 border-l-4 border-purple-500">
+                      <div className="flex items-center gap-2 mb-1">
+                        <Icons.BarChart3 className="w-4 h-4 text-purple-500" />
+                        <p className="text-xs text-gray-600 font-medium">MG. CONTRIBUIÇÃO</p>
+                      </div>
+                      <p className="text-2xl font-bold text-purple-600">{formatPercent(calculos.margemContribuicaoRealPerc)}</p>
+                      <p className="text-xs text-gray-500 mt-1">{formatCurrency(calculos.margemContribuicaoReal)}/un</p>
+                    </div>
+
+                    <div className="bg-white rounded-lg shadow p-5 border-l-4 border-yellow-500">
+                      <div className="flex items-center gap-2 mb-1">
+                        <Icons.Target className="w-4 h-4 text-yellow-600" />
+                        <p className="text-xs text-gray-600 font-medium">PONTO EQUILÍBRIO</p>
+                      </div>
+                      <p className="text-2xl font-bold text-yellow-600">{calculos.pontoEquilibrioComRateio.toFixed(0)} un</p>
+                      <p className="text-xs text-gray-500 mt-1">Com rateio</p>
+                    </div>
+
+                    <div className="bg-white rounded-lg shadow p-5 border-l-4 border-indigo-500">
+                      <div className="flex items-center gap-2 mb-1">
+                        <Icons.Package className="w-4 h-4 text-indigo-500" />
+                        <p className="text-xs text-gray-600 font-medium">VOLUME MENSAL</p>
+                      </div>
+                      <p className="text-2xl font-bold text-indigo-600">{produtoAtual.volumeMensal} un</p>
+                    </div>
+                  </div>
+
+                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg shadow-md p-6 mb-6 border-2 border-blue-200">
+                    <div className="flex items-start gap-3 mb-4">
+                      <Icons.Info className="w-6 h-6 text-blue-600 flex-shrink-0 mt-1" />
+                      <div>
+                        <h3 className="text-lg font-bold text-gray-800 mb-2">Análise Dupla: Precificação vs. Gestão</h3>
+                        <p className="text-sm text-gray-700">Duas perspectivas complementares para melhor tomada de decisão sobre preços</p>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="bg-white rounded-lg p-5 border-2 border-orange-200">
+                        <div className="flex items-center gap-2 mb-3">
+                          <Icons.Calculator />
+                          <h4 className="font-bold text-gray-800">Visão de Precificação</h4>
+                        </div>
+                        <p className="text-xs text-gray-600 mb-3">Custo cheio do produto (com rateio de fixos)</p>
+                        
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-sm">
+                            <span className="text-gray-700">Custo Total/Un:</span>
+                            <span className="font-semibold">{formatCurrency(calculos.custoTotalUnitario)}</span>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span className="text-gray-700">Lucro/Un:</span>
+                            <span className="font-semibold">{formatCurrency(calculos.lucroPorBotijaoComRateio)}</span>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span className="text-gray-700">Margem de Lucro:</span>
+                            <span className="font-semibold">{formatPercent(calculos.margemLucroComRateio)}</span>
+                          </div>
+                          <div className="flex justify-between text-sm pt-2 border-t">
+                            <span className="text-gray-700">PEQ Produto:</span>
+                            <span className="font-bold text-orange-600">{calculos.pontoEquilibrioComRateio.toFixed(0)} un</span>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span className="text-gray-700">Folga:</span>
+                            <span className="font-semibold">{calculos.folgaSegurancaRateio.toFixed(0)} un</span>
+                          </div>
+                        </div>
+                        
+                        <div className="mt-3 p-2 bg-orange-50 rounded text-xs text-gray-700">
+                          <strong>Uso:</strong> Para definir preço mínimo que cobre todos os custos deste produto
+                        </div>
+                      </div>
+
+                      <div className="bg-white rounded-lg p-5 border-2 border-green-200">
+                        <div className="flex items-center gap-2 mb-3">
+                          <Icons.TrendingUp className="w-5 h-5 text-green-600" />
+                          <h4 className="font-bold text-gray-800">Visão de Gestão Real</h4>
+                        </div>
+                        <p className="text-xs text-gray-600 mb-3">Contribuição efetiva para custos fixos totais</p>
+                        
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-sm">
+                            <span className="text-gray-700">MC Unitária:</span>
+                            <span className="font-semibold">{formatCurrency(calculos.margemContribuicaoReal)}</span>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span className="text-gray-700">MC %:</span>
+                            <span className="font-semibold">{formatPercent(calculos.margemContribuicaoRealPerc)}</span>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span className="text-gray-700">Contribuição Total:</span>
+                            <span className="font-semibold">{formatCurrency(calculos.valorContribuicaoTotal)}</span>
+                          </div>
+                          <div className="flex justify-between text-sm pt-2 border-t">
+                            <span className="text-gray-700">Cobre Fixos:</span>
+                            <span className="font-bold text-green-600">{formatPercent(calculos.percCoberturaCustosFixos)}</span>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span className="text-gray-700">PEQ Empresa:</span>
+                            <span className="font-semibold">{calculos.pontoEquilibrioEmpresa.toFixed(0)} un</span>
+                          </div>
+                        </div>
+                        
+                        <div className="mt-3 p-2 bg-green-50 rounded text-xs text-gray-700">
+                          <strong>Uso:</strong> Para avaliar contribuição real e decisões de mix de produtos
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="mt-4 p-3 bg-white rounded-lg border border-blue-200">
+                      <p className="text-xs text-gray-700">
+                        <strong>💡 Interpretação:</strong> O produto contribui <strong>{formatCurrency(calculos.valorContribuicaoTotal)}</strong> mensalmente 
+                        para cobrir os custos fixos totais de <strong>{formatCurrency(calculos.totalCustosFixos)}</strong>, 
+                        representando <strong>{formatPercent(calculos.percCoberturaCustosFixos)}</strong> de cobertura.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+                    <h3 className="text-base font-bold text-gray-800 mb-4 flex items-center gap-2">
+                      <Icons.Calculator />
+                      SIMULAÇÃO DE CENÁRIOS - arraste a barra azul para simular
+                    </h3>
+                    
+                    <div className="mb-6">
+                      <div className="flex justify-between items-center mb-3">
+                        <label className="text-sm font-medium text-gray-700">Preço de Simulação</label>
+                        <span className="text-2xl font-bold text-indigo-600">{formatCurrency(precoSimulacao)}</span>
+                      </div>
+                      <input type="range" min={Math.max(calculos.custoTotalUnitario * 0.8, 0)}
+                        max={produtoAtual.precoMaxConcorrencia * 1.5} step="0.5" value={precoSimulacao}
+                        onChange={(e) => setPrecoSimulacao(parseFloat(e.target.value))}
+                        className="w-full h-3 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600" />
+                      <div className="flex justify-between text-xs text-gray-500 mt-2">
+                        <span>{formatCurrency(Math.max(calculos.custoTotalUnitario * 0.8, 0))}</span>
+                        <span className="text-gray-700 font-medium">Arraste para simular</span>
+                        <span>{formatCurrency(produtoAtual.precoMaxConcorrencia * 1.5)}</span>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <p className="text-xs text-gray-600 mb-1">Receita</p>
+                        <p className="text-lg font-bold text-blue-600">{formatCurrency(calculos.receitaSimulacao)}</p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <p className="text-xs text-gray-600 mb-1">MC Unitária</p>
+                        <p className="text-lg font-bold text-green-600">{formatCurrency(calculos.margemContribuicaoSimulacao)}</p>
+                      </div>
+                      <div className={`rounded-lg p-4 ${calculos.lucroSimulacao >= 0 ? 'bg-green-50' : 'bg-red-50'}`}>
+                        <p className="text-xs text-gray-600 mb-1">Lucro</p>
+                        <p className={`text-lg font-bold ${calculos.lucroSimulacao >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          {formatCurrency(calculos.lucroSimulacao)}
+                        </p>
+                      </div>
+                      <div className={`rounded-lg p-4 ${calculos.margemLucroSimulacao >= 0 ? 'bg-purple-50' : 'bg-red-50'}`}>
+                        <p className="text-xs text-gray-600 mb-1">Margem</p>
+                        <p className={`text-lg font-bold ${calculos.margemLucroSimulacao >= 0 ? 'text-purple-600' : 'text-red-600'}`}>
+                          {formatPercent(calculos.margemLucroSimulacao)}
+                        </p>
+                      </div>
+                      <div className="bg-orange-50 rounded-lg p-4">
+                        <p className="text-xs text-gray-600 mb-1">Contribuição</p>
+                        <p className="text-lg font-bold text-orange-600">{formatCurrency(calculos.contribuicaoSimulacao)}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-white rounded-lg shadow-md p-4 text-center border-t-4 border-blue-600">
+                    <p className="text-sm text-gray-600">
+                      Elaborado para o <span className="font-semibold text-gray-800">Prof. Paulo H. Donassolo</span> para a <span className="font-semibold text-gray-800">Academia do Gás</span>
+                    <br />
+                    <strong>Obs.:</strong> Os valores apresentados servem apenas como referência. Valide os valores e os cálculos com o seu Contador.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            );
+          }
+
+          // TELA DE INPUTS
+          return (
+            <div className="min-h-screen bg-gray-100 p-6">
+              <div className="max-w-5xl mx-auto">
+                <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg shadow-lg p-6 mb-6 text-white">
+                  <div className="flex items-center gap-3">
+                    <Icons.Calculator />
+                    <div>
+                      <h1 className="text-2xl font-bold">Calculadora de Precificação de Gás-Academia do Gás</h1>
+                      <p className="text-sm text-blue-100">Análise de custos • Margem de Contribuição • Ponto de equilíbrio</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-lg shadow p-4 mb-6">
+                  <div className="flex gap-3">
+                    {Object.entries(produtos).map(([key, prod]) => (
+                      <button key={key} onClick={() => { setProdutoSelecionado(key); setPrecoSimulacao(prod.precoAtual); }}
+                        className={`flex-1 px-4 py-3 rounded-lg font-semibold transition-all ${produtoSelecionado === key ? 'bg-blue-600 text-white shadow' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}>
+                        {prod.nome}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+                  <h2 className="text-base font-bold text-gray-800 mb-4 flex items-center gap-2">
+                    <Icons.Percent />
+                    PARTICIPAÇÃO NO FATURAMENTO TOTAL
+                  </h2>
+                  <p className="text-sm text-gray-600 mb-4">
+                    Defina a participação (%) de cada produto no faturamento total para rateio dos custos fixos
+                  </p>
+                  <div className="grid grid-cols-3 gap-4 mb-3">
+                    {Object.entries(produtos).map(([key, prod]) => (
+                      <div key={key}>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">{prod.nome} (%)</label>
+                        <input type="number" step="0.1" value={participacaoFaturamento[key]}
+                          onChange={(e) => setParticipacaoFaturamento(prev => ({ ...prev, [key]: parseFloat(e.target.value) || 0 }))}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" />
+                      </div>
+                    ))}
+                  </div>
+                  <div className="flex justify-between items-center pt-3 border-t">
+                    <span className="font-semibold text-gray-700">Total:</span>
+                    <span className={`font-bold ${Object.values(participacaoFaturamento).reduce((a, b) => a + b, 0) === 100 ? 'text-green-600' : 'text-red-600'}`}>
+                      {Object.values(participacaoFaturamento).reduce((a, b) => a + b, 0).toFixed(1)}%
+                    </span>
+                  </div>
+                  {Object.values(participacaoFaturamento).reduce((a, b) => a + b, 0) !== 100 && (
+                    <p className="text-xs text-red-600 mt-1 flex items-center gap-1">
+                      <Icons.AlertCircle />
+                      A soma deve totalizar 100%
+                    </p>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                  <div className="bg-white rounded-lg shadow-md p-6">
+                    <h2 className="text-base font-bold text-gray-800 mb-4 flex items-center gap-2">
+                      <Icons.DollarSign />
+                      CUSTOS FIXOS MENSAIS
+                    </h2>
+                    <p className="text-sm text-gray-600 mb-4">
+                      Valores totais (rateio {produtoAtual.nome}: {participacaoFaturamento[produtoSelecionado]}%)
+                    </p>
+                    <div className="space-y-3">
+                      {Object.entries(custosFixosBase).map(([key, value]) => (
+                        <div key={key}>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">{labelsFixos[key]} (R$)</label>
+                          <div className="flex gap-2 items-center">
+                            <input type="number" value={value}
+                              onChange={(e) => setCustosFixosBase(prev => ({ ...prev, [key]: parseFloat(e.target.value) || 0 }))}
+                              className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" />
+                            <div className="bg-blue-50 px-3 py-2 rounded-lg text-sm text-blue-700 font-semibold min-w-[90px] text-right">
+                              {formatCurrency(custosFixosCalculados[key])}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                      <div className="pt-3 border-t-2">
+                        <div className="flex justify-between items-center mb-1">
+                          <span className="font-semibold text-gray-700">Total Geral:</span>
+                          <span className="font-bold text-blue-600">{formatCurrency(calculos.totalCustosFixos)}</span>
+                        </div>
+                        <div className="flex justify-between items-center text-sm">
+                          <span className="text-gray-600">Rateio {produtoAtual.nome}:</span>
+                          <span className="text-blue-600 font-semibold">{formatCurrency(calculos.custoFixoProduto)}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-white rounded-lg shadow-md p-6">
+                    <h2 className="text-base font-bold text-gray-800 mb-4 flex items-center gap-2">
+                      <Icons.Package />
+                      CUSTOS VARIÁVEIS POR UNIDADE
+                    </h2>
+                    <div className="space-y-3">
+                      {Object.entries(produtoAtual.custosVariaveis).map(([key, value]) => (
+                        <div key={key}>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            {labelsVariaveis[key]} (por unidade)
+                          </label>
+                          <input type="number" step="0.01" value={value}
+                            onChange={(e) => setProdutos(prev => ({
+                              ...prev,
+                              [produtoSelecionado]: {
+                                ...prev[produtoSelecionado],
+                                custosVariaveis: { ...prev[produtoSelecionado].custosVariaveis, [key]: parseFloat(e.target.value) || 0 }
+                              }
+                            }))}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" />
+                        </div>
+                      ))}
+                      <div className="pt-3 border-t-2">
+                        <div className="flex justify-between items-center font-bold">
+                          <span>Total Variável/Un:</span>
+                          <span className="text-blue-600">{formatCurrency(calculos.custoVariavelUnitario)}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                  <div className="bg-white rounded-lg shadow-md p-6">
+                    <h2 className="text-base font-bold text-gray-800 mb-4 flex items-center gap-2">
+                      <Icons.BarChart3 className="w-5 h-5 text-orange-600" />
+                      DADOS DE VENDA
+                    </h2>
+                    <div className="space-y-3">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Volume Mensal Estimado (unidades deste produto)</label>
+                        <input type="number" value={produtoAtual.volumeMensal}
+                          onChange={(e) => setProdutos(prev => ({
+                            ...prev,
+                            [produtoSelecionado]: { ...prev[produtoSelecionado], volumeMensal: parseFloat(e.target.value) || 0 }
+                          }))}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Preço Atual Praticado (R$)</label>
+                        <input type="number" step="0.01" value={produtoAtual.precoAtual}
+                          onChange={(e) => setProdutos(prev => ({
+                            ...prev,
+                            [produtoSelecionado]: { ...prev[produtoSelecionado], precoAtual: parseFloat(e.target.value) || 0 }
+                          }))}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Preço Mínimo da Concorrência (R$)</label>
+                        <input type="number" step="0.01" value={produtoAtual.precoMinConcorrencia}
+                          onChange={(e) => setProdutos(prev => ({
+                            ...prev,
+                            [produtoSelecionado]: { ...prev[produtoSelecionado], precoMinConcorrencia: parseFloat(e.target.value) || 0 }
+                          }))}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Preço Máximo da Concorrência (R$)</label>
+                        <input type="number" step="0.01" value={produtoAtual.precoMaxConcorrencia}
+                          onChange={(e) => setProdutos(prev => ({
+                            ...prev,
+                            [produtoSelecionado]: { ...prev[produtoSelecionado], precoMaxConcorrencia: parseFloat(e.target.value) || 0 }
+                          }))}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-white rounded-lg shadow-md p-6">
+                    <h2 className="text-base font-bold text-gray-800 mb-4 flex items-center gap-2">
+                      <Icons.Target className="w-5 h-5 text-purple-600" />
+                      OBJETIVO DA SIMULAÇÃO
+                    </h2>
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <label className="flex items-center p-3 border-2 rounded-lg cursor-pointer hover:bg-gray-50">
+                          <input type="radio" name="modo" checked={modoCalculo === 'margem'}
+                            onChange={() => { setModoCalculo('margem'); setValorInput(25); }}
+                            className="w-4 h-4 text-blue-600" />
+                          <span className="ml-3 font-medium text-gray-700">Margem → Calcular Preço</span>
+                        </label>
+                        <label className="flex items-center p-3 border-2 rounded-lg cursor-pointer hover:bg-gray-50">
+                          <input type="radio" name="modo" checked={modoCalculo === 'preco'}
+                            onChange={() => { setModoCalculo('preco'); setValorInput(produtoAtual.precoAtual); }}
+                            className="w-4 h-4 text-blue-600" />
+                          <span className="ml-3 font-medium text-gray-700">Preço → Calcular Margem</span>
+                        </label>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          {modoCalculo === 'margem' ? 'Margem de Lucro Desejada (%)' : 'Preço Alvo (R$)'}
+                        </label>
+                        <input type="number" step={modoCalculo === 'margem' ? '0.1' : '0.01'} value={valorInput}
+                          onChange={(e) => setValorInput(parseFloat(e.target.value) || 0)}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-lg font-semibold" />
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Nome da Empresa</label>
+                          <input type="text" value={produtoAtual.nomeEmpresa}
+                            onChange={(e) => setProdutos(prev => ({
+                              ...prev,
+                              [produtoSelecionado]: { ...prev[produtoSelecionado], nomeEmpresa: e.target.value }
+                            }))}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Responsável</label>
+                          <input type="text" value={produtoAtual.responsavel}
+                            onChange={(e) => setProdutos(prev => ({
+                              ...prev,
+                              [produtoSelecionado]: { ...prev[produtoSelecionado], responsavel: e.target.value }
+                            }))}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mb-6">
+                  <button onClick={() => setMostrarResultados(true)}
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-lg shadow-lg transition-all flex items-center justify-center gap-2 text-lg">
+                    <Icons.Calculator />
+                    Calcular Precificação
+                  </button>
+                </div>
+
+                <div className="bg-white rounded-lg shadow-md p-4 text-center border-t-4 border-blue-600">
+                  <p className="text-sm text-gray-600">
+                    Elaborado para o <span className="font-semibold text-gray-800">Prof. Paulo H. Donassolo</span> para a <span className="font-semibold text-gray-800">Academia do Gás</span>
+                    <br />
+                    <strong>Obs.:</strong> Os valores apresentados servem apenas como referência. Valide os valores e os cálculos com o seu Contador.
+                  </p>
+                </div>
+              </div>
+            </div>
+          );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<SimuladorPrecificacaoGas />);
+    </script>
+</body>
+</html>

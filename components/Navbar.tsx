@@ -1,16 +1,36 @@
-import React, { useState } from 'react';
-import { Menu, X } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Menu, X, ArrowRight } from 'lucide-react';
+import { SITE_CONFIG as STATIC_CONFIG } from '../config/site-config';
+import { useSiteConfig } from '../contexts/SiteConfigContext';
 
-const Navbar = () => {
-  const [isOpen, setIsOpen] = useState(false);
+interface NavbarProps {
+  currentRoute?: string;
+}
+
+const Navbar: React.FC<NavbarProps> = ({ currentRoute = '#/' }) => {
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { config } = useSiteConfig();
+
+  // Caso o config ainda não tenha carregado as páginas internas, use um fallback seguro
+  const pagesConfig = config.pages || STATIC_CONFIG.pages;
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const navLinks = [
-    { name: 'Artigos', href: '#/artigos' },
-    { name: 'Mentoria', href: '#/mentoria' },
-    { name: 'Serviços', href: '#/servicos' },
-    { name: 'Livros & Cursos', href: '#/livros' },  // ← ADICIONADO
-    { name: 'Downloads', href: '#/downloads' },
-    { name: 'Contato', href: '#/contato' }
+    { name: 'Início', href: '#/' },
+    { name: 'Pilares', href: '#/pilares' },
+    ...(pagesConfig?.articles?.visible !== false ? [{ name: 'Artigos', href: '#/artigos' }] : []),
+    ...(pagesConfig?.downloads?.visible !== false ? [{ name: 'Ferramentas', href: '#/ferramentas' }] : []),
+    ...(pagesConfig?.courses?.visible !== false ? [{ name: 'Livros e Cursos', href: '#/livros' }] : []),
+    { name: 'Trilhas', href: '#/trilhas' },
+    ...(pagesConfig?.contact?.visible !== false ? [{ name: 'Contato', href: '#/contato' }] : []),
   ];
 
   return (
@@ -52,23 +72,23 @@ const Navbar = () => {
 
           {/* Mobile Menu Button */}
           <button
-            onClick={() => setIsOpen(!isOpen)}
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
             aria-label="Toggle menu"
           >
-            {isOpen ? <X size={24} /> : <Menu size={24} />}
+            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
 
         {/* Mobile Menu */}
-        {isOpen && (
+        {mobileMenuOpen && (
           <div className="md:hidden py-4 border-t border-gray-100">
             <div className="flex flex-col space-y-1">
               {navLinks.map((link) => (
                 <a
                   key={link.name}
                   href={link.href}
-                  onClick={() => setIsOpen(false)}
+                  onClick={() => setMobileMenuOpen(false)}
                   className="px-4 py-3 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-lg transition-all"
                 >
                   {link.name}
@@ -76,7 +96,7 @@ const Navbar = () => {
               ))}
               <a
                 href="#/area-aluno"
-                onClick={() => setIsOpen(false)}
+                onClick={() => setMobileMenuOpen(false)}
                 className="mx-4 mt-4 px-6 py-3 bg-gradient-to-r from-blue-600 to-teal-500 text-white text-sm font-bold rounded-xl hover:from-blue-500 hover:to-teal-400 transition-all text-center shadow-lg"
               >
                 Área do Aluno →

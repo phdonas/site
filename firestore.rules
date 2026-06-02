@@ -1,0 +1,12 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Permite leitura pública para que os visitantes vejam o conteúdo do site
+    // Restringe a escrita apenas para usuários autenticados (Admin logado)
+    match /{document=**} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+  }
+}

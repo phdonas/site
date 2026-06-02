@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestor de Landing Pages | Prof. Paulo H. Donassolo</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .modal { display: none; }
+    .modal.active { display: flex; }
+    .preview-iframe { border: 1px solid #e5e7eb; border-radius: 12px; }
+    .editor-section { background: white; border: 2px solid #e5e7eb; border-radius: 12px; padding: 24px; margin-bottom: 16px; }
+    .field-group { margin-bottom: 20px; }
+    .field-label { font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px; display: block; }
+    .field-input { width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; }
+    .field-input:focus { outline: none; border-color: #3b82f6; }
+    .btn { padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.2s; border: none; }
+    .btn-primary { background: #3b82f6; color: white; }
+    .btn-primary:hover { background: #2563eb; }
+    .btn-secondary { background: #f3f4f6; color: #374151; }
+    .btn-secondary:hover { background: #e5e7eb; }
+    .btn-danger { background: #ef4444; color: white; }
+    .btn-danger:hover { background: #dc2626; }
+    .lp-card { background: white; border: 2px solid #e5e7eb; border-radius: 12px; padding: 20px; cursor: pointer; transition: all 0.2s; }
+    .lp-card:hover { border-color: #3b82f6; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1); }
+    .badge { display: inline-block; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 700; }
+    .badge-download { background: #dbeafe; color: #1e40af; }
+    .badge-link { background: #fef3c7; color: #92400e; }
+    .tab { padding: 12px 24px; cursor: pointer; font-weight: 600; border-bottom: 3px solid transparent; }
+    .tab.active { border-bottom-color: #3b82f6; color: #3b82f6; }
+    .validation-error { border-color: #ef4444 !important; }
+    .validation-success { border-color: #10b981 !important; }
+  </style>
+</head>
+<body class="bg-gray-50">
+
+  <header class="bg-white border-b border-gray-200 sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center">
+          <span class="text-white font-bold text-lg">PD</span>
+        </div>
+        <div>
+          <h1 class="text-xl font-bold text-gray-900">Gestor de Landing Pages</h1>
+          <p class="text-sm text-gray-500">Prof. Paulo H. Donassolo</p>
+        </div>
+      </div>
+      <div class="flex gap-3">
+        <button onclick="openSettings()" class="btn btn-secondary text-sm">⚙️ Configurações</button>
+        <button onclick="createNewLP()" class="btn btn-primary text-sm">➕ Nova Landing Page</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-6 py-8">
+    <div class="mb-6 flex gap-4">
+      <input type="text" id="searchInput" placeholder="🔍 Buscar..." class="field-input flex-1" oninput="filterLPs()">
+      <select id="filterType" class="field-input w-48" onchange="filterLPs()">
+        <option value="all">Todos os tipos</option>
+        <option value="Download">Download</option>
+        <option value="Link">Link</option>
+      </select>
+    </div>
+    <div id="lpsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+    <div id="emptyState" class="text-center py-20 hidden">
+      <div class="text-6xl mb-4">📄</div>
+      <h2 class="text-2xl font-bold text-gray-900 mb-2">Nenhuma Landing Page criada</h2>
+      <p class="text-gray-600 mb-6">Clique em "Nova Landing Page" para começar</p>
+      <button onclick="createNewLP()" class="btn btn-primary">➕ Criar Primeira LP</button>
+    </div>
+  </main>
+
+  <!-- MODAL EDITOR -->
+  <div id="editorModal" class="modal fixed inset-0 bg-black bg-opacity-50 items-center justify-center z-50 overflow-y-auto">
+    <div class="bg-gray-50 w-full h-full flex">
+      <div class="w-1/2 overflow-y-auto p-8">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-2xl font-bold text-gray-900" id="editorTitle">Nova Landing Page</h2>
+          <button onclick="closeEditor()" class="text-gray-500 hover:text-gray-700 text-2xl">✕</button>
+        </div>
+        
+        <div class="flex border-b border-gray-200 mb-6">
+          <div class="tab active" onclick="switchTab(event, 'conteudo')">📝 Conteúdo</div>
+          <div class="tab" onclick="switchTab(event, 'design')">🎨 Design</div>
+          <div class="tab" onclick="switchTab(event, 'config')">⚙️ Config</div>
+        </div>
+
+        <div id="tabConteudo" class="tab-content">
+          <div class="editor-section">
+            <h3 class="text-lg font-bold mb-4">📋 Metadados</h3>
+            <div class="field-group">
+              <label class="field-label">Title da Página</label>
+              <input type="text" id="pageTitle" class="field-input" onchange="updatePreview()">
+            </div>
+            <div class="field-group">
+              <label class="field-label">Meta Description</label>
+              <textarea id="metaDesc" class="field-input" rows="2" onchange="updatePreview()"></textarea>
+            </div>
+            <div class="field-group">
+              <label class="field-label">Meta Keywords</label>
+              <input type="text" id="metaKeywords" class="field-input" onchange="updatePreview()">
+            </div>
+          </div>
+          
+          <div class="editor-section">
+            <h3 class="text-lg font-bold mb-4">🎯 Hero</h3>
+            <div class="field-group">
+              <label class="field-label">Badge</label>
+              <input type="text" id="badge" class="field-input" onchange="updatePreview()">
+            </div>
+            <div class="field-group">
+              <label class="field-label">Título - Linha 1</label>
+              <input type="text" id="titleLine1" class="field-input" onchange="updatePreview()">
+            </div>
+            <div class="field-group">
+              <label class="field-label">Título - Linha 2</label>
+              <input type="text" id="titleLine2" class="field-input" onchange="updatePreview()">
+            </div>
+            <div class="field-group">
+              <label class="field-label">Descrição</label>
+              <textarea id="heroDesc" class="field-input" rows="3" onchange="updatePreview()"></textarea>
+            </div>
+          </div>
+          
+          <div class="editor-section">
+            <h3 class="text-lg font-bold mb-4">✅ Benefícios</h3>
+            <div id="beneficiosList"></div>
+            <button onclick="addBeneficio()" class="btn btn-secondary text-sm mt-2">➕ Adicionar</button>
+          </div>
+          
+          <div class="editor-section">
+            <h3 class="text-lg font-bold mb-4">📋 Formulário</h3>
+            <div class="field-group">
+              <label class="field-label">Título</label>
+              <input type="text" id="formTitle" class="field-input" onchange="updatePreview()">
+            </div>
+            <div class="field-group">
+              <label class="field-label">Subtítulo</label>
+              <input type="text" id="formSubtitle" class="field-input" onchange="updatePreview()">
+            </div>
+            <div class="field-group">
+              <label class="field-label">Texto do Botão</label>
+              <input type="text" id="buttonText" class="field-input" onchange="updatePreview()">
+            </div>
+          </div>
+        </div>
+
+        <div id="tabDesign" class="tab-content hidden">
+          <div class="editor-section">
+            <h3 class="text-lg font-bold mb-4">🎨 Cores</h3>
+            <div class="field-group">
+              <label class="field-label">Fundo</label>
+              <div class="flex gap-3">
+                <input type="color" id="bgColor" class="w-12 h-12 rounded border" value="#fbfbfd" onchange="syncColor('bg')">
+                <input type="text" id="bgColorText" class="field-input flex-1" value="#fbfbfd" onchange="syncColor('bg')">
+              </div>
+            </div>
+            <div class="field-group">
+              <label class="field-label">Primária</label>
+              <div class="flex gap-3">
+                <input type="color" id="primaryColor" class="w-12 h-12 rounded border" value="#3b82f6" onchange="syncColor('primary')">
+                <input type="text" id="primaryColorText" class="field-input flex-1" value="#3b82f6" onchange="syncColor('primary')">
+              </div>
+            </div>
+            <div class="field-group">
+              <label class="field-label">Texto</label>
+              <div class="flex gap-3">
+                <input type="color" id="textColor" class="w-12 h-12 rounded border" value="#1d1d1f" onchange="syncColor('text')">
+                <input type="text" id="textColorText" class="field-input flex-1" value="#1d1d1f" onchange="syncColor('text')">
+              </div>
+            </div>
+          </div>
+          
+          <div class="editor-section">
+            <h3 class="text-lg font-bold mb-4">✍️ Tipografia</h3>
+            <div class="field-group">
+              <label class="field-label">Fonte</label>
+              <select id="fontFamily" class="field-input" onchange="updatePreview()">
+                <option value="Inter">Inter</option>
+                <option value="Roboto">Roboto</option>
+                <option value="Open Sans">Open Sans</option>
+                <option value="Montserrat">Montserrat</option>
+                <option value="Poppins">Poppins</option>
+              </select>
+            </div>
+            <div class="field-group">
+              <label class="field-label">Tamanho Título</label>
+              <select id="titleSize" class="field-input" onchange="updatePreview()">
+                <option value="text-4xl md:text-5xl lg:text-6xl">Grande</option>
+                <option value="text-5xl md:text-6xl lg:text-7xl" selected>Muito Grande</option>
+                <option value="text-6xl md:text-7xl lg:text-8xl">Extra Grande</option>
+              </select>
+            </div>
+            <div class="field-group">
+              <label class="field-label">Peso Título</label>
+              <select id="titleWeight" class="field-input" onchange="updatePreview()">
+                <option value="font-light">Leve</option>
+                <option value="font-normal">Normal</option>
+                <option value="font-semibold">Semi-Negrito</option>
+                <option value="font-bold" selected>Negrito</option>
+                <option value="font-extrabold">Extra Negrito</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="editor-section">
+            <h3 class="text-lg font-bold mb-4">🔘 Botão</h3>
+            <div class="field-group">
+              <label class="field-label">Cor Fundo</label>
+              <div class="flex gap-3">
+                <input type="color" id="buttonBgColor" class="w-12 h-12 rounded border" value="#3b82f6" onchange="syncColor('buttonBg')">
+                <input type="text" id="buttonBgColorText" class="field-input flex-1" value="#3b82f6" onchange="syncColor('buttonBg')">
+              </div>
+            </div>
+            <div class="field-group">
+              <label class="field-label">Cor Texto</label>
+              <div class="flex gap-3">
+                <input type="color" id="buttonTextColor" class="w-12 h-12 rounded border" value="#ffffff" onchange="syncColor('buttonText')">
+                <input type="text" id="buttonTextColorText" class="field-input flex-1" value="#ffffff" onchange="syncColor('buttonText')">
+              </div>
+            </div>
+            <div class="field-group">
+              <label class="field-label">Tamanho</label>
+              <select id="buttonSize" class="field-input" onchange="updatePreview()">
+                <option value="px-8 py-3 text-base">Pequeno</option>
+                <option value="px-10 py-4 text-lg" selected>Médio</option>
+                <option value="px-12 py-5 text-xl">Grande</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div id="tabConfig" class="tab-content hidden">
+          <div class="editor-section">
+            <h3 class="text-lg font-bold mb-4">⚙️ Configurações</h3>
+            <div class="field-group">
+              <label class="field-label">Nome da LP <span class="text-red-500">*</span></label>
+              <input type="text" id="lpName" class="field-input" oninput="validateMaterialId()">
+            </div>
+            <div class="field-group">
+              <label class="field-label">Material_ID <span class="text-red-500">*</span></label>
+              <input type="text" id="materialId" class="field-input" oninput="validateMaterialId()">
+              <p id="materialIdError" class="text-xs text-red-500 mt-1 hidden"></p>
+            </div>
+            <div class="field-group">
+              <label class="field-label">Tipo <span class="text-red-500">*</span></label>
+              <select id="tipoEntrega" class="field-input" onchange="toggleRedirectUrl()">
+                <option value="Download">Download</option>
+                <option value="Link">Link</option>
+              </select>
+            </div>
+            <div class="field-group" id="redirectUrlGroup" style="display:none">
+              <label class="field-label">URL Redirect</label>
+              <input type="url" id="redirectUrl" class="field-input">
+            </div>
+            <div class="field-group">
+              <label class="field-label">URL Web App <span class="text-red-500">*</span></label>
+              <input type="url" id="webAppUrl" class="field-input" placeholder="https://script.google.com/macros/s/.../exec" oninput="validateWebAppUrl(this)"><p id="webAppUrlHint" class="text-xs text-gray-400 mt-1">Cole aqui a URL do Google Apps Script (Implantar → Gerenciar implantações)</p><p id="webAppUrlError" class="text-xs text-red-500 mt-1 hidden">⚠️ URL inválida — deve começar com https://script.google.com</p>
+            </div>
+            <div class="field-group">
+              <label class="field-label">Google Analytics ID</label>
+              <input type="text" id="gaId" class="field-input" value="G-QLJ9N5BYTD">
+            </div>
+          </div>
+        </div>
+
+        <div class="sticky bottom-0 bg-gray-50 pt-4 pb-2 flex gap-3">
+          <button onclick="saveLP()" class="btn btn-primary flex-1">💾 Salvar</button>
+          <button onclick="exportLP()" class="btn btn-secondary">📋 Copiar HTML</button>
+          <button onclick="deleteCurrentLP()" class="btn btn-danger">🗑️ Excluir</button>
+        </div>
+      </div>
+
+      <div class="w-1/2 bg-gray-100 p-8 overflow-y-auto">
+        <div class="sticky top-0 mb-4 flex gap-2">
+          <button onclick="setPreviewMode('desktop')" id="previewDesktop" class="btn btn-primary flex-1 text-sm">🖥️ Desktop</button>
+          <button onclick="setPreviewMode('mobile')" id="previewMobile" class="btn btn-secondary flex-1 text-sm">📱 Mobile</button>
+        </div>
+        <div id="previewContainer" class="bg-white rounded-xl overflow-hidden" style="width:100%">
+          <iframe id="previewFrame" class="w-full" style="height:1200px;border:none"></iframe>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL SETTINGS -->
+  <div id="settingsModal" class="modal fixed inset-0 bg-black bg-opacity-50 items-center justify-center z-50">
+    <div class="bg-white rounded-2xl p-8 max-w-2xl w-full mx-4">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-2xl font-bold">⚙️ Configurações</h2>
+        <button onclick="closeSettings()" class="text-gray-500 hover:text-gray-700 text-2xl">✕</button>
+      </div>
+      <div class="space-y-6">
+        <div class="field-group">
+          <label class="field-label">URL Web App Padrão</label>
+          <input type="url" id="settingsWebAppUrl" class="field-input">
+        </div>
+        <div class="field-group">
+          <label class="field-label">Google Analytics ID</label>
+          <input type="text" id="settingsGaId" class="field-input" value="G-QLJ9N5BYTD">
+        </div>
+        <div class="field-group">
+          <button onclick="exportAllData()" class="btn btn-secondary w-full">📦 Backup</button>
+        </div>
+        <div class="field-group">
+          <input type="file" id="importFile" accept=".json" class="field-input">
+          <button onclick="importAllData()" class="btn btn-secondary w-full mt-2">📥 Restaurar</button>
+        </div>
+      </div>
+      <div class="mt-8 flex gap-3">
+        <button onclick="saveSettings()" class="btn btn-primary flex-1">💾 Salvar</button>
+        <button onclick="closeSettings()" class="btn btn-secondary">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+const STORAGE_KEY='phd_lps',SETTINGS_KEY='phd_lp_settings';let currentLPs=[],currentEditingLP=null,currentEditingIndex=null;function loadLPs(){const s=localStorage.getItem(STORAGE_KEY);return s?JSON.parse(s):[]}function saveLPs(l){localStorage.setItem(STORAGE_KEY,JSON.stringify(l))}function loadSettings(){const s=localStorage.getItem(SETTINGS_KEY);return s?JSON.parse(s):{webAppUrl:'',gaId:'G-QLJ9N5BYTD'}}function saveSettingsData(s){localStorage.setItem(SETTINGS_KEY,JSON.stringify(s))}function renderDashboard(){currentLPs=loadLPs();const g=document.getElementById('lpsGrid'),e=document.getElementById('emptyState');if(currentLPs.length===0){g.innerHTML='';e.classList.remove('hidden');return}e.classList.add('hidden');let h='';currentLPs.forEach((lp,i)=>{const bc=lp.tipoEntrega==='Download'?'badge-download':'badge-link',d=new Date(lp.createdAt).toLocaleDateString('pt-BR');h+='<div class="lp-card" onclick="editLP('+i+')"><div class="flex items-start justify-between mb-3"><h3 class="text-lg font-bold text-gray-900">'+(lp.pageTitle||'Sem título')+'</h3><span class="badge '+bc+'">'+lp.tipoEntrega+'</span></div><p class="text-sm text-gray-600 mb-2"><strong>Material_ID:</strong> '+lp.materialId+'</p><p class="text-sm text-gray-600 mb-2"><strong>LP:</strong> '+lp.lpName+'</p><p class="text-xs text-gray-400">'+d+'</p></div>'});g.innerHTML=h}function createNewLP(){currentEditingLP=getDefaultLP();currentEditingIndex=null;loadLPIntoEditor(currentEditingLP);document.getElementById('editorTitle').textContent='Nova LP';document.getElementById('editorModal').classList.add('active');updatePreview()}function editLP(i){currentEditingLP=JSON.parse(JSON.stringify(currentLPs[i]));currentEditingIndex=i;loadLPIntoEditor(currentEditingLP);document.getElementById('editorTitle').textContent='Editar LP';document.getElementById('editorModal').classList.add('active');updatePreview()}function closeEditor(){document.getElementById('editorModal').classList.remove('active');currentEditingLP=null;currentEditingIndex=null}function getDefaultLP(){const s=loadSettings();return{pageTitle:'Material Gratuito | Prof. Paulo',metaDesc:'Material gratuito',metaKeywords:'gestão, vendas',badge:'Material Gratuito',titleLine1:'Título do Material',titleLine2:'Subtítulo',heroDesc:'Descrição do material',beneficios:['Prático','Real','Aplicável'],formTitle:'Receba grátis',formSubtitle:'Preencha os dados',buttonText:'Receber Grátis',bgColor:'#fbfbfd',primaryColor:'#3b82f6',textColor:'#1d1d1f',buttonBgColor:'#3b82f6',buttonTextColor:'#ffffff',fontFamily:'Inter',titleSize:'text-5xl md:text-6xl lg:text-7xl',titleWeight:'font-bold',buttonSize:'px-10 py-4 text-lg',lpName:'',materialId:'',tipoEntrega:'Download',redirectUrl:'',webAppUrl:s.webAppUrl||'',gaId:s.gaId||'G-QLJ9N5BYTD',createdAt:new Date().toISOString()}}function loadLPIntoEditor(lp){document.getElementById('pageTitle').value=lp.pageTitle;document.getElementById('metaDesc').value=lp.metaDesc;document.getElementById('metaKeywords').value=lp.metaKeywords;document.getElementById('badge').value=lp.badge;document.getElementById('titleLine1').value=lp.titleLine1;document.getElementById('titleLine2').value=lp.titleLine2;document.getElementById('heroDesc').value=lp.heroDesc;document.getElementById('formTitle').value=lp.formTitle;document.getElementById('formSubtitle').value=lp.formSubtitle;document.getElementById('buttonText').value=lp.buttonText;document.getElementById('bgColor').value=lp.bgColor;document.getElementById('bgColorText').value=lp.bgColor;document.getElementById('primaryColor').value=lp.primaryColor;document.getElementById('primaryColorText').value=lp.primaryColor;document.getElementById('textColor').value=lp.textColor;document.getElementById('textColorText').value=lp.textColor;document.getElementById('buttonBgColor').value=lp.buttonBgColor;document.getElementById('buttonBgColorText').value=lp.buttonBgColor;document.getElementById('buttonTextColor').value=lp.buttonTextColor;document.getElementById('buttonTextColorText').value=lp.buttonTextColor;document.getElementById('fontFamily').value=lp.fontFamily;document.getElementById('titleSize').value=lp.titleSize;document.getElementById('titleWeight').value=lp.titleWeight;document.getElementById('buttonSize').value=lp.buttonSize;document.getElementById('lpName').value=lp.lpName;document.getElementById('materialId').value=lp.materialId;document.getElementById('tipoEntrega').value=lp.tipoEntrega;document.getElementById('redirectUrl').value=lp.redirectUrl||'';document.getElementById('webAppUrl').value=lp.webAppUrl;document.getElementById('gaId').value=lp.gaId;renderBeneficios(lp.beneficios);toggleRedirectUrl()}function renderBeneficios(bs){const c=document.getElementById('beneficiosList');c.innerHTML='';bs.forEach((b,i)=>{const d=document.createElement('div');d.className='field-group flex gap-2';d.innerHTML='<input type="text" class="field-input flex-1" value="'+b+'" onchange="updateBeneficio('+i+',this.value)"><button onclick="removeBeneficio('+i+')" class="btn btn-danger text-sm" style="padding:8px 12px">🗑️</button>';c.appendChild(d)})}function addBeneficio(){if(!currentEditingLP.beneficios)currentEditingLP.beneficios=[];if(currentEditingLP.beneficios.length>=5){alert('Máximo 5');return}currentEditingLP.beneficios.push('Novo');renderBeneficios(currentEditingLP.beneficios);updatePreview()}function updateBeneficio(i,v){currentEditingLP.beneficios[i]=v;updatePreview()}function removeBeneficio(i){currentEditingLP.beneficios.splice(i,1);renderBeneficios(currentEditingLP.beneficios);updatePreview()}function switchTab(e,t){document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));e.target.classList.add('active');document.getElementById('tabConteudo').classList.add('hidden');document.getElementById('tabDesign').classList.add('hidden');document.getElementById('tabConfig').classList.add('hidden');document.getElementById('tab'+t.charAt(0).toUpperCase()+t.slice(1)).classList.remove('hidden')}function validateMaterialId(){const m=document.getElementById('materialId').value,n=document.getElementById('lpName').value,e=document.getElementById('materialIdError'),mi=document.getElementById('materialId'),ni=document.getElementById('lpName');let errs=[];if(m&&!/^[a-z0-9-]+$/.test(m)){errs.push('Minúsculas e hífens');mi.classList.add('validation-error')}else mi.classList.remove('validation-error');if(n&&!/^[a-z0-9-]+$/.test(n))ni.classList.add('validation-error');else ni.classList.remove('validation-error');const ex=currentLPs.find((lp,i)=>lp.materialId===m&&i!==currentEditingIndex);if(ex){errs.push('ID já existe');mi.classList.add('validation-error')}if(errs.length>0){e.textContent='⚠️ '+errs.join(', ');e.classList.remove('hidden');return false}else{e.classList.add('hidden');mi.classList.add('validation-success');return true}}function toggleRedirectUrl(){const t=document.getElementById('tipoEntrega').value,g=document.getElementById('redirectUrlGroup');g.style.display=t==='Link'?'block':'none'}function syncColor(t){if(t==='bg'){document.getElementById('bgColor').value=document.getElementById('bgColorText').value;document.getElementById('bgColorText').value=document.getElementById('bgColor').value}else if(t==='primary'){document.getElementById('primaryColor').value=document.getElementById('primaryColorText').value;document.getElementById('primaryColorText').value=document.getElementById('primaryColor').value}else if(t==='text'){document.getElementById('textColor').value=document.getElementById('textColorText').value;document.getElementById('textColorText').value=document.getElementById('textColor').value}else if(t==='buttonBg'){document.getElementById('buttonBgColor').value=document.getElementById('buttonBgColorText').value;document.getElementById('buttonBgColorText').value=document.getElementById('buttonBgColor').value}else if(t==='buttonText'){document.getElementById('buttonTextColor').value=document.getElementById('buttonTextColorText').value;document.getElementById('buttonTextColorText').value=document.getElementById('buttonTextColor').value}updatePreview()}let previewMode='desktop';function setPreviewMode(m){previewMode=m;const c=document.getElementById('previewContainer'),d=document.getElementById('previewDesktop'),mb=document.getElementById('previewMobile');if(m==='mobile'){c.style.width='375px';c.style.margin='0 auto';d.classList.remove('btn-primary');d.classList.add('btn-secondary');mb.classList.remove('btn-secondary');mb.classList.add('btn-primary')}else{c.style.width='100%';c.style.margin='0';mb.classList.remove('btn-primary');mb.classList.add('btn-secondary');d.classList.remove('btn-secondary');d.classList.add('btn-primary')}updatePreview()}function updatePreview(){const h=generateHTML(true),f=document.getElementById('previewFrame'),d=f.contentDocument||f.contentWindow.document;d.open();d.write(h);d.close()}function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;')}function generateHTML(isPrev){const TEMPLATE='<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>##TITLE##</title><meta name="description" content="##DESC##"><meta name="keywords" content="##KEYWORDS##"><script src="https://cdn.tailwindcss.com"><\/script><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">##ANALYTICS##<style>body{font-family:\'##FONT##\',sans-serif;background-color:##BGCOLOR##;color:##TEXTCOLOR##}.apple-blur{backdrop-filter:saturate(180%) blur(20px);background-color:rgba(251,251,253,0.8)}.input-field{transition:all 0.2s ease}.input-field:focus{outline:none;box-shadow:0 0 0 4px rgba(59,130,246,0.1)}.input-error{border-color:#ef4444!important}.input-success{border-color:#10b981!important}@keyframes slideIn{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}.error-message,.success-message{animation:slideIn 0.3s ease}</style></head><body><header class="apple-blur border-b border-gray-100 sticky top-0 z-50"><div class="max-w-6xl mx-auto px-6 py-6 flex items-center justify-between"><div class="flex items-center gap-3"><div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center"><span class="text-white font-bold text-lg">PD</span></div><span class="text-lg font-bold text-gray-900">Prof. Paulo H. Donassolo</span></div><a href="https://phdonassolo.com" class="text-sm font-semibold text-gray-600 hover:text-blue-600 transition-colors">← Voltar ao site</a></div></header><section class="pt-20 pb-16 px-6"><div class="max-w-4xl mx-auto text-center"><div class="inline-block px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest mb-6" style="background-color:##PRIMARY##20;color:##PRIMARY##">##BADGE##</div><h1 class="##TITLESIZE## ##TITLEWEIGHT## tracking-tight mb-6 leading-[1.1]">##TITLELINE1##<br><span style="color:##PRIMARY##">##TITLELINE2##</span></h1><p class="text-xl md:text-2xl text-gray-600 font-medium max-w-3xl mx-auto mb-8 leading-relaxed">##HERODESC##</p><div class="flex flex-wrap items-center justify-center gap-8 text-sm text-gray-500 font-semibold">##BENEFITS##</div></div></section><section class="pb-24 px-6"><div class="max-w-2xl mx-auto"><div class="bg-white rounded-[32px] p-8 md:p-12 shadow-xl border border-gray-100"><div class="mb-8 text-center"><h2 class="text-3xl font-bold mb-3">##FORMTITLE##</h2><p class="text-gray-600 font-medium">##FORMSUBTITLE##</p></div><form id="leadForm" class="space-y-6"><input type="text" name="website" id="website" style="position:absolute;left:-9999px" tabindex="-1" autocomplete="off"><input type="hidden" id="loadTimestamp"><div><label for="nome" class="block text-sm font-bold text-gray-700 mb-2">Nome Completo <span class="text-red-500">*</span></label><input type="text" id="nome" placeholder="Ex: João Silva Santos" required class="input-field w-full px-5 py-4 border-2 border-gray-200 rounded-2xl text-base font-medium focus:border-blue-600"><p id="nome-error" class="error-message text-red-500 text-sm font-semibold mt-2 hidden"></p><p id="nome-success" class="success-message text-green-600 text-sm font-semibold mt-2 hidden">✓ Nome válido</p></div><div><label for="email" class="block text-sm font-bold text-gray-700 mb-2">Email Profissional <span class="text-red-500">*</span></label><input type="email" id="email" placeholder="Ex: joao@empresa.com.br" required class="input-field w-full px-5 py-4 border-2 border-gray-200 rounded-2xl text-base font-medium focus:border-blue-600"><p id="email-error" class="error-message text-red-500 text-sm font-semibold mt-2 hidden"></p><p id="email-success" class="success-message text-green-600 text-sm font-semibold mt-2 hidden">✓ Email válido</p></div><div><label for="whatsapp" class="block text-sm font-bold text-gray-700 mb-2">WhatsApp <span class="text-red-500">*</span></label><div class="flex gap-3"><select id="pais" class="input-field px-4 py-4 border-2 border-gray-200 rounded-2xl text-base font-medium focus:border-blue-600 bg-white"><option value="+55">🇧🇷 +55</option><option value="+1">🇺🇸 +1</option><option value="+351">🇵🇹 +351</option></select><input type="tel" id="whatsapp" placeholder="(11) 99999-9999" required class="input-field flex-1 px-5 py-4 border-2 border-gray-200 rounded-2xl text-base font-medium focus:border-blue-600"></div><p id="whatsapp-error" class="error-message text-red-500 text-sm font-semibold mt-2 hidden"></p><p id="whatsapp-success" class="success-message text-green-600 text-sm font-semibold mt-2 hidden">✓ Número válido</p></div><div class="flex items-start gap-3 p-4 bg-gray-50 rounded-xl"><input type="checkbox" id="politica" required class="mt-1 w-5 h-5 text-blue-600 border-2 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"><label for="politica" class="text-sm text-gray-700 font-medium leading-relaxed cursor-pointer">Concordo em receber comunicações do Prof. Paulo H. Donassolo e estou ciente da <a href="https://phdonassolo.com/politica-de-privacidade" target="_blank" class="text-blue-600 underline">Política de Privacidade</a>.</label></div><button type="submit" id="btnSubmit" class="##BUTTONSIZE## w-full rounded-2xl font-bold transition-all shadow-lg hover:shadow-xl" style="background-color:##BUTTONBG##;color:##BUTTONTEXT##"><span id="btnText">##BUTTONTEXT_VALUE##</span><span id="btnLoading" class="hidden">⏳ Enviando...</span></button></form><div id="successMessage" class="hidden text-center"><div class="text-6xl mb-4">✅</div><h3 class="text-2xl font-bold mb-2" style="color:##PRIMARY##">Tudo certo!</h3><p class="text-gray-600 font-medium">Verifique seu email. O material está chegando!</p></div></div></div></section><script>const M="##MATERIALID##",W="##WEBAPP##",R="##REDIRECT##";document.getElementById("loadTimestamp").value=Date.now();const urlParams=new URLSearchParams(window.location.search);const origem=urlParams.get("src")||"direto";const V={nome:v=>{const t=v.trim(),w=t.split(/\\s+/);return t.length<3?{valid:!1,message:"Nome muito curto"}:w.length<2?{valid:!1,message:"Digite nome e sobrenome"}:/^[a-zA-ZÀ-ÿ\\s]+$/.test(t)?{valid:!0,message:""}:{valid:!1,message:"Apenas letras"}},email:v=>{const t=v.trim().toLowerCase();if(!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(t))return{valid:!1,message:"Email inválido"};const d=t.split("@")[1];return["10minutemail.com","guerrillamail.com","mailinator.com","temp-mail.org","yopmail.com"].includes(d)?{valid:!1,message:"Email temporário não permitido"}:{valid:!0,message:""}},whatsapp:(v,c)=>{const n=v.replace(/\\D/g,"");if(!n)return{valid:!1,message:"Digite seu WhatsApp"};const r={"+55":{min:10,max:11},"+1":{min:10,max:10},"+351":{min:9,max:9}}[c]||{min:10,max:11};return n.length<r.min||n.length>r.max?{valid:!1,message:"Número inválido"}:{valid:!0,message:""}}};function S(f,r){const i=document.getElementById(f),e=document.getElementById(f+"-error"),s=document.getElementById(f+"-success");r.valid?(i.classList.remove("input-error"),i.classList.add("input-success"),e.classList.add("hidden"),s.classList.remove("hidden")):(i.classList.add("input-error"),i.classList.remove("input-success"),e.textContent="⚠️ "+r.message,e.classList.remove("hidden"),s.classList.add("hidden"))}const mask=v=>{const c=v.replace(/\\D/g,"");return c.length<=10?c.replace(/(\\d{2})(\\d)/,"($1) $2").replace(/(\\d{4})(\\d)/,"$1-$2"):c.replace(/(\\d{2})(\\d)/,"($1) $2").replace(/(\\d{5})(\\d)/,"$1-$2").substring(0,15)};const n=document.getElementById("nome"),em=document.getElementById("email"),w=document.getElementById("whatsapp"),p=document.getElementById("pais");n.addEventListener("blur",()=>S("nome",V.nome(n.value)));em.addEventListener("blur",()=>S("email",V.email(em.value)));w.addEventListener("input",e=>{e.target.value=p.value==="+55"?mask(e.target.value):e.target.value.replace(/\\D/g,"")});w.addEventListener("blur",()=>S("whatsapp",V.whatsapp(w.value,p.value)));p.addEventListener("change",()=>{w.placeholder={"+55":"(11) 99999-9999","+1":"(555) 123-4567","+351":"912 345 678"}[p.value];w.value=""});document.getElementById("leadForm").addEventListener("submit",async e=>{e.preventDefault();const nV=V.nome(n.value),eV=V.email(em.value),wV=V.whatsapp(w.value,p.value);S("nome",nV);S("email",eV);S("whatsapp",wV);if(!nV.valid||!eV.valid||!wV.valid)return alert("❌ Corrija os erros");if(!document.getElementById("politica").checked)return alert("❌ Aceite a política");if(document.getElementById("website").value)return;const lt=parseInt(document.getElementById("loadTimestamp").value),ts=(Date.now()-lt)/1e3;if(ts<5)return alert("❌ Preencha com calma");const b=document.getElementById("btnSubmit"),bt=document.getElementById("btnText"),bl=document.getElementById("btnLoading");b.disabled=!0;bt.classList.add("hidden");bl.classList.remove("hidden");try{await fetch(W,{method:"POST",mode:"no-cors",headers:{"Content-Type":"application/json"},body:JSON.stringify({nome:n.value.trim(),email:em.value.trim().toLowerCase(),whatsapp:p.value+" "+w.value.replace(/\\D/g,""),material_id:M,origem:origem,pais:p.value,timestamp:lt,timeSpent:ts})});document.getElementById("leadForm").classList.add("hidden");document.getElementById("successMessage").classList.remove("hidden");document.getElementById("successMessage").scrollIntoView({behavior:"smooth",block:"center"});if(typeof gtag!=="undefined")gtag("event","conversion",{send_to:"##GAID##",value:M});if(R)setTimeout(()=>window.open(R,"_blank"),2e3)}catch(err){console.error(err);alert("❌ Erro ao enviar");b.disabled=!1;bt.classList.remove("hidden");bl.classList.add("hidden")}});<\/script></body></html>';let h=TEMPLATE;const pageTitle=document.getElementById('pageTitle').value,metaDesc=document.getElementById('metaDesc').value,metaKeywords=document.getElementById('metaKeywords').value,badge=document.getElementById('badge').value,titleLine1=document.getElementById('titleLine1').value,titleLine2=document.getElementById('titleLine2').value,heroDesc=document.getElementById('heroDesc').value,formTitle=document.getElementById('formTitle').value,formSubtitle=document.getElementById('formSubtitle').value,buttonText=document.getElementById('buttonText').value,bgColor=document.getElementById('bgColorText').value,primaryColor=document.getElementById('primaryColorText').value,textColor=document.getElementById('textColorText').value,buttonBgColor=document.getElementById('buttonBgColorText').value,buttonTextColor=document.getElementById('buttonTextColorText').value,fontFamily=document.getElementById('fontFamily').value,titleSize=document.getElementById('titleSize').value,titleWeight=document.getElementById('titleWeight').value,buttonSize=document.getElementById('buttonSize').value,materialId=document.getElementById('materialId').value,redirectUrl=document.getElementById('redirectUrl').value,webAppUrl=document.getElementById('webAppUrl').value,gaId=document.getElementById('gaId').value;let benefitsHTML='';if(currentEditingLP&&currentEditingLP.beneficios){currentEditingLP.beneficios.forEach(b=>{benefitsHTML+='<div class="flex items-center gap-2"><svg class="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>'+esc(b)+'</div>'})}const analytics=isPrev?'':'<script async src="https://www.googletagmanager.com/gtag/js?id='+gaId+'"><\/script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date());gtag("config","'+gaId+'");<\/script>';h=h.replace(/##TITLE##/g,esc(pageTitle));h=h.replace(/##DESC##/g,esc(metaDesc));h=h.replace(/##KEYWORDS##/g,esc(metaKeywords));h=h.replace(/##FONT##/g,fontFamily);h=h.replace(/##BGCOLOR##/g,bgColor);h=h.replace(/##TEXTCOLOR##/g,textColor);h=h.replace(/##ANALYTICS##/g,analytics);h=h.replace(/##PRIMARY##/g,primaryColor);h=h.replace(/##BADGE##/g,esc(badge));h=h.replace(/##TITLESIZE##/g,titleSize);h=h.replace(/##TITLEWEIGHT##/g,titleWeight);h=h.replace(/##TITLELINE1##/g,esc(titleLine1));h=h.replace(/##TITLELINE2##/g,esc(titleLine2));h=h.replace(/##HERODESC##/g,esc(heroDesc));h=h.replace(/##BENEFITS##/g,benefitsHTML);h=h.replace(/##FORMTITLE##/g,esc(formTitle));h=h.replace(/##FORMSUBTITLE##/g,esc(formSubtitle));h=h.replace(/##BUTTONSIZE##/g,buttonSize);h=h.replace(/##BUTTONBG##/g,buttonBgColor);h=h.replace(/##BUTTONTEXT##/g,buttonTextColor);h=h.replace(/##BUTTONTEXT_VALUE##/g,esc(buttonText));h=h.replace(/##MATERIALID##/g,esc(materialId));h=h.replace(/##WEBAPP##/g,esc(webAppUrl));h=h.replace(/##REDIRECT##/g,esc(redirectUrl||''));h=h.replace(/##GAID##/g,esc(gaId));return h}function saveLP(){const errors=[];const lpName=document.getElementById('lpName').value.trim(),materialId=document.getElementById('materialId').value.trim(),webAppUrl=document.getElementById('webAppUrl').value.trim();if(!lpName)errors.push('Nome LP');if(!materialId)errors.push('Material_ID');if(!webAppUrl)errors.push('URL Web App');else if(!webAppUrl.startsWith('https://script.google.com'))errors.push('URL Web App deve ser do Google Apps Script (https://script.google.com/...)');if(errors.length>0){alert('❌ Campos obrigatórios:\n'+errors.join(', '));return}const lpData={pageTitle:document.getElementById('pageTitle').value,metaDesc:document.getElementById('metaDesc').value,metaKeywords:document.getElementById('metaKeywords').value,badge:document.getElementById('badge').value,titleLine1:document.getElementById('titleLine1').value,titleLine2:document.getElementById('titleLine2').value,heroDesc:document.getElementById('heroDesc').value,beneficios:currentEditingLP.beneficios||[],formTitle:document.getElementById('formTitle').value,formSubtitle:document.getElementById('formSubtitle').value,buttonText:document.getElementById('buttonText').value,bgColor:document.getElementById('bgColorText').value,primaryColor:document.getElementById('primaryColorText').value,textColor:document.getElementById('textColorText').value,buttonBgColor:document.getElementById('buttonBgColorText').value,buttonTextColor:document.getElementById('buttonTextColorText').value,fontFamily:document.getElementById('fontFamily').value,titleSize:document.getElementById('titleSize').value,titleWeight:document.getElementById('titleWeight').value,buttonSize:document.getElementById('buttonSize').value,lpName:lpName,materialId:materialId,tipoEntrega:document.getElementById('tipoEntrega').value,redirectUrl:document.getElementById('redirectUrl').value,webAppUrl:webAppUrl,gaId:document.getElementById('gaId').value,createdAt:currentEditingLP.createdAt||new Date().toISOString(),updatedAt:new Date().toISOString()};if(currentEditingIndex!==null)currentLPs[currentEditingIndex]=lpData;else currentLPs.push(lpData);saveLPs(currentLPs);alert('✅ LP salva!\n\nPróximo:\n1. Copiar HTML\n2. Deploy no HostGator');closeEditor();renderDashboard()}function deleteCurrentLP(){if(currentEditingIndex===null){alert('LP não salva');return}if(!confirm('Excluir LP?'))return;currentLPs.splice(currentEditingIndex,1);saveLPs(currentLPs);alert('✅ Excluída');closeEditor();renderDashboard()}function exportLP(){const webAppUrl=document.getElementById('webAppUrl').value.trim();if(!webAppUrl||!webAppUrl.startsWith('https://script.google.com')){alert('❌ URL do Web App inválida!\n\nA URL deve começar com:\nhttps://script.google.com/macros/s/...\n\nConfigure em ⚙️ Config antes de exportar.');return;}const html=generateHTML(false);navigator.clipboard.writeText(html).then(()=>{alert('✅ HTML copiado!\n\n1. cPanel → File Manager\n2. public_html/lp/'+document.getElementById('lpName').value+'/\n3. Criar index.html\n4. Colar código')}).catch(()=>{const blob=new Blob([html],{type:'text/html'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='index.html';a.click();alert('✅ Arquivo baixado!')})}function exportAllData(){const data={lps:currentLPs,settings:loadSettings(),exportedAt:new Date().toISOString()},json=JSON.stringify(data,null,2),blob=new Blob([json],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='phd-lps-backup.json';a.click();alert('✅ Backup exportado')}function importAllData(){const file=document.getElementById('importFile').files[0];if(!file){alert('Selecione arquivo');return}const reader=new FileReader();reader.onload=e=>{try{const data=JSON.parse(e.target.result);if(!data.lps){alert('Arquivo inválido');return}if(!confirm('Importar '+data.lps.length+' LPs?'))return;saveLPs(data.lps);if(data.settings)saveSettingsData(data.settings);alert('✅ Importado');renderDashboard();closeSettings()}catch(err){alert('❌ Erro: '+err.message)}};reader.readAsText(file)}function openSettings(){const s=loadSettings();document.getElementById('settingsWebAppUrl').value=s.webAppUrl||'';document.getElementById('settingsGaId').value=s.gaId||'G-QLJ9N5BYTD';document.getElementById('settingsModal').classList.add('active')}function closeSettings(){document.getElementById('settingsModal').classList.remove('active')}function saveSettings(){const s={webAppUrl:document.getElementById('settingsWebAppUrl').value,gaId:document.getElementById('settingsGaId').value};saveSettingsData(s);alert('✅ Salvo');closeSettings()}function filterLPs(){const term=document.getElementById('searchInput').value.toLowerCase(),type=document.getElementById('filterType').value,filtered=currentLPs.filter(lp=>{const match=lp.pageTitle.toLowerCase().includes(term)||lp.materialId.toLowerCase().includes(term);const matchType=type==='all'||lp.tipoEntrega===type;return match&&matchType});renderDashboard()}function validateWebAppUrl(input){const v=input.value.trim(),err=document.getElementById('webAppUrlError'),hint=document.getElementById('webAppUrlHint');if(!v){err.classList.add('hidden');hint.classList.remove('hidden')}else if(!v.startsWith('https://script.google.com')){err.classList.remove('hidden');hint.classList.add('hidden');input.style.borderColor='#ef4444'}else{err.classList.add('hidden');hint.classList.remove('hidden');input.style.borderColor='#10b981'}}document.addEventListener('DOMContentLoaded',()=>{renderDashboard();setPreviewMode('desktop')});
+  </script>
+</body>
+</html>

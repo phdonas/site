@@ -2,26 +2,36 @@
 import React, { useState, useEffect } from 'react';
 import { DataService } from '../services/dataService';
 import { SITE_CONFIG } from '../config/site-config';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
+import { auth } from '../services/firebase';
 import { 
   Settings, Activity, CheckCircle, XCircle, 
-  Database, ExternalLink, LogOut, Save, RefreshCw, AlertTriangle, Info, HardDrive, Trash2, Cpu, Clock, BookOpen, FileCode, MessageSquare, ShieldCheck
+  Database, ExternalLink, LogOut, Save, RefreshCw, AlertTriangle, Info, HardDrive, Trash2, Cpu, Clock, BookOpen, FileCode, MessageSquare, ShieldCheck, FolderEdit, Users, Layout
 } from 'lucide-react';
+import { ContentManager } from '../components/admin/ContentManager';
+import { LeadsManager } from '../components/admin/LeadsManager';
+import { SiteEditor } from '../components/admin/SiteEditor';
 
 const AdminPage: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'status' | 'guide' | 'server' | 'editor'>('status');
+  const [activeTab, setActiveTab] = useState<'status' | 'content' | 'leads' | 'editor' | 'guide' | 'server'>('content');
   const [isWpConnected, setIsWpConnected] = useState<boolean | null>(null);
   const [saving, setSaving] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [lastError, setLastError] = useState<string | null>(null);
+  const [isAuth, setIsAuth] = useState(false);
   
   const [config, setConfig] = useState(SITE_CONFIG);
 
   useEffect(() => {
-    if (localStorage.getItem('phd_session') !== 'admin') {
-      window.location.hash = '#/login';
-      return;
-    }
-    checkConn();
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setIsAuth(true);
+        checkConn();
+      } else {
+        window.location.hash = '#/login';
+      }
+    });
+    return () => unsubscribe();
   }, []);
 
   const checkConn = async () => {
@@ -50,8 +60,8 @@ const AdminPage: React.FC = () => {
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('phd_session');
+  const handleLogout = async () => {
+    await signOut(auth);
     window.location.hash = '#/login';
   };
 
@@ -79,47 +89,51 @@ const AdminPage: React.FC = () => {
         </div>
 
         <div className="flex bg-gray-200/50 p-1 rounded-2xl border border-gray-200 shadow-sm overflow-x-auto mb-8 no-scrollbar">
+          <button onClick={() => setActiveTab('content')} className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${activeTab === 'content' ? 'bg-white shadow-sm text-black' : 'text-gray-500'}`}>
+            <FolderEdit size={16} /> Gestão de Conteúdo
+          </button>
+          <button onClick={() => setActiveTab('editor')} className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${activeTab === 'editor' ? 'bg-white shadow-sm text-black text-blue-600' : 'text-gray-500'}`}>
+            <Layout size={16} /> Editor Visual (CMS)
+          </button>
+          <button onClick={() => setActiveTab('leads')} className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${activeTab === 'leads' ? 'bg-white shadow-sm text-black' : 'text-gray-500'}`}>
+            <Users size={16} /> Meus Leads
+          </button>
           <button onClick={() => setActiveTab('status')} className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${activeTab === 'status' ? 'bg-white shadow-sm text-black' : 'text-gray-500'}`}>
             <Activity size={16} /> Conexão API
           </button>
-          <button onClick={() => setActiveTab('guide')} className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${activeTab === 'guide' ? 'bg-white shadow-sm text-black' : 'text-gray-500'}`}>
-            <BookOpen size={16} /> Guia de Edição
-          </button>
-          <button onClick={() => setActiveTab('server')} className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${activeTab === 'server' ? 'bg-white shadow-sm text-black' : 'text-gray-500'}`}>
-            <ShieldCheck size={16} /> Segurança Hostgator
-          </button>
-          <button onClick={() => setActiveTab('editor')} className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${activeTab === 'editor' ? 'bg-white shadow-sm text-black' : 'text-gray-500'}`}>
-            <Settings size={16} /> Configurações Rápidas
-          </button>
         </div>
 
+        {activeTab === 'content' && <ContentManager />}
+        {activeTab === 'editor' && <SiteEditor />}
+        {activeTab === 'leads' && <LeadsManager />}
+
         {activeTab === 'status' && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-in fade-in duration-500">
-            <div className="bg-white p-8 rounded-[32px] card-shadow border border-gray-100">
-              <div className="flex items-center justify-between mb-6">
-                <div className="p-3 bg-gray-50 rounded-2xl"><Database className="text-blue-600" /></div>
-                <div>
-                  {isWpConnected === null ? <RefreshCw className="animate-spin text-gray-300" /> : isWpConnected ? <CheckCircle className="text-green-500" size={28} /> : <XCircle className="text-red-500" size={28} />}
-                </div>
-              </div>
-              <h3 className="text-2xl font-bold mb-2">Status da API</h3>
-              <p className="text-sm text-gray-500 mb-6 leading-relaxed">Verificando comunicação com <strong>phdonassolo.com</strong>.</p>
-              
-              <div className="flex flex-col gap-3">
-                <button onClick={handleForceSync} disabled={syncing} className="bg-blue-600 text-white px-6 py-3 rounded-xl font-bold text-xs flex items-center justify-center gap-2 hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/20 disabled:opacity-50">
-                  <RefreshCw size={14} className={syncing ? 'animate-spin' : ''} /> {syncing ? 'Sincronizando Conteúdo...' : 'Forçar Sincronização de Vídeos e Posts'}
-                </button>
-              </div>
-            </div>
-            
-            <div className="bg-black text-white p-8 rounded-[32px] card-shadow border border-gray-100 flex flex-col justify-between">
+          <div className="grid grid-cols-1 gap-6 animate-in fade-in duration-500">
+            <div className="bg-white p-8 rounded-[32px] card-shadow border border-gray-100 flex flex-col md:flex-row items-center justify-between gap-6">
               <div>
-                <h3 className="text-2xl font-bold mb-2">Links Externos</h3>
-                <p className="text-gray-400 text-sm">Como abrir links em nova aba?</p>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-3 bg-blue-50 rounded-2xl"><Database className="text-blue-600" /></div>
+                  <h3 className="text-2xl font-bold">Base de Dados Nativa (Firebase)</h3>
+                </div>
+                <p className="text-sm text-gray-500 max-w-xl leading-relaxed">
+                  O site foi desconectado do WordPress e agora todas as edições são locais. Para resgatar os artigos e vídeos antigos pela última vez e upar o resto do site pro banco de dados, clique em Sincronizar.
+                </p>
               </div>
-              <div className="mt-4 p-4 bg-white/5 rounded-xl border border-white/10 text-[10px] font-mono leading-relaxed">
-                {`<a href="URL" target="_blank" rel="noopener">Texto</a>`}
-              </div>
+              <button 
+                onClick={async () => {
+                  if(window.confirm('Tem certeza? Isso fará o download final do WP e enviará tudo para o Firebase. Essa operação não tem volta.')) {
+                    setSyncing(true);
+                    const success = await DataService.migrateDataToFirestore();
+                    if(success) alert('Migração finalizada! Todos os seus dados agora são locais no Firebase.');
+                    else alert('Erro durante a migração. Verifique os logs.');
+                    setSyncing(false);
+                  }
+                }}
+                disabled={syncing}
+                className="bg-blue-600 text-white px-8 py-4 rounded-xl font-bold hover:bg-blue-700 transition-all flex items-center justify-center gap-3 w-full md:w-auto shadow-lg shadow-blue-500/20"
+              >
+                {syncing ? <><RefreshCw size={20} className="animate-spin" /> Processando...</> : <><Database size={20} /> Sincronizar Tudo</>}
+              </button>
             </div>
           </div>
         )}

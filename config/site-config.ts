@@ -8,29 +8,76 @@
 const DEFAULT_CONFIG = {
   name: "PH Donassolo",
   email_contato: "paulo@phdonassolo.com",
-  whatsapp: "351910298213", // Apenas números: Código País + DDD + Número (Ex: 351... ou 55...)
+  whatsapp: "351910298213", 
   whatsapp_display: "+351 910 298 213", 
   whatsapp_message: "Olá Paulo, vim pelo site e gostaria de saber mais sobre seu trabalho.",
   
   hero: {
+    visible: true,
     title: "Conhecimento para o que vem a seguir.",
     subtitle: "Hub de conteúdo exclusivo sobre profissionais de vendas, mercado imobiliário e longevidade ativa.",
-    tag: "Site Oficial"
+    tag: "Site Oficial",
+    backgroundImage: "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=2000",
+    buttonText: "Explorar Conteúdo",
+    buttonLink: "#/artigos"
   },
   
-  // Configurações do Assistente AI (Gemini)
   assistant: {
+    visible: true,
     name: "Assistente Digital PH",
     welcome_message: "Olá! Sou o assistente do Prof. Paulo. Como posso ajudar você hoje com nossos conteúdos, cursos ou consultorias?",
-    instructions: "Você é o assistente virtual de Prof. Paulo Donassolo. Seu tom deve ser profissional, elegante e prestativo (estilo Apple). Priorize informações sobre os 4 pilares: Professor Paulo, Consultoria Imobiliária, 4050oumais e Academia do Gás. Se o usuário perguntar sobre preços ou detalhes muito específicos de agenda, sugira clicar no botão de WhatsApp para falar diretamente com o Prof. Paulo."
+    instructions: "Você é o assistente virtual de Prof. Paulo Donassolo. Seu tom deve ser profissional, elegante e prestativo (estilo Apple). Priorize informações sobre os 4 pilares: Professor Paulo, Consultoria Imobiliária, 4050oumais e Academia do Gás."
   },
   
-  // Seções da Home
   sections: {
-    videos_title: "Aulas Curtas & Insights",
-    videos_subtitle: "Conteúdo visual direto ao ponto para sua evolução.",
-    articles_title: "Insights & Pensamento",
-    articles_subtitle: "Os últimos artigos divididos por pilares de conhecimento."
+    pillars: {
+      visible: true,
+      title: "Pilares de Conhecimento",
+      subtitle: "Explore os temas que fundamentam nossa metodologia."
+    },
+    services: {
+      visible: true,
+      title: "Como posso ajudar?",
+      subtitle: "Conheça nossas soluções para impulsionar seus resultados."
+    },
+    videos: {
+      visible: true,
+      title: "Aulas Curtas & Insights",
+      subtitle: "Conteúdo visual direto ao ponto para sua evolução.",
+      linkText: "Ver todos os vídeos"
+    },
+    articles: {
+      visible: true,
+      title: "Insights & Pensamento",
+      subtitle: "Os últimos artigos divididos por pilares de conhecimento."
+    },
+    leadForm: {
+      visible: true,
+      title: "Receba as últimas atualizações"
+    }
+  },
+
+  pages: {
+    articles: {
+      visible: true,
+      title: "Artigos & Insights",
+      subtitle: "Reflexões profundas sobre mercado, vendas e desenvolvimento."
+    },
+    downloads: {
+      visible: true,
+      title: "Ferramentas e Materiais",
+      subtitle: "Acesse e baixe conteúdos práticos desenvolvidos para acelerar seus resultados."
+    },
+    courses: {
+      visible: true,
+      title: "Cursos e Livros Recomendados",
+      subtitle: "Aprofunde seu conhecimento com nossa curadoria de materiais."
+    },
+    contact: {
+      visible: true,
+      title: "Fale Conosco",
+      subtitle: "Entre em contato para palestras, consultorias ou dúvidas em geral."
+    }
   },
   
   footer: {

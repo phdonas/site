@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadora de Precificação de Gás</title>
+<style>
+  :root{--primary:#1a3c6e;--accent:#e85d04;--light:#f0f4ff;--success:#2d6a4f;--border:#cbd5e1;--text:#1e293b;--muted:#64748b;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Segoe UI',sans-serif;background:#f1f5f9;color:var(--text);}
+  header{background:linear-gradient(135deg,var(--primary),#2563eb);color:white;padding:18px 28px;display:flex;align-items:center;gap:14px;box-shadow:0 4px 14px rgba(0,0,0,.2);}
+  header h1{font-size:1.3rem;font-weight:700;}
+  header p{font-size:.82rem;opacity:.85;}
+  .container{max-width:920px;margin:0 auto;padding:24px 14px 60px;}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+  @media(max-width:640px){.grid{grid-template-columns:1fr;}}
+  .card{background:#fff;border-radius:12px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,.07);border:1px solid var(--border);}
+  .card h3{font-size:.88rem;font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:.06em;margin-bottom:14px;padding-bottom:7px;border-bottom:2px solid var(--light);}
+  .field{margin-bottom:10px;}
+  .field label{display:block;font-size:.78rem;font-weight:600;color:var(--muted);margin-bottom:3px;}
+  .field input,.field select{width:100%;padding:8px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:.88rem;color:var(--text);background:#fafbff;transition:border .2s;}
+  .field input:focus{outline:none;border-color:#2563eb;background:#fff;}
+  .subtotal{margin-top:10px;padding:9px 11px;background:var(--light);border-radius:7px;font-size:.85rem;font-weight:700;color:var(--primary);display:flex;justify-content:space-between;}
+  .radio-row{display:flex;gap:14px;margin-bottom:12px;flex-wrap:wrap;}
+  .radio-row label{display:flex;align-items:center;gap:5px;font-size:.85rem;font-weight:600;cursor:pointer;}
+  .radio-row input[type=radio]{accent-color:var(--primary);width:15px;height:15px;}
+  .btn-calc{width:100%;padding:12px;background:linear-gradient(135deg,var(--primary),#2563eb);color:#fff;border:none;border-radius:9px;font-size:.97rem;font-weight:700;cursor:pointer;margin-top:6px;letter-spacing:.04em;transition:opacity .2s;box-shadow:0 4px 12px rgba(37,99,235,.3);}
+  .btn-calc:hover{opacity:.9;}
+  #results{display:none;}
+  .result-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:22px 0;}
+  @media(max-width:640px){.result-grid{grid-template-columns:1fr 1fr;}}
+  .kpi{background:#fff;border-radius:10px;padding:14px 16px;border:1px solid var(--border);}
+  .kpi .label{font-size:.72rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;}
+  .kpi .value{font-size:1.25rem;font-weight:800;color:var(--primary);margin-top:3px;}
+  .kpi.accent .value{color:var(--accent);}
+  .kpi.green .value{color:var(--success);}
+  .detail-card{background:#fff;border-radius:12px;padding:18px 22px;margin-bottom:14px;border:1px solid var(--border);}
+  .detail-card h4{font-size:.82rem;font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;padding-bottom:7px;border-bottom:2px solid var(--light);}
+  .row{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #f1f5f9;font-size:.85rem;}
+  .row:last-child{border-bottom:none;}
+  .row span:last-child{font-weight:700;}
+  .row.hl{background:var(--light);margin:0 -6px;padding:6px;border-radius:5px;}
+  .row.hl span:last-child{color:var(--accent);font-size:.93rem;}
+  .market-bar{height:9px;background:var(--border);border-radius:99px;margin:7px 0;position:relative;overflow:visible;}
+  .market-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,#10b981,#2563eb);}
+  .market-pin{position:absolute;top:-5px;width:19px;height:19px;background:var(--accent);border:2px solid #fff;border-radius:50%;box-shadow:0 2px 5px rgba(0,0,0,.25);transform:translateX(-50%);}
+  .badge{display:inline-block;padding:2px 9px;border-radius:99px;font-size:.72rem;font-weight:700;}
+  .badge.ok{background:#dcfce7;color:#166534;}
+  .badge.no{background:#fee2e2;color:#991b1b;}
+  .badge.bl{background:#dbeafe;color:#1e40af;}
+  .btn-pdf{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;padding:14px;background:linear-gradient(135deg,#e85d04,#f4a261);color:#fff;border:none;border-radius:11px;font-size:1rem;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(232,93,4,.35);transition:opacity .2s;margin-top:18px;}
+  .btn-pdf:hover{opacity:.9;}
+  .alert{padding:10px 14px;border-radius:9px;font-size:.85rem;font-weight:600;margin-bottom:14px;display:none;background:#fee2e2;color:#b91c1c;border:1px solid #fca5a5;}
+  .alert.show{display:block;}
+</style>
+</head>
+<body>
+<header>
+  <div style="font-size:1.8rem">⛽</div>
+  <div><h1>Calculadora de Precificação de Gás</h1><p>Análise de custos · Margem · Ponto de equilíbrio · Relatório em PDF</p></div>
+</header>
+<div class="container">
+  <div id="alerta" class="alert">⚠️ Preencha todos os campos obrigatórios.</div>
+  <div class="grid">
+    <div class="card">
+      <h3>🏢 Custos Fixos Mensais</h3>
+      <div class="field"><label>Aluguel (R$)</label><input type="number" id="aluguel" placeholder="2500" min="0"></div>
+      <div class="field"><label>Salários + Encargos (R$)</label><input type="number" id="salarios" placeholder="8000" min="0"></div>
+      <div class="field"><label>Despesas Administrativas (R$)</label><input type="number" id="desp_adm" placeholder="1200" min="0"></div>
+      <div class="field"><label>Marketing (R$)</label><input type="number" id="marketing" placeholder="600" min="0"></div>
+      <div class="field"><label>Outros Fixos (R$)</label><input type="number" id="outros_fixos" placeholder="400" min="0"></div>
+      <div class="subtotal"><span>Total Custos Fixos</span><span id="total_fixos">R$ 0,00</span></div>
+    </div>
+    <div class="card">
+      <h3>🔄 Custos Variáveis por Botijão</h3>
+      <div class="field"><label>Custo de Aquisição do Gás (R$)</label><input type="number" id="custo_gas" placeholder="65" min="0"></div>
+      <div class="field"><label>Frete / Entrega (R$)</label><input type="number" id="frete" placeholder="4.50" min="0"></div>
+      <div class="field"><label>Comissão de Venda (R$)</label><input type="number" id="comissao" placeholder="2" min="0"></div>
+      <div class="field"><label>Impostos sobre Venda (%)</label><input type="number" id="impostos_pct" placeholder="4" min="0" max="100"></div>
+      <div class="field"><label>Outros Variáveis (R$/un)</label><input type="number" id="outros_var" placeholder="1" min="0"></div>
+      <div class="subtotal"><span>Total Custos Variáveis</span><span id="total_var">R$ 0,00 / un</span></div>
+    </div>
+    <div class="card">
+      <h3>📦 Dados de Venda</h3>
+      <div class="field"><label>Volume Mensal Estimado (botijões)</label><input type="number" id="volume" placeholder="400" min="1"></div>
+      <div class="field"><label>Preço Atual Praticado (R$)</label><input type="number" id="preco_atual" placeholder="110" min="0"></div>
+      <div class="field"><label>Preço Mínimo da Concorrência (R$)</label><input type="number" id="preco_min" placeholder="105" min="0"></div>
+      <div class="field"><label>Preço Máximo da Concorrência (R$)</label><input type="number" id="preco_max" placeholder="125" min="0"></div>
+    </div>
+    <div class="card">
+      <h3>🎯 Objetivo da Simulação</h3>
+      <div class="radio-row">
+        <label><input type="radio" name="modo" value="margem" checked> Margem → Calcular Preço</label>
+        <label><input type="radio" name="modo" value="preco"> Preço → Calcular Margem</label>
+      </div>
+      <div class="field"><label id="lbl_entrada">Margem Desejada (%)</label><input type="number" id="val_entrada" placeholder="20" min="0"></div>
+      <div class="field"><label>Nome da Empresa</label><input type="text" id="empresa" placeholder="Distribuidora Exemplo Ltda."></div>
+      <div class="field"><label>Responsável</label><input type="text" id="responsavel" placeholder="João Silva"></div>
+      <button class="btn-calc" onclick="calcular()">⚡ Calcular Precificação</button>
+    </div>
+  </div>
+
+  <div id="results">
+    <h2 style="margin:26px 0 14px;font-size:1.15rem;color:var(--primary);font-weight:800;">📊 Resultados da Simulação</h2>
+    <div class="result-grid" id="kpis"></div>
+    <div class="grid">
+      <div>
+        <div class="detail-card" id="card_custos"></div>
+        <div class="detail-card" id="card_peq"></div>
+      </div>
+      <div>
+        <div class="detail-card" id="card_margem"></div>
+        <div class="detail-card" id="card_mercado"></div>
+      </div>
+    </div>
+    <button class="btn-pdf" onclick="gerarPDF()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg>
+      Gerar Relatório em PDF (Imprimir / Salvar)
+    </button>
+  </div>
+</div>
+
+<script>
+const fmt  = v => v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+const fmtp = v => (v*100).toFixed(2).replace('.',',')+'%';
+const n    = id => parseFloat(document.getElementById(id).value)||0;
+const s    = id => document.getElementById(id).value.trim();
+let R = {};
+
+document.querySelectorAll('input[type=number]').forEach(el=>el.addEventListener('input',totais));
+document.querySelectorAll('input[name=modo]').forEach(el=>el.addEventListener('change',()=>{
+  document.getElementById('lbl_entrada').textContent =
+    document.querySelector('input[name=modo]:checked').value==='margem'?'Margem Desejada (%)':'Preço Alvo (R$)';
+}));
+
+function totais(){
+  document.getElementById('total_fixos').textContent = fmt(n('aluguel')+n('salarios')+n('desp_adm')+n('marketing')+n('outros_fixos'));
+  const pa=n('preco_atual')||100;
+  document.getElementById('total_var').textContent = fmt(n('custo_gas')+n('frete')+n('comissao')+(n('impostos_pct')/100*pa)+n('outros_var'))+' / un';
+}
+
+function calcular(){
+  const al=document.getElementById('alerta');
+  al.classList.remove('show');
+  const vol=n('volume');
+  if(!vol||!n('val_entrada')){al.classList.add('show');return;}
+  const modo=document.querySelector('input[name=modo]:checked').value;
+  const valEnt=n('val_entrada');
+  const CF=n('aluguel')+n('salarios')+n('desp_adm')+n('marketing')+n('outros_fixos');
+  const impPct=n('impostos_pct')/100;
+  let preco;
+  if(modo==='margem'){
+    const cv0=n('custo_gas')+n('frete')+n('comissao')+n('outros_var');
+    preco=cv0/(1-valEnt/100-impPct);
+  } else {preco=valEnt;}
+  const imp=impPct*preco;
+  const CV=n('custo_gas')+n('frete')+n('comissao')+imp+n('outros_var');
+  const CF_u=CF/vol; const CT=CV+CF_u;
+  const margem=modo==='margem'?valEnt/100:(preco-CV)/preco;
+  const mc=(preco-CV)/preco; const vc=preco-CV;
+  const ml=(preco-CT)/preco; const lu=preco-CT; const lt=lu*vol;
+  const peq_u=CF/vc; const peq_v=peq_u*preco;
+  const pa=n('preco_atual'),pmin=n('preco_min'),pmax=n('preco_max');
+  R={CF,CV,CF_u,CT,mc,vc,ml,lu,lt,peq_u,peq_v,preco,margem,vol,pa,pmin,pmax,imp,impPct,modo,
+    pos_min:pmin?(preco-pmin)/pmin*100:null, pos_max:pmax?(preco-pmax)/pmax*100:null,
+    empresa:s('empresa'),responsavel:s('responsavel')};
+  render();
+  document.getElementById('results').style.display='block';
+  document.getElementById('results').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function render(){
+  const r=R;
+  document.getElementById('kpis').innerHTML=`
+    <div class="kpi accent"><div class="label">💰 Preço Sugerido</div><div class="value">${fmt(r.preco)}</div></div>
+    <div class="kpi"><div class="label">📈 Margem de Lucro</div><div class="value">${fmtp(r.ml)}</div></div>
+    <div class="kpi green"><div class="label">💵 Lucro Mensal</div><div class="value">${fmt(r.lt)}</div></div>
+    <div class="kpi"><div class="label">🔄 Mg. Contribuição</div><div class="value">${fmtp(r.mc)}</div></div>
+    <div class="kpi"><div class="label">⚖️ Ponto Equilíbrio</div><div class="value">${Math.ceil(r.peq_u)} un</div></div>
+    <div class="kpi"><div class="label">📦 Volume Mensal</div><div class="value">${r.vol} un</div></div>`;
+
+  document.getElementById('card_custos').innerHTML=`
+    <h4>🏗️ Estrutura de Custos</h4>
+    <div class="row"><span>Custos Fixos Totais</span><span>${fmt(r.CF)}</span></div>
+    <div class="row"><span>Custo Fixo Unitário</span><span>${fmt(r.CF_u)}</span></div>
+    <div class="row"><span>Custo Variável (sem imp.)</span><span>${fmt(r.CV-r.imp)}</span></div>
+    <div class="row"><span>Impostos (${(r.impPct*100).toFixed(1)}%)</span><span>${fmt(r.imp)}</span></div>
+    <div class="row hl"><span>Custo Total Unitário</span><span>${fmt(r.CT)}</span></div>`;
+
+  document.getElementById('card_peq').innerHTML=`
+    <h4>⚖️ Ponto de Equilíbrio</h4>
+    <div class="row"><span>Em Unidades</span><span>${Math.ceil(r.peq_u)} botijões</span></div>
+    <div class="row"><span>Em Valor</span><span>${fmt(r.peq_v)}</span></div>
+    <div class="row"><span>Volume vs PEQ</span><span class="badge ${r.vol>=Math.ceil(r.peq_u)?'ok':'no'}">${r.vol>=Math.ceil(r.peq_u)?'✅ Acima':'⚠️ Abaixo'}</span></div>
+    <div class="row"><span>Folga de Segurança</span><span>${(r.vol-r.peq_u).toFixed(0)} un</span></div>`;
+
+  document.getElementById('card_margem').innerHTML=`
+    <h4>📊 Análise de Margens</h4>
+    <div class="row"><span>Valor de Contribuição</span><span>${fmt(r.vc)}</span></div>
+    <div class="row"><span>Margem de Contribuição</span><span>${fmtp(r.mc)}</span></div>
+    <div class="row"><span>Margem de Lucro</span><span>${fmtp(r.ml)}</span></div>
+    <div class="row"><span>Lucro por Botijão</span><span>${fmt(r.lu)}</span></div>
+    <div class="row hl"><span>Lucro Total Mensal</span><span>${fmt(r.lt)}</span></div>`;
+
+  let mkt=`<h4>🏆 Posicionamento de Mercado</h4>`;
+  if(r.pmin&&r.pmax){
+    const pos=Math.min(Math.max((r.preco-r.pmin)/(r.pmax-r.pmin)*100,0),100);
+    mkt+=`<div class="row"><span>Mínimo Concorrência</span><span>${fmt(r.pmin)}</span></div>
+    <div class="row"><span>Máximo Concorrência</span><span>${fmt(r.pmax)}</span></div>
+    <div class="row"><span>Preço Atual</span><span>${fmt(r.pa)}</span></div>
+    <div class="row hl"><span>Preço Sugerido</span><span>${fmt(r.preco)}</span></div>
+    <p style="font-size:.75rem;color:var(--muted);margin:9px 0 3px">Posição na faixa de mercado</p>
+    <div class="market-bar"><div class="market-fill" style="width:100%"></div><div class="market-pin" style="left:${pos}%"></div></div>
+    <div style="display:flex;justify-content:space-between;font-size:.72rem;color:var(--muted);margin-bottom:6px"><span>${fmt(r.pmin)}</span><span>${fmt(r.pmax)}</span></div>
+    ${r.pos_min!==null?`<span class="badge ${r.pos_min>=0?'ok':'no'}">${r.pos_min>=0?'+':''}${r.pos_min.toFixed(1)}% vs mín</span> `:''}
+    ${r.pos_max!==null?`<span class="badge ${r.pos_max<=0?'bl':'no'}">${r.pos_max>=0?'+':''}${r.pos_max.toFixed(1)}% vs máx</span>`:''}`;
+  } else { mkt+=`<p style="color:var(--muted);font-size:.85rem">Informe os preços da concorrência para ver o posicionamento.</p>`; }
+  document.getElementById('card_mercado').innerHTML=mkt;
+}
+
+// ── GERAÇÃO DO PDF VIA JANELA DE IMPRESSÃO ─────────────────────────────────
+function gerarPDF(){
+  const r=R;
+  const now=new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});
+  const folga=(r.vol-r.peq_u).toFixed(0);
+
+  const html=`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8">
+  <title>Relatório de Precificação — ${r.empresa||'Gás'}</title>
+  <style>
+    @page{size:A4 portrait;margin:10mm 12mm;}
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Segoe UI',Arial,sans-serif;font-size:8.5pt;color:#1e293b;background:#fff;}
+
+    .header{background:linear-gradient(135deg,#1a3c6e,#2563eb);color:#fff;padding:9px 14px 7px;border-radius:6px;margin-bottom:9px;}
+    .header h1{font-size:13pt;font-weight:800;letter-spacing:-.01em;}
+    .header .sub{font-size:7.5pt;opacity:.88;margin-top:2px;display:flex;gap:18px;}
+    .accent-bar{height:3px;background:linear-gradient(90deg,#e85d04,#f4a261);border-radius:99px;margin-bottom:9px;}
+
+    .kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:5px;margin-bottom:9px;}
+    .kpi{border-radius:6px;padding:7px 8px;text-align:center;}
+    .kpi .lbl{font-size:6pt;font-weight:700;text-transform:uppercase;letter-spacing:.05em;opacity:.8;margin-bottom:2px;}
+    .kpi .val{font-size:9.5pt;font-weight:800;}
+    .k1{background:#1a3c6e;color:#fff;}
+    .k2{background:#2563eb;color:#fff;}
+    .k3{background:#2d6a4f;color:#fff;}
+    .k4{background:#7c3aed;color:#fff;}
+    .k5{background:#0369a1;color:#fff;}
+    .k6{background:#0f766e;color:#fff;}
+
+    .body{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+    .sec{border:1px solid #e2e8f0;border-radius:6px;overflow:hidden;}
+    .sec-head{background:#1a3c6e;color:#fff;padding:5px 9px;font-size:7.5pt;font-weight:700;text-transform:uppercase;letter-spacing:.06em;}
+    .sec-head.blue{background:#2563eb;}
+    .sec-head.teal{background:#0f766e;}
+    .sec-head.indigo{background:#4f46e5;}
+    .sec-body{padding:0;}
+    .row{display:flex;justify-content:space-between;padding:4.5px 9px;border-bottom:1px solid #f1f5f9;font-size:8pt;}
+    .row:last-child{border-bottom:none;}
+    .row .v{font-weight:700;}
+    .row.hl{background:#f0f4ff;}
+    .row.hl .v{color:#e85d04;font-size:8.5pt;}
+
+    .badge{display:inline-block;padding:1px 7px;border-radius:99px;font-size:7pt;font-weight:700;}
+    .ok{background:#dcfce7;color:#166534;}
+    .no{background:#fee2e2;color:#991b1b;}
+    .bl{background:#dbeafe;color:#1e40af;}
+
+    .market-bar{height:7px;background:#e2e8f0;border-radius:99px;margin:5px 0 2px;position:relative;}
+    .market-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,#10b981,#2563eb);}
+    .market-pin{position:absolute;top:-4px;width:15px;height:15px;background:#e85d04;border:2px solid #fff;border-radius:50%;box-shadow:0 1px 4px rgba(0,0,0,.3);transform:translateX(-50%);}
+    .mkt-labels{display:flex;justify-content:space-between;font-size:6.5pt;color:#64748b;}
+    .mkt-badges{margin-top:5px;}
+
+    .footer{margin-top:8px;border-top:1px solid #e2e8f0;padding-top:5px;display:flex;justify-content:space-between;font-size:7pt;color:#94a3b8;}
+    .footer strong{color:#1a3c6e;}
+  </style>
+  </head><body>
+
+  <div class="header">
+    <h1>⛽ Relatório de Precificação de Gás</h1>
+    <div class="sub">
+      <span>🏢 ${r.empresa||'Empresa não informada'}</span>
+      <span>👤 ${r.responsavel||'—'}</span>
+      <span>📅 ${now}</span>
+    </div>
+  </div>
+  <div class="accent-bar"></div>
+
+  <div class="kpis">
+    <div class="kpi k1"><div class="lbl">💰 Preço Sugerido</div><div class="val">${fmt(r.preco)}</div></div>
+    <div class="kpi k2"><div class="lbl">📈 Margem de Lucro</div><div class="val">${fmtp(r.ml)}</div></div>
+    <div class="kpi k3"><div class="lbl">💵 Lucro Mensal</div><div class="val">${fmt(r.lt)}</div></div>
+    <div class="kpi k4"><div class="lbl">🔄 Mg. Contribuição</div><div class="val">${fmtp(r.mc)}</div></div>
+    <div class="kpi k5"><div class="lbl">⚖️ Ponto Equilíbrio</div><div class="val">${Math.ceil(r.peq_u)} un</div></div>
+    <div class="kpi k6"><div class="lbl">📦 Volume Mensal</div><div class="val">${r.vol} un</div></div>
+  </div>
+
+  <div class="body">
+    <div>
+      <div class="sec">
+        <div class="sec-head">1. Estrutura de Custos</div>
+        <div class="sec-body">
+          <div class="row"><span>Custos Fixos Totais (mensal)</span><span class="v">${fmt(r.CF)}</span></div>
+          <div class="row"><span>Custo Fixo Unitário</span><span class="v">${fmt(r.CF_u)}</span></div>
+          <div class="row"><span>Custo Variável (sem impostos)</span><span class="v">${fmt(r.CV-r.imp)}</span></div>
+          <div class="row"><span>Impostos sobre Venda (${(r.impPct*100).toFixed(1)}%)</span><span class="v">${fmt(r.imp)}</span></div>
+          <div class="row hl"><span>Custo Total Unitário</span><span class="v">${fmt(r.CT)}</span></div>
+        </div>
+      </div>
+
+      <br>
+
+      <div class="sec">
+        <div class="sec-head blue">2. Ponto de Equilíbrio</div>
+        <div class="sec-body">
+          <div class="row"><span>Em Unidades (botijões)</span><span class="v">${Math.ceil(r.peq_u)}</span></div>
+          <div class="row"><span>Em Valor</span><span class="v">${fmt(r.peq_v)}</span></div>
+          <div class="row"><span>Volume Mensal Estimado</span><span class="v">${r.vol} un</span></div>
+          <div class="row"><span>Status</span><span><span class="badge ${r.vol>=Math.ceil(r.peq_u)?'ok':'no'}">${r.vol>=Math.ceil(r.peq_u)?'✅ Acima do PEQ':'⚠️ Abaixo do PEQ'}</span></span></div>
+          <div class="row hl"><span>Folga de Segurança</span><span class="v">${folga} un (${(parseFloat(folga)/r.vol*100).toFixed(1)}%)</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="sec">
+        <div class="sec-head indigo">3. Análise de Margens</div>
+        <div class="sec-body">
+          <div class="row"><span>Modo de Cálculo</span><span class="v">${r.modo==='margem'?'Margem → Preço':'Preço → Margem'}</span></div>
+          <div class="row hl"><span>Preço Sugerido</span><span class="v">${fmt(r.preco)}</span></div>
+          <div class="row"><span>Valor de Contribuição</span><span class="v">${fmt(r.vc)}</span></div>
+          <div class="row"><span>Margem de Contribuição</span><span class="v">${fmtp(r.mc)}</span></div>
+          <div class="row"><span>Margem de Lucro Líquido</span><span class="v">${fmtp(r.ml)}</span></div>
+          <div class="row"><span>Lucro por Botijão</span><span class="v">${fmt(r.lu)}</span></div>
+          <div class="row hl"><span>Lucro Total Mensal</span><span class="v">${fmt(r.lt)}</span></div>
+        </div>
+      </div>
+
+      <br>
+
+      ${r.pmin&&r.pmax?`
+      <div class="sec">
+        <div class="sec-head teal">4. Posicionamento de Mercado</div>
+        <div class="sec-body" style="padding:6px 9px;">
+          <div class="row" style="padding:4px 0"><span>Mínimo da Concorrência</span><span class="v">${fmt(r.pmin)}</span></div>
+          <div class="row" style="padding:4px 0"><span>Máximo da Concorrência</span><span class="v">${fmt(r.pmax)}</span></div>
+          <div class="row" style="padding:4px 0"><span>Preço Atual Praticado</span><span class="v">${fmt(r.pa)}</span></div>
+          <div class="row hl" style="padding:4px 0;margin:0 -9px;padding-left:9px;padding-right:9px"><span>Preço Sugerido</span><span class="v">${fmt(r.preco)}</span></div>
+          <p style="font-size:7pt;color:#64748b;margin:7px 0 2px">Posição do preço sugerido na faixa de mercado:</p>
+          <div class="market-bar">
+            <div class="market-fill" style="width:100%"></div>
+            <div class="market-pin" style="left:${Math.min(Math.max((r.preco-r.pmin)/(r.pmax-r.pmin)*100,0),100)}%"></div>
+          </div>
+          <div class="mkt-labels"><span>${fmt(r.pmin)}</span><span>${fmt(r.pmax)}</span></div>
+          <div class="mkt-badges">
+            ${r.pos_min!==null?`<span class="badge ${r.pos_min>=0?'ok':'no'}">${r.pos_min>=0?'+':''}${r.pos_min.toFixed(1)}% vs mín</span> `:''}
+            ${r.pos_max!==null?`<span class="badge ${r.pos_max<=0?'bl':'no'}">${r.pos_max>=0?'+':''}${r.pos_max.toFixed(1)}% vs máx</span>`:''}
+          </div>
+        </div>
+      </div>`:'<div class="sec"><div class="sec-head teal">4. Posicionamento de Mercado</div><div class="sec-body"><div class="row">Preços da concorrência não informados.</div></div></div>'}
+    </div>
+  </div>
+
+  <div class="footer">
+    <span>Gerado em ${now} · Calculadora de Precificação de Gás</span>
+    <span><strong>${r.empresa||''}</strong>${r.responsavel?' · '+r.responsavel:''}</span>
+  </div>
+
+  <script>window.onload=()=>{window.print();}<\/script>
+  </body></html>`;
+
+  const win=window.open('','_blank');
+  win.document.write(html);
+  win.document.close();
+}
+</script>
+</body>
+</html>

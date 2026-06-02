@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { useSiteConfig } from '../contexts/SiteConfigContext';
 
 interface ContactPageProps {
   initialMessage?: string;
 }
 
 const ContactPage = ({ initialMessage = '' }: ContactPageProps) => {
+  const { config } = useSiteConfig();
   const [formData, setFormData] = useState({ name: '', email: '', phone: '', message: initialMessage });
 
   useEffect(() => {
@@ -69,9 +71,9 @@ const ContactPage = ({ initialMessage = '' }: ContactPageProps) => {
   return (
     <div className="min-h-screen bg-white">
       <div className="max-w-7xl mx-auto px-6 py-20">
-        <h1 className="text-5xl font-bold text-center mb-6">Entre em Contato</h1>
+        <h1 className="text-5xl font-bold text-center mb-6">{config.pages?.contact?.title || "Entre em Contato"}</h1>
         <p className="text-xl text-gray-600 text-center max-w-2xl mx-auto mb-16">
-          Tem alguma dúvida? Preencha o formulário abaixo.
+          {config.pages?.contact?.subtitle || "Tem alguma dúvida? Preencha o formulário abaixo."}
         </p>
 
         <div className="grid md:grid-cols-2 gap-12">
@@ -82,14 +84,14 @@ const ContactPage = ({ initialMessage = '' }: ContactPageProps) => {
                 <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">📧</div>
                 <div>
                   <h3 className="font-semibold mb-1">Email</h3>
-                  <a href="mailto:paulo@phdonassolo.com" className="text-blue-600">paulo@phdonassolo.com</a>
+                  <a href={`mailto:${config.email_contato}`} className="text-blue-600">{config.email_contato || 'paulo@phdonassolo.com'}</a>
                 </div>
               </div>
               <div className="flex items-start gap-4">
                 <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">📱</div>
                 <div>
                   <h3 className="font-semibold mb-1">WhatsApp</h3>
-                  <a href="https://wa.me/351910298213" className="text-green-600">+351 910 298 213</a>
+                  <a href={`https://wa.me/${config.whatsapp}`} className="text-green-600">{config.whatsapp_display || '+351 910 298 213'}</a>
                 </div>
               </div>
             </div>

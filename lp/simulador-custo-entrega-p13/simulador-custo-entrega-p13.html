@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulador de Custo de Entrega — Academia do Gás</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;800&family=Barlow+Condensed:wght@600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --azul:       #1a3a5c;
+      --azul-med:   #1e5799;
+      --azul-claro: #2e86c1;
+      --amarelo:    #f5a623;
+      --amarelo-bg: #fffbf0;
+      --cinza-bg:   #f4f6f9;
+      --cinza-card: #ffffff;
+      --cinza-brd:  #dde3ec;
+      --verde:      #1a7f4b;
+      --verde-bg:   #f0faf4;
+      --texto:      #1c2b3a;
+      --texto-sec:  #5a6a7a;
+      --radius:     10px;
+    }
+
+    body {
+      font-family: 'Barlow', sans-serif;
+      background: var(--cinza-bg);
+      color: var(--texto);
+      min-height: 100vh;
+    }
+
+    /* ── HEADER ─────────────────────────────────────────────────────── */
+    .header {
+      background: linear-gradient(135deg, var(--azul) 0%, #0d2640 100%);
+      padding: 28px 24px 24px;
+      text-align: center;
+      border-bottom: 4px solid var(--amarelo);
+    }
+    .header-badge {
+      display: inline-block;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--amarelo);
+      background: rgba(245,166,35,.12);
+      border: 1px solid rgba(245,166,35,.35);
+      padding: 4px 12px;
+      border-radius: 4px;
+      margin-bottom: 10px;
+    }
+    .header h1 {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: clamp(22px, 4vw, 34px);
+      font-weight: 800;
+      color: #fff;
+      line-height: 1.15;
+      margin-bottom: 6px;
+    }
+    .header h1 span { color: var(--amarelo); }
+    .header p {
+      font-size: 13px;
+      color: rgba(255,255,255,.65);
+      max-width: 520px;
+      margin: 0 auto;
+    }
+
+    /* ── LAYOUT ─────────────────────────────────────────────────────── */
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 24px 16px 48px;
+    }
+
+    .grid-main {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+    @media (max-width: 720px) {
+      .grid-main { grid-template-columns: 1fr; }
+    }
+
+    /* ── CARDS ──────────────────────────────────────────────────────── */
+    .card {
+      background: var(--cinza-card);
+      border: 1px solid var(--cinza-brd);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .card-header {
+      background: var(--azul);
+      padding: 12px 18px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .card-header h2 {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: .5px;
+      text-transform: uppercase;
+      color: #fff;
+    }
+    .card-header .icon {
+      width: 22px; height: 22px;
+      background: var(--amarelo);
+      border-radius: 5px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px;
+      flex-shrink: 0;
+    }
+    .card-body { padding: 18px; }
+
+    /* ── GRUPOS DE INPUT ─────────────────────────────────────────────── */
+    .grupo {
+      margin-bottom: 20px;
+    }
+    .grupo:last-child { margin-bottom: 0; }
+    .grupo-titulo {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--azul-claro);
+      padding-bottom: 6px;
+      border-bottom: 2px solid var(--cinza-brd);
+      margin-bottom: 12px;
+    }
+
+    .campo { margin-bottom: 10px; }
+    .campo label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--texto-sec);
+      margin-bottom: 4px;
+    }
+    .campo input {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1.5px solid var(--cinza-brd);
+      border-radius: 6px;
+      font-family: 'Barlow', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--texto);
+      background: #fafbfc;
+      transition: border-color .15s, box-shadow .15s;
+      appearance: textfield;
+    }
+    .campo input:focus {
+      outline: none;
+      border-color: var(--azul-claro);
+      box-shadow: 0 0 0 3px rgba(46,134,193,.12);
+      background: #fff;
+    }
+    .campo .hint {
+      font-size: 11px;
+      color: var(--texto-sec);
+      margin-top: 3px;
+    }
+
+    /* ── RESULTADOS ─────────────────────────────────────────────────── */
+    .res-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .res-item {
+      background: var(--cinza-bg);
+      border: 1px solid var(--cinza-brd);
+      border-radius: 7px;
+      padding: 10px 12px;
+    }
+    .res-item .label {
+      font-size: 11px;
+      color: var(--texto-sec);
+      margin-bottom: 2px;
+    }
+    .res-item .valor {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--azul);
+    }
+    .res-item .sub {
+      font-size: 10px;
+      color: var(--texto-sec);
+      margin-top: 1px;
+    }
+    .res-item.destaque {
+      background: #eaf3fb;
+      border-color: #aad4ee;
+    }
+    .res-item.destaque .valor { color: var(--azul-med); }
+
+    .res-subtitulo {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--azul-claro);
+      padding-bottom: 6px;
+      border-bottom: 2px solid var(--cinza-brd);
+      margin: 16px 0 10px;
+    }
+
+    /* CARD TOTAL */
+    .total-card {
+      background: linear-gradient(135deg, var(--azul) 0%, #0d2d50 100%);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 16px;
+      position: relative;
+      overflow: hidden;
+    }
+    .total-card::before {
+      content: '';
+      position: absolute;
+      top: -20px; right: -20px;
+      width: 100px; height: 100px;
+      background: rgba(245,166,35,.08);
+      border-radius: 50%;
+    }
+    .total-card .tc-label {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: .5px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.65);
+      margin-bottom: 4px;
+    }
+    .total-card .tc-valor {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 42px;
+      font-weight: 800;
+      color: var(--amarelo);
+      line-height: 1;
+      margin-bottom: 12px;
+    }
+    .total-card .tc-linha {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      color: rgba(255,255,255,.75);
+      padding: 4px 0;
+      border-top: 1px solid rgba(255,255,255,.1);
+    }
+    .total-card .tc-linha span:last-child { font-weight: 700; color: #fff; }
+    .total-card .tc-alerta {
+      margin-top: 10px;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .alerta-ok   { background: rgba(26,127,75,.25); color: #7dffc0; }
+    .alerta-med  { background: rgba(245,166,35,.2); color: #ffd97a; }
+    .alerta-alto { background: rgba(220,53,69,.25); color: #ffa0aa; }
+
+    /* COMPOSIÇÃO */
+    .comp-barra {
+      display: flex;
+      height: 10px;
+      border-radius: 5px;
+      overflow: hidden;
+      margin-bottom: 10px;
+      background: var(--cinza-brd);
+    }
+    .comp-seg { height: 100%; transition: width .4s ease; }
+    .seg-veiculo  { background: var(--azul-claro); }
+    .seg-mo       { background: var(--azul); }
+    .seg-adm      { background: var(--amarelo); }
+
+    .comp-legenda { display: flex; flex-direction: column; gap: 6px; }
+    .comp-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 13px;
+    }
+    .comp-item .ci-left { display: flex; align-items: center; gap: 6px; color: var(--texto-sec); }
+    .comp-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+    .comp-item .ci-right { font-weight: 700; color: var(--texto); }
+    .comp-item .ci-pct { font-size: 11px; color: var(--texto-sec); margin-left: 4px; font-weight: 400; }
+
+    /* ── BOTÃO DOWNLOAD ─────────────────────────────────────────────── */
+    .btn-download {
+      width: 100%;
+      padding: 14px;
+      background: var(--amarelo);
+      color: var(--azul);
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: .5px;
+      text-transform: uppercase;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: background .15s, transform .1s;
+      margin-top: 16px;
+    }
+    .btn-download:hover { background: #e09515; }
+    .btn-download:active { transform: scale(.98); }
+
+    /* ── DISCLAIMER / FOOTER ────────────────────────────────────────── */
+    .disclaimer {
+      margin-top: 20px;
+      padding: 14px 16px;
+      background: #fff8e1;
+      border: 1px solid #ffe082;
+      border-radius: 8px;
+      font-size: 11px;
+      color: #7a6000;
+      line-height: 1.6;
+    }
+    .disclaimer strong { color: #5a4500; }
+
+    .footer-credits {
+      text-align: center;
+      margin-top: 28px;
+      font-size: 12px;
+      color: var(--texto-sec);
+      padding-bottom: 12px;
+    }
+    .footer-credits a { color: var(--azul-claro); text-decoration: none; }
+    .footer-credits a:hover { text-decoration: underline; }
+
+    /* ── PRINT ──────────────────────────────────────────────────────── */
+    @media print {
+      .btn-download { display: none; }
+      body { background: #fff; }
+      .header { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+      .total-card { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <div class="header-badge">Academia do Gás · Prof. Paulo H. Donassolo</div>
+    <h1>Simulador de <span>Custo de Entrega</span><br>Gás de Cozinha (P13)</h1>
+    <p>Preencha os dados da sua operação e descubra o custo real de cada botijão entregue.</p>
+  </div>
+
+  <div class="container">
+    <div class="grid-main">
+
+      <!-- ═══════════════════════════════ INPUTS ═══════════════════════════════ -->
+      <div class="card">
+        <div class="card-header">
+          <div class="icon">📋</div>
+          <h2>Dados da Operação</h2>
+        </div>
+        <div class="card-body">
+
+          <!-- VOLUME -->
+          <div class="grupo">
+            <div class="grupo-titulo">Volume e Percentuais</div>
+
+            <div class="campo">
+              <label>Volume Total Mensal (botijões)</label>
+              <input type="number" id="volumeTotal" value="1000" min="1" oninput="calcular()">
+            </div>
+            <div class="campo">
+              <label>Percentual de P13 no Volume Total (%)</label>
+              <input type="number" id="percentualP13" value="100" min="0" max="100" oninput="calcular()">
+            </div>
+            <div class="campo">
+              <label>Percentual de P13 com Entrega (%)</label>
+              <input type="number" id="percentualP13ComEntrega" value="70" min="0" max="100" oninput="calcular()">
+            </div>
+            <div class="campo">
+              <label>Entregas realizadas com Moto (%)</label>
+              <input type="number" id="percentualMoto" value="60" min="0" max="100" oninput="calcular()">
+              <div class="hint" id="hint-carro">Entregas com carro: 40%</div>
+            </div>
+          </div>
+
+          <!-- PREÇO DE VENDA -->
+          <div class="grupo">
+            <div class="grupo-titulo">Preço de Venda</div>
+            <div class="campo">
+              <label>Preço Médio de Venda P13 (R$)</label>
+              <input type="number" id="precoVendaP13" value="109" min="1" step="0.01" oninput="calcular()">
+            </div>
+          </div>
+
+          <!-- CUSTOS VEICULARES -->
+          <div class="grupo">
+            <div class="grupo-titulo">Custos Mensais dos Veículos</div>
+            <div class="campo">
+              <label>Custo Mensal Total — Moto (R$)</label>
+              <input type="number" id="custoMensalMoto" value="800" min="0" step="0.01" oninput="calcular()">
+              <div class="hint">Depreciação + IPVA + seguro + manutenção</div>
+            </div>
+            <div class="campo">
+              <label>Quilometragem Mensal — Moto (km)</label>
+              <input type="number" id="kmMensalMoto" value="2000" min="1" oninput="calcular()">
+            </div>
+            <div class="campo">
+              <label>Distância Média por Entrega — Moto (km)</label>
+              <input type="number" id="distMoto" value="3" min="0.1" step="0.1" oninput="calcular()">
+            </div>
+            <div class="campo">
+              <label>Custo Mensal Total — Carro (R$)</label>
+              <input type="number" id="custoMensalCarro" value="1500" min="0" step="0.01" oninput="calcular()">
+              <div class="hint">Depreciação + IPVA + seguro + manutenção</div>
+            </div>
+            <div class="campo">
+              <label>Quilometragem Mensal — Carro (km)</label>
+              <input type="number" id="kmMensalCarro" value="3000" min="1" oninput="calcular()">
+            </div>
+            <div class="campo">
+              <label>Distância Média por Entrega — Carro (km)</label>
+              <input type="number" id="distCarro" value="5" min="0.1" step="0.1" oninput="calcular()">
+            </div>
+          </div>
+
+          <!-- MÃO DE OBRA -->
+          <div class="grupo">
+            <div class="grupo-titulo">Custo de Mão de Obra</div>
+            <div class="campo">
+              <label>Custo Total Mensal — Entregador Moto (R$)</label>
+              <input type="number" id="custoMOMoto" value="2000" min="0" step="0.01" oninput="calcular()">
+              <div class="hint">Salário + INSS + FGTS + férias + 13º + VT + VR + EPI</div>
+            </div>
+            <div class="campo">
+              <label>Custo Total Mensal — Entregador Carro (R$)</label>
+              <input type="number" id="custoMOCarro" value="2200" min="0" step="0.01" oninput="calcular()">
+            </div>
+            <div class="campo">
+              <label>Entregas por Mês por Entregador</label>
+              <input type="number" id="entregasPorMes" value="500" min="1" oninput="calcular()">
+            </div>
+          </div>
+
+          <!-- ADMINISTRATIVO -->
+          <div class="grupo">
+            <div class="grupo-titulo">Custos Administrativos</div>
+            <div class="campo">
+              <label>% sobre Custos Diretos</label>
+              <input type="number" id="percAdm" value="10" min="0" max="100" step="0.1" oninput="calcular()">
+              <div class="hint">Atendente, sistema, telefone, aluguel proporcional</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════ RESULTADOS ═══════════════════════════ -->
+      <div class="card">
+        <div class="card-header">
+          <div class="icon">📊</div>
+          <h2>Resultados</h2>
+        </div>
+        <div class="card-body">
+
+          <!-- VOLUMES -->
+          <div class="res-subtitulo">Volumes Calculados</div>
+          <div class="res-grid">
+            <div class="res-item">
+              <div class="label">Volume Mensal P13</div>
+              <div class="valor" id="r-volP13">1.000</div>
+              <div class="sub">botijões</div>
+            </div>
+            <div class="res-item">
+              <div class="label">Entregas P13 / Mês</div>
+              <div class="valor" id="r-entregasP13">700</div>
+              <div class="sub">entregas</div>
+            </div>
+          </div>
+
+          <!-- CUSTO POR KM -->
+          <div class="res-subtitulo">Custo por Km</div>
+          <div class="res-grid">
+            <div class="res-item">
+              <div class="label">Moto</div>
+              <div class="valor" id="r-kmMoto">R$ 0,40</div>
+              <div class="sub">por km</div>
+            </div>
+            <div class="res-item">
+              <div class="label">Carro</div>
+              <div class="valor" id="r-kmCarro">R$ 0,50</div>
+              <div class="sub">por km</div>
+            </div>
+          </div>
+
+          <!-- CUSTO VEICULAR POR ENTREGA -->
+          <div class="res-subtitulo">Custo Veicular por Entrega</div>
+          <div class="res-grid">
+            <div class="res-item">
+              <div class="label">Moto</div>
+              <div class="valor" id="r-vMoto">R$ 1,20</div>
+            </div>
+            <div class="res-item">
+              <div class="label">Carro</div>
+              <div class="valor" id="r-vCarro">R$ 2,50</div>
+            </div>
+          </div>
+          <div class="res-grid" style="grid-template-columns:1fr; margin-bottom:0">
+            <div class="res-item destaque">
+              <div class="label">Custo Veicular Ponderado P13</div>
+              <div class="valor" id="r-vPonderado">R$ 1,72</div>
+              <div class="sub" id="r-vPonderadoSub">60% moto + 40% carro</div>
+            </div>
+          </div>
+
+          <!-- MÃO DE OBRA POR ENTREGA -->
+          <div class="res-subtitulo">Mão de Obra por Entrega</div>
+          <div class="res-grid">
+            <div class="res-item">
+              <div class="label">Entregador Moto</div>
+              <div class="valor" id="r-moMoto">R$ 4,00</div>
+            </div>
+            <div class="res-item">
+              <div class="label">Entregador Carro</div>
+              <div class="valor" id="r-moCarro">R$ 4,40</div>
+            </div>
+          </div>
+          <div class="res-grid" style="grid-template-columns:1fr; margin-bottom:0">
+            <div class="res-item destaque">
+              <div class="label">Mão de Obra Ponderada P13</div>
+              <div class="valor" id="r-moPonderado">R$ 4,16</div>
+              <div class="sub" id="r-moPonderadoSub">60% moto + 40% carro</div>
+            </div>
+          </div>
+
+          <!-- ADMINISTRATIVO -->
+          <div class="res-subtitulo">Custo Administrativo</div>
+          <div class="res-grid" style="grid-template-columns:1fr">
+            <div class="res-item destaque">
+              <div class="label">Administrativo por Entrega</div>
+              <div class="valor" id="r-adm">R$ 0,59</div>
+              <div class="sub" id="r-admSub">10% sobre custos diretos</div>
+            </div>
+          </div>
+
+          <!-- TOTAL -->
+          <div class="total-card" style="margin-top:16px">
+            <div class="tc-label">Custo Total por Entrega P13</div>
+            <div class="tc-valor" id="r-total">R$ 6,47</div>
+            <div class="tc-linha">
+              <span>Preço de Venda:</span>
+              <span id="r-precoVenda">R$ 109,00</span>
+            </div>
+            <div class="tc-linha">
+              <span>% do Custo sobre Venda:</span>
+              <span id="r-pctVenda">5,9%</span>
+            </div>
+            <div class="tc-alerta alerta-ok" id="r-alerta">
+              ✔ Custo dentro de parâmetros saudáveis (&lt;8%)
+            </div>
+          </div>
+
+          <!-- COMPOSIÇÃO -->
+          <div class="res-subtitulo">Composição do Custo</div>
+          <div class="comp-barra">
+            <div class="comp-seg seg-veiculo" id="bar-veiculo" style="width:27%"></div>
+            <div class="comp-seg seg-mo"      id="bar-mo"      style="width:64%"></div>
+            <div class="comp-seg seg-adm"     id="bar-adm"     style="width:9%"></div>
+          </div>
+          <div class="comp-legenda">
+            <div class="comp-item">
+              <span class="ci-left"><span class="comp-dot" style="background:var(--azul-claro)"></span>Veículo</span>
+              <span class="ci-right"><span id="comp-veiculo-val">R$ 1,72</span> <span class="ci-pct" id="comp-veiculo-pct">(27%)</span></span>
+            </div>
+            <div class="comp-item">
+              <span class="ci-left"><span class="comp-dot" style="background:var(--azul)"></span>Mão de Obra</span>
+              <span class="ci-right"><span id="comp-mo-val">R$ 4,16</span> <span class="ci-pct" id="comp-mo-pct">(64%)</span></span>
+            </div>
+            <div class="comp-item">
+              <span class="ci-left"><span class="comp-dot" style="background:var(--amarelo)"></span>Administrativo</span>
+              <span class="ci-right"><span id="comp-adm-val">R$ 0,59</span> <span class="ci-pct" id="comp-adm-pct">(9%)</span></span>
+            </div>
+          </div>
+
+          <!-- BOTÃO DOWNLOAD -->
+          <button class="btn-download" onclick="baixarSimulacao()">
+            <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd"/>
+            </svg>
+            Baixar Resultado (.txt)
+          </button>
+
+        </div>
+      </div>
+    </div><!-- /grid-main -->
+
+    <!-- DISCLAIMER -->
+    <div class="disclaimer">
+      <strong>⚠ Atenção:</strong> Este simulador tem finalidade exclusivamente educacional. Os valores calculados são estimativas baseadas nos dados informados e servem como referência para fins didáticos. Os custos trabalhistas devem ser validados com um contador habilitado. Os parâmetros reais variam conforme região, porte da operação e condições dos veículos.
+    </div>
+
+    <div class="footer-credits">
+      © Academia do Gás &nbsp;·&nbsp; Prof. Paulo H. Donassolo &nbsp;·&nbsp;
+      <a href="https://www.phdonassolo.com" target="_blank">www.phdonassolo.com</a>
+    </div>
+
+  </div><!-- /container -->
+
+  <script>
+    // ── Formatação ──────────────────────────────────────────────────────────
+    const fmt = (v) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    const fmtN = (v, d = 1) => v.toLocaleString('pt-BR', { minimumFractionDigits: d, maximumFractionDigits: d });
+    const fmtInt = (v) => Math.round(v).toLocaleString('pt-BR');
+    const el = (id) => document.getElementById(id);
+    const val = (id) => parseFloat(el(id).value) || 0;
+
+    // ── Cálculo principal ───────────────────────────────────────────────────
+    function calcular() {
+      const pMoto  = Math.min(100, Math.max(0, val('percentualMoto')));
+      const pCarro = 100 - pMoto;
+      el('hint-carro').textContent = `Entregas com carro: ${pCarro}%`;
+
+      // Volumes
+      const volP13     = val('volumeTotal') * (val('percentualP13') / 100);
+      const entregasP13 = volP13 * (val('percentualP13ComEntrega') / 100);
+
+      // Custo/km
+      const kmMoto  = val('kmMensalMoto')  || 1;
+      const kmCarro = val('kmMensalCarro') || 1;
+      const cKmMoto  = val('custoMensalMoto')  / kmMoto;
+      const cKmCarro = val('custoMensalCarro') / kmCarro;
+
+      // Custo veicular/entrega
+      const cvMoto  = cKmMoto  * val('distMoto');
+      const cvCarro = cKmCarro * val('distCarro');
+      const cvPond  = (cvMoto * pMoto / 100) + (cvCarro * pCarro / 100);
+
+      // MO/entrega
+      const entPorMes = val('entregasPorMes') || 1;
+      const moMoto  = val('custoMOMoto')  / entPorMes;
+      const moCarro = val('custoMOCarro') / entPorMes;
+      const moPond  = (moMoto * pMoto / 100) + (moCarro * pCarro / 100);
+
+      // Direto + adm
+      const direto = cvPond + moPond;
+      const adm    = direto * (val('percAdm') / 100);
+      const total  = direto + adm;
+
+      // % sobre venda
+      const precoV = val('precoVendaP13') || 1;
+      const pctV   = (total / precoV) * 100;
+
+      // Composição
+      const pVeiculo = total > 0 ? (cvPond / total) * 100 : 0;
+      const pMO      = total > 0 ? (moPond  / total) * 100 : 0;
+      const pAdm     = total > 0 ? (adm     / total) * 100 : 0;
+
+      // ── Atualiza DOM ──────────────────────────────────────────────────────
+      el('r-volP13').textContent      = fmtInt(volP13) + ' bot.';
+      el('r-entregasP13').textContent = fmtInt(entregasP13);
+
+      el('r-kmMoto').textContent  = fmt(cKmMoto);
+      el('r-kmCarro').textContent = fmt(cKmCarro);
+
+      el('r-vMoto').textContent  = fmt(cvMoto);
+      el('r-vCarro').textContent = fmt(cvCarro);
+      el('r-vPonderado').textContent = fmt(cvPond);
+      el('r-vPonderadoSub').textContent = `${pMoto}% moto + ${pCarro}% carro`;
+
+      el('r-moMoto').textContent  = fmt(moMoto);
+      el('r-moCarro').textContent = fmt(moCarro);
+      el('r-moPonderado').textContent = fmt(moPond);
+      el('r-moPonderadoSub').textContent = `${pMoto}% moto + ${pCarro}% carro`;
+
+      el('r-adm').textContent    = fmt(adm);
+      el('r-admSub').textContent = `${val('percAdm')}% sobre custos diretos`;
+
+      el('r-total').textContent     = fmt(total);
+      el('r-precoVenda').textContent = fmt(precoV);
+      el('r-pctVenda').textContent  = fmtN(pctV) + '%';
+
+      // Alerta de saúde
+      const alertaEl = el('r-alerta');
+      alertaEl.className = 'tc-alerta';
+      if (pctV <= 8) {
+        alertaEl.classList.add('alerta-ok');
+        alertaEl.textContent = '✔ Custo dentro de parâmetros saudáveis (≤8%)';
+      } else if (pctV <= 12) {
+        alertaEl.classList.add('alerta-med');
+        alertaEl.textContent = '⚠ Custo elevado — revise rotas e volume por saída (8-12%)';
+      } else {
+        alertaEl.classList.add('alerta-alto');
+        alertaEl.textContent = '✖ Custo crítico — entrega pode estar no prejuízo (>12%)';
+      }
+
+      // Barras composição
+      el('bar-veiculo').style.width = pVeiculo.toFixed(1) + '%';
+      el('bar-mo').style.width      = pMO.toFixed(1) + '%';
+      el('bar-adm').style.width     = pAdm.toFixed(1) + '%';
+
+      el('comp-veiculo-val').textContent = fmt(cvPond);
+      el('comp-veiculo-pct').textContent = `(${fmtN(pVeiculo)}%)`;
+      el('comp-mo-val').textContent = fmt(moPond);
+      el('comp-mo-pct').textContent = `(${fmtN(pMO)}%)`;
+      el('comp-adm-val').textContent = fmt(adm);
+      el('comp-adm-pct').textContent = `(${fmtN(pAdm)}%)`;
+
+      // Guarda globalmente para download
+      window._sim = {
+        volP13, entregasP13,
+        cKmMoto, cKmCarro,
+        cvMoto, cvCarro, cvPond,
+        moMoto, moCarro, moPond,
+        adm, total, pctV,
+        pVeiculo, pMO, pAdm,
+        precoV
+      };
+    }
+
+    // ── Download TXT ────────────────────────────────────────────────────────
+    function baixarSimulacao() {
+      const s = window._sim;
+      if (!s) return;
+
+      const linha = (label, valor) => `  ${label.padEnd(42, '.')} ${valor}`;
+      const agora = new Date().toLocaleString('pt-BR');
+
+      const txt = [
+        '═══════════════════════════════════════════════════════',
+        '  SIMULADOR DE CUSTO DE ENTREGA — GÁS DE COZINHA (P13)',
+        '  Academia do Gás · Prof. Paulo H. Donassolo',
+        '  www.phdonassolo.com',
+        `  Gerado em: ${agora}`,
+        '═══════════════════════════════════════════════════════',
+        '',
+        '── DADOS DA OPERAÇÃO ──────────────────────────────────',
+        linha('Volume total mensal', val('volumeTotal') + ' botijões'),
+        linha('% de P13 no volume', val('percentualP13') + '%'),
+        linha('% de P13 com entrega', val('percentualP13ComEntrega') + '%'),
+        linha('% de entregas com moto', val('percentualMoto') + '%'),
+        linha('% de entregas com carro', (100 - val('percentualMoto')) + '%'),
+        linha('Preço médio de venda P13', fmt(val('precoVendaP13'))),
+        '',
+        '── VOLUMES CALCULADOS ─────────────────────────────────',
+        linha('Volume mensal P13', Math.round(s.volP13) + ' botijões'),
+        linha('Entregas P13 / mês', Math.round(s.entregasP13) + ' entregas'),
+        '',
+        '── CUSTO POR KM ───────────────────────────────────────',
+        linha('Custo por km — Moto', fmt(s.cKmMoto)),
+        linha('Custo por km — Carro', fmt(s.cKmCarro)),
+        '',
+        '── CUSTO VEICULAR POR ENTREGA ─────────────────────────',
+        linha('Veículo Moto', fmt(s.cvMoto)),
+        linha('Veículo Carro', fmt(s.cvCarro)),
+        linha('PONDERADO P13', fmt(s.cvPond) + '  ← ' + fmtN(s.pVeiculo) + '% do custo total'),
+        '',
+        '── MÃO DE OBRA POR ENTREGA ────────────────────────────',
+        linha('Entregador Moto', fmt(s.moMoto)),
+        linha('Entregador Carro', fmt(s.moCarro)),
+        linha('PONDERADA P13', fmt(s.moPond) + '  ← ' + fmtN(s.pMO) + '% do custo total'),
+        '',
+        '── CUSTO ADMINISTRATIVO ───────────────────────────────',
+        linha('Custo adm por entrega (' + val('percAdm') + '%)', fmt(s.adm) + '  ← ' + fmtN(s.pAdm) + '% do custo total'),
+        '',
+        '═══════════════════════════════════════════════════════',
+        '  CUSTO TOTAL POR ENTREGA P13 ......... ' + fmt(s.total),
+        '  % sobre o Preço de Venda ............ ' + fmtN(s.pctV) + '%',
+        '  Preço de Venda ....................... ' + fmt(s.precoV),
+        '═══════════════════════════════════════════════════════',
+        '',
+        '  DISCLAIMER: valores estimados para fins educacionais.',
+        '  Valide com seu contador antes de tomar decisões.',
+        ''
+      ].join('\n');
+
+      const blob = new Blob([txt], { type: 'text/plain;charset=utf-8' });
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement('a');
+      a.href     = url;
+      a.download = 'Custo_Entrega_GLP_' + new Date().toISOString().slice(0,10) + '.txt';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    // Inicializa
+    calcular();
+  </script>
+</body>
+</html>

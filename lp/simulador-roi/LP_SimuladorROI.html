@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Simulador de ROI em Vendas | Prof. Paulo H. Donassolo</title>
+  
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="Acesse gratuitamente o Simulador de ROI em Vendas. Calcule o retorno dos seus investimentos em equipes comerciais.">
+  <meta name="keywords" content="simulador roi, calculadora vendas, retorno investimento, prof paulo donassolo">
+  <meta name="author" content="Prof. Paulo H. Donassolo">
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Google Fonts - Inter -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-QLJ9N5BYTD"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-QLJ9N5BYTD');
+  </script>
+  
+  <style>
+    body { 
+      font-family: 'Inter', sans-serif; 
+      background-color: #fbfbfd;
+      color: #1d1d1f;
+    }
+    .apple-blur {
+      backdrop-filter: saturate(180%) blur(20px);
+      background-color: rgba(251, 251, 253, 0.8);
+    }
+    .input-field { transition: all 0.2s ease; }
+    .input-field:focus { outline: none; box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1); }
+    .input-error { border-color: #ef4444 !important; }
+    .input-success { border-color: #10b981 !important; }
+    @keyframes slideIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+    .error-message, .success-message { animation: slideIn 0.3s ease; }
+  </style>
+</head>
+<body>
+  
+  <!-- HEADER -->
+  <header class="apple-blur border-b border-gray-100 sticky top-0 z-50">
+    <div class="max-w-6xl mx-auto px-6 py-6 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center">
+          <span class="text-white font-bold text-lg">PD</span>
+        </div>
+        <span class="text-lg font-bold text-gray-900">Prof. Paulo H. Donassolo</span>
+      </div>
+      <a href="https://phdonassolo.com" class="text-sm font-semibold text-gray-600 hover:text-blue-600 transition-colors">
+        ← Voltar ao site
+      </a>
+    </div>
+  </header>
+
+  <!-- HERO SECTION -->
+  <section class="pt-20 pb-16 px-6">
+    <div class="max-w-4xl mx-auto text-center">
+      <div class="inline-block px-4 py-2 bg-green-50 text-green-600 rounded-full text-xs font-bold uppercase tracking-widest mb-6">
+        Ferramenta Gratuita
+      </div>
+      
+      <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-6 leading-[1.1]">
+        Simulador de<br>
+        <span class="text-blue-600">ROI em Vendas</span>
+      </h1>
+      
+      <p class="text-xl md:text-2xl text-gray-600 font-medium max-w-3xl mx-auto mb-8 leading-relaxed">
+        Calcule o retorno sobre investimento da sua equipe de vendas. Descubra se seus investimentos em gestão comercial estão gerando resultados.
+      </p>
+      
+      <div class="flex flex-wrap items-center justify-center gap-8 text-sm text-gray-500 font-semibold">
+        <div class="flex items-center gap-2">
+          <svg class="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+          </svg>
+          Cálculos precisos
+        </div>
+        <div class="flex items-center gap-2">
+          <svg class="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+          </svg>
+          Relatório detalhado
+        </div>
+        <div class="flex items-center gap-2">
+          <svg class="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+          </svg>
+          Acesso imediato
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FORM SECTION -->
+  <section class="pb-24 px-6">
+    <div class="max-w-2xl mx-auto">
+      <div class="bg-white rounded-[32px] p-8 md:p-12 shadow-xl border border-gray-100">
+        
+        <div class="mb-8 text-center">
+          <h2 class="text-3xl font-bold mb-3">Acesse o simulador agora</h2>
+          <p class="text-gray-600 font-medium">Cadastre-se para acessar a ferramenta</p>
+        </div>
+
+        <form id="leadForm" class="space-y-6">
+          
+          <!-- HONEYPOT -->
+          <input type="text" name="website" id="website" style="position:absolute;left:-9999px" tabindex="-1" autocomplete="off">
+          <input type="hidden" id="loadTimestamp" name="loadTimestamp">
+          
+          <!-- NOME COMPLETO -->
+          <div>
+            <label for="nome" class="block text-sm font-bold text-gray-700 mb-2">
+              Nome Completo <span class="text-red-500">*</span>
+            </label>
+            <input 
+              type="text" 
+              id="nome" 
+              name="nome"
+              placeholder="Ex: João Silva Santos"
+              required
+              class="input-field w-full px-5 py-4 border-2 border-gray-200 rounded-2xl text-base font-medium focus:border-blue-600"
+            >
+            <p id="nome-error" class="error-message text-red-500 text-sm font-semibold mt-2 hidden"></p>
+            <p id="nome-success" class="success-message text-green-600 text-sm font-semibold mt-2 hidden">✓ Nome válido</p>
+          </div>
+
+          <!-- EMAIL -->
+          <div>
+            <label for="email" class="block text-sm font-bold text-gray-700 mb-2">
+              Email Profissional <span class="text-red-500">*</span>
+            </label>
+            <input 
+              type="email" 
+              id="email" 
+              name="email"
+              placeholder="Ex: joao@empresa.com.br"
+              required
+              class="input-field w-full px-5 py-4 border-2 border-gray-200 rounded-2xl text-base font-medium focus:border-blue-600"
+            >
+            <p id="email-error" class="error-message text-red-500 text-sm font-semibold mt-2 hidden"></p>
+            <p id="email-success" class="success-message text-green-600 text-sm font-semibold mt-2 hidden">✓ Email válido</p>
+          </div>
+
+          <!-- WHATSAPP -->
+          <div>
+            <label for="whatsapp" class="block text-sm font-bold text-gray-700 mb-2">
+              WhatsApp <span class="text-red-500">*</span>
+            </label>
+            
+            <div class="flex gap-3">
+              <select id="pais" name="pais" class="input-field px-4 py-4 border-2 border-gray-200 rounded-2xl text-base font-medium focus:border-blue-600 bg-white">
+                <option value="+55">🇧🇷 +55</option>
+                <option value="+1">🇺🇸 +1</option>
+                <option value="+351">🇵🇹 +351</option>
+              </select>
+              
+              <input 
+                type="tel" 
+                id="whatsapp" 
+                name="whatsapp"
+                placeholder="(11) 99999-9999"
+                required
+                class="input-field flex-1 px-5 py-4 border-2 border-gray-200 rounded-2xl text-base font-medium focus:border-blue-600"
+              >
+            </div>
+            
+            <p id="whatsapp-error" class="error-message text-red-500 text-sm font-semibold mt-2 hidden"></p>
+            <p id="whatsapp-success" class="success-message text-green-600 text-sm font-semibold mt-2 hidden">✓ Número válido</p>
+          </div>
+
+          <!-- POLÍTICA DE PRIVACIDADE -->
+          <div class="flex items-start gap-3 p-4 bg-gray-50 rounded-xl">
+            <input 
+              type="checkbox" 
+              id="politica" 
+              name="politica"
+              required
+              class="mt-1 w-5 h-5 text-blue-600 border-2 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+            >
+            <label for="politica" class="text-sm text-gray-700 font-medium leading-relaxed cursor-pointer">
+              Li e concordo com a <a href="https://phdonassolo.com" class="text-blue-600 font-bold hover:underline">Política de Privacidade</a>. 
+              Meus dados serão usados exclusivamente para acesso ao simulador.
+            </label>
+          </div>
+
+          <!-- BOTÃO DE ENVIO -->
+          <button 
+            type="submit" 
+            id="btnSubmit"
+            class="w-full py-5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-lg rounded-2xl transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <span id="btnText">Acessar simulador grátis</span>
+            <span id="btnLoading" class="hidden">Enviando...</span>
+          </button>
+          
+          <p class="text-center text-xs text-gray-400 font-medium">
+            🔒 Seus dados estão protegidos. Não enviamos spam.
+          </p>
+        </form>
+
+        <!-- MENSAGEM DE REDIRECIONAMENTO -->
+        <div id="successMessage" class="hidden text-center py-12">
+          <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <svg class="w-10 h-10 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+            </svg>
+          </div>
+          <h3 class="text-3xl font-bold mb-4">Cadastro concluído!</h3>
+          <p class="text-xl text-gray-600 font-medium mb-8">
+            Redirecionando para o simulador<span class="dots">...</span>
+          </p>
+          <div class="flex items-center justify-center gap-2 text-sm text-gray-500">
+            <div class="w-6 h-6 border-2 border-gray-200 border-t-blue-600 rounded-full animate-spin"></div>
+            <span>Abrindo em nova aba</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="py-12 px-6 border-t border-gray-100 bg-white">
+    <div class="max-w-6xl mx-auto text-center">
+      <p class="text-sm text-gray-500 font-medium">
+        © 2025 Prof. Paulo H. Donassolo. Todos os direitos reservados.
+      </p>
+      <div class="flex items-center justify-center gap-6 mt-4">
+        <a href="https://phdonassolo.com" class="text-sm text-gray-600 hover:text-blue-600 font-semibold transition-colors">Política de Privacidade</a>
+        <a href="https://phdonassolo.com" class="text-sm text-gray-600 hover:text-blue-600 font-semibold transition-colors">Termos de Uso</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- JAVASCRIPT -->
+  <script>
+    const URL_WEB_APP = "https://script.google.com/macros/s/AKfycbwAz17lsqIudknZuxeWf8OG5wJhEAf_UTJ1_H0yiSGyjleipJ9gRu68dx9hNrWYimtL/exec";
+    const MATERIAL_ID = "simulador-roi";
+    const URL_REDIRECT = "https://phdonassolo.com/simulador"; // ⚠️ EDITE: URL do simulador
+    
+    document.getElementById('loadTimestamp').value = Date.now();
+    
+    const validators = {
+      nome: (value) => {
+        const trimmed = value.trim();
+        const words = trimmed.split(/\s+/);
+        if (trimmed.length < 3) return { valid: false, message: 'Nome muito curto' };
+        if (words.length < 2) return { valid: false, message: 'Digite nome completo (nome e sobrenome)' };
+        if (!/^[a-zA-ZÀ-ÿ\s]+$/.test(trimmed)) return { valid: false, message: 'Nome deve conter apenas letras' };
+        return { valid: true, message: '' };
+      },
+      
+      email: (value) => {
+        const trimmed = value.trim().toLowerCase();
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(trimmed)) return { valid: false, message: 'Email inválido' };
+        
+        const disposableDomains = ['10minutemail.com', 'guerrillamail.com', 'mailinator.com', 'temp-mail.org', 'yopmail.com'];
+        const domain = trimmed.split('@')[1];
+        if (disposableDomains.includes(domain)) return { valid: false, message: 'Use um email permanente (não temporário)' };
+        
+        return { valid: true, message: '' };
+      },
+      
+      whatsapp: (value, countryCode) => {
+        const cleaned = value.replace(/\D/g, '');
+        if (cleaned.length === 0) return { valid: false, message: 'Digite seu número de WhatsApp' };
+        
+        const validations = {
+          '+55': { min: 10, max: 11, example: '(11) 99999-9999' },
+          '+1': { min: 10, max: 10, example: '(555) 123-4567' },
+          '+351': { min: 9, max: 9, example: '912 345 678' }
+        };
+        
+        const rules = validations[countryCode] || validations['+55'];
+        
+        if (cleaned.length < rules.min) return { valid: false, message: `Número muito curto. Ex: ${rules.example}` };
+        if (cleaned.length > rules.max) return { valid: false, message: `Número muito longo. Ex: ${rules.example}` };
+        
+        return { valid: true, message: '' };
+      }
+    };
+    
+    const maskPhoneBR = (value) => {
+      const cleaned = value.replace(/\D/g, '');
+      if (cleaned.length <= 10) {
+        return cleaned.replace(/(\d{2})(\d)/, '($1) $2').replace(/(\d{4})(\d)/, '$1-$2');
+      } else {
+        return cleaned.replace(/(\d{2})(\d)/, '($1) $2').replace(/(\d{5})(\d)/, '$1-$2').substring(0, 15);
+      }
+    };
+    
+    function showValidation(fieldName, result) {
+      const input = document.getElementById(fieldName);
+      const errorEl = document.getElementById(`${fieldName}-error`);
+      const successEl = document.getElementById(`${fieldName}-success`);
+      
+      if (result.valid) {
+        input.classList.remove('input-error');
+        input.classList.add('input-success');
+        errorEl.classList.add('hidden');
+        successEl.classList.remove('hidden');
+      } else {
+        input.classList.add('input-error');
+        input.classList.remove('input-success');
+        errorEl.textContent = '⚠️ ' + result.message;
+        errorEl.classList.remove('hidden');
+        successEl.classList.add('hidden');
+      }
+    }
+    
+    const nomeInput = document.getElementById('nome');
+    const emailInput = document.getElementById('email');
+    const whatsappInput = document.getElementById('whatsapp');
+    const paisSelect = document.getElementById('pais');
+    
+    nomeInput.addEventListener('blur', () => showValidation('nome', validators.nome(nomeInput.value)));
+    emailInput.addEventListener('blur', () => showValidation('email', validators.email(emailInput.value)));
+    
+    whatsappInput.addEventListener('input', (e) => {
+      if (paisSelect.value === '+55') {
+        e.target.value = maskPhoneBR(e.target.value);
+      } else {
+        e.target.value = e.target.value.replace(/\D/g, '');
+      }
+    });
+    
+    whatsappInput.addEventListener('blur', () => {
+      showValidation('whatsapp', validators.whatsapp(whatsappInput.value, paisSelect.value));
+    });
+    
+    paisSelect.addEventListener('change', () => {
+      const examples = { '+55': '(11) 99999-9999', '+1': '(555) 123-4567', '+351': '912 345 678' };
+      whatsappInput.placeholder = examples[paisSelect.value];
+      whatsappInput.value = '';
+    });
+    
+    document.getElementById('leadForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const nomeValid = validators.nome(nomeInput.value);
+      const emailValid = validators.email(emailInput.value);
+      const whatsappValid = validators.whatsapp(whatsappInput.value, paisSelect.value);
+      
+      showValidation('nome', nomeValid);
+      showValidation('email', emailValid);
+      showValidation('whatsapp', whatsappValid);
+      
+      if (!nomeValid.valid || !emailValid.valid || !whatsappValid.valid) {
+        alert('❌ Por favor, corrija os erros antes de enviar.');
+        return;
+      }
+      
+      if (!document.getElementById('politica').checked) {
+        alert('❌ Você precisa concordar com a Política de Privacidade.');
+        return;
+      }
+      
+      if (document.getElementById('website').value !== '') {
+        console.log('Bot detectado via honeypot');
+        return;
+      }
+      
+      const loadTime = parseInt(document.getElementById('loadTimestamp').value);
+      const submitTime = Date.now();
+      const timeSpent = (submitTime - loadTime) / 1000;
+      
+      if (timeSpent < 5) {
+        alert('❌ Por favor, preencha o formulário com calma.');
+        return;
+      }
+      
+      const btnSubmit = document.getElementById('btnSubmit');
+      const btnText = document.getElementById('btnText');
+      const btnLoading = document.getElementById('btnLoading');
+      
+      btnSubmit.disabled = true;
+      btnText.classList.add('hidden');
+      btnLoading.classList.remove('hidden');
+      
+      const dados = {
+        nome: nomeInput.value.trim(),
+        email: emailInput.value.trim().toLowerCase(),
+        whatsapp: paisSelect.value + ' ' + whatsappInput.value.replace(/\D/g, ''),
+        material_id: MATERIAL_ID,
+        pais: paisSelect.value,
+        timestamp: loadTime,
+        timeSpent: timeSpent
+      };
+      
+      try {
+        const response = await fetch(URL_WEB_APP, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(dados)
+        });
+        
+        // Mostrar mensagem de sucesso
+        document.getElementById('leadForm').classList.add('hidden');
+        document.getElementById('successMessage').classList.remove('hidden');
+        document.getElementById('successMessage').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        
+        // Analytics
+        if (typeof gtag !== 'undefined') {
+          gtag('event', 'conversion', {
+            'send_to': 'G-QLJ9N5BYTD',
+            'value': MATERIAL_ID
+          });
+        }
+        
+        // Redirecionar após 2 segundos
+        setTimeout(() => {
+          window.open(URL_REDIRECT, '_blank');
+        }, 2000);
+        
+      } catch (erro) {
+        alert('❌ Erro ao enviar. Tente novamente.');
+        btnSubmit.disabled = false;
+        btnText.classList.remove('hidden');
+        btnLoading.classList.add('hidden');
+      }
+    });
+  </script>
+
+</body>
+</html>
