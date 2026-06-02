@@ -1,0 +1,40 @@
+name: Deploy Automático para Hostgator
+
+on:
+  push:
+    branches:
+      - main # O deploy acontecerá sempre que a branch main for atualizada
+
+jobs:
+  build-and-deploy:
+    name: Build & FTP Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: 🚚 Obter o Código
+      uses: actions/checkout@v4
+
+    - name: ⚙️ Instalar Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20' # Versão do Node.js
+        cache: 'npm'
+
+    - name: 📦 Instalar Dependências
+      run: npm ci --legacy-peer-deps
+
+    - name: 🚀 Build do Projeto
+      run: npm run build
+
+    - name: 📂 Enviar via FTP
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+      with:
+        server: ${{ secrets.FTP_SERVER }}
+        username: ${{ secrets.FTP_USERNAME }}
+        password: ${{ secrets.FTP_PASSWORD }}
+        local-dir: ./dist/ # Envia apenas o que estiver na pasta dist
+        server-dir: /public_html/ # Pasta raiz no Hostgator. Se seu site ficar em subpasta, mude aqui.
+        exclude: |
+          **/.git*
+          **/.git*/**
+          **/node_modules/**
