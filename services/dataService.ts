@@ -151,11 +151,8 @@ export const DataService = {
       }
 
       // 2. Bater na API do WP PELA ÚLTIMA VEZ para resgatar os Artigos e Vídeos Históricos
-      const fetchUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent('https://phdonassolo.com/wp-json/wp/v2/posts?per_page=100&_embed')}`;
-      const res = await fetch(fetchUrl);
-      if (res.ok) {
-        const posts = await res.json();
-        if (Array.isArray(posts)) {
+      const posts = await secureFetch('/posts?per_page=100');
+      if (posts && Array.isArray(posts)) {
           // Artigos
           const mappedArticles = posts.map(mapWPPostToArticle);
           for (const art of mappedArticles) {
