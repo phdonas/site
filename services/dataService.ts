@@ -178,7 +178,6 @@ export const DataService = {
             await setDoc(doc(db, 'videos', vid.id), vid);
           }
         }
-      }
 
       return true;
     } catch (e) {
