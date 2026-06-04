@@ -33,7 +33,7 @@ jobs:
         username: ${{ secrets.FTP_USERNAME }}
         password: ${{ secrets.FTP_PASSWORD }}
         local-dir: ./dist/ # Envia apenas o que estiver na pasta dist
-        server-dir: /public_html/ # Pasta raiz no Hostgator. Se seu site ficar em subpasta, mude aqui.
+        server-dir: ./ # Pasta raiz da conta FTP. Como o seu FTP já abre dentro do public_html, usamos ./ para jogar direto lá.
         exclude: |
           **/.git*
           **/.git*/**
