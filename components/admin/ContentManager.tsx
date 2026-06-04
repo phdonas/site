@@ -43,7 +43,7 @@ export const ContentManager: React.FC = () => {
     // Default forms based on tab
     const defaults: any = { id: newId };
     if (activeTab === 'articles') {
-      defaults.title = ''; defaults.content = ''; defaults.excerpt = ''; defaults.category = 'Geral'; defaults.pillarId = 'prof-paulo'; defaults.date = new Date().toISOString(); defaults.publishDate = new Date().toISOString(); defaults.imageUrl = '';
+      defaults.title = ''; defaults.content = ''; defaults.excerpt = ''; defaults.category = 'Geral'; defaults.pillarIds = ['prof-paulo']; defaults.date = new Date().toISOString(); defaults.publishDate = new Date().toISOString(); defaults.imageUrl = ''; defaults.slug = ''; defaults.seoTitle = ''; defaults.seoDescription = ''; defaults.focusKeyword = ''; defaults.tags = [];
     } else if (activeTab === 'videos') {
       defaults.title = ''; defaults.url = ''; defaults.thumb = ''; defaults.publishDate = new Date().toISOString();
     } else if (activeTab === 'books') {
@@ -100,13 +100,32 @@ export const ContentManager: React.FC = () => {
           <input type="text" placeholder="Título do Artigo" className="w-full p-3 border border-gray-200 rounded-xl" value={formData.title || ''} onChange={e => setFormData({...formData, title: e.target.value})} />
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="text-xs text-gray-500 font-bold mb-1 block">Pilar</label>
-              <select className="w-full p-3 border border-gray-200 rounded-xl" value={formData.pillarId} onChange={e => setFormData({...formData, pillarId: e.target.value})}>
-                <option value="prof-paulo">Prof. Paulo</option>
-                <option value="consultoria-imobiliaria">Consultoria Imobiliária</option>
-                <option value="4050oumais">40/50 ou Mais</option>
-                <option value="academia-do-gas">Academia do Gás</option>
-              </select>
+              <label className="text-xs text-gray-500 font-bold mb-1 block">Pilares (Selecione um ou mais)</label>
+              <div className="flex flex-col gap-2 p-3 border border-gray-200 rounded-xl bg-white max-h-32 overflow-y-auto">
+                {[
+                  {id: 'prof-paulo', name: 'Prof. Paulo'},
+                  {id: 'consultoria-imobiliaria', name: 'Consultoria Imobiliária'},
+                  {id: '4050oumais', name: '40/50 ou Mais'},
+                  {id: 'academia-do-gas', name: 'Academia do Gás'}
+                ].map(p => (
+                  <label key={p.id} className="flex items-center gap-2 text-sm cursor-pointer">
+                    <input 
+                      type="checkbox" 
+                      className="accent-blue-600 w-4 h-4"
+                      checked={(formData.pillarIds || []).includes(p.id)}
+                      onChange={(e) => {
+                        const current = formData.pillarIds || [];
+                        if (e.target.checked) {
+                          setFormData({...formData, pillarIds: [...current, p.id]});
+                        } else {
+                          setFormData({...formData, pillarIds: current.filter((id: string) => id !== p.id)});
+                        }
+                      }}
+                    />
+                    {p.name}
+                  </label>
+                ))}
+              </div>
             </div>
             <div>
               <label className="text-xs text-gray-500 font-bold mb-1 block">Data de Liberação (Agendamento)</label>
@@ -115,6 +134,39 @@ export const ContentManager: React.FC = () => {
           </div>
           <input type="text" placeholder="URL da Imagem de Capa" className="w-full p-3 border border-gray-200 rounded-xl" value={formData.imageUrl || ''} onChange={e => setFormData({...formData, imageUrl: e.target.value})} />
           <textarea placeholder="Resumo (Excerpt)" rows={2} className="w-full p-3 border border-gray-200 rounded-xl resize-none" value={formData.excerpt || ''} onChange={e => setFormData({...formData, excerpt: e.target.value})}></textarea>
+          
+          <div className="p-4 border border-blue-100 bg-blue-50/50 rounded-xl space-y-4">
+            <h4 className="font-bold text-blue-800 text-sm flex items-center gap-2">Configurações de SEO (Yoast)</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="text-xs text-gray-500 font-bold mb-1 block">URL Customizada (Slug)</label>
+                <input type="text" placeholder="ex: como-vender-mais" className="w-full p-3 border border-gray-200 rounded-xl" value={formData.slug || ''} onChange={e => setFormData({...formData, slug: e.target.value})} />
+              </div>
+              <div>
+                <label className="text-xs text-gray-500 font-bold mb-1 block">Frase Chave de Foco (Focus Keyword)</label>
+                <input type="text" placeholder="ex: técnica de vendas" className="w-full p-3 border border-gray-200 rounded-xl" value={formData.focusKeyword || ''} onChange={e => setFormData({...formData, focusKeyword: e.target.value})} />
+              </div>
+            </div>
+            <div>
+              <div className="flex justify-between items-center mb-1">
+                <label className="text-xs text-gray-500 font-bold block">Título SEO (Recomendado até 60 caracteres)</label>
+                <span className={`text-xs font-bold ${(formData.seoTitle?.length || 0) > 60 ? 'text-red-500' : 'text-green-600'}`}>{formData.seoTitle?.length || 0} / 60</span>
+              </div>
+              <input type="text" placeholder="Título atraente para o Google" className="w-full p-3 border border-gray-200 rounded-xl" value={formData.seoTitle || ''} onChange={e => setFormData({...formData, seoTitle: e.target.value})} />
+            </div>
+            <div>
+              <div className="flex justify-between items-center mb-1">
+                <label className="text-xs text-gray-500 font-bold block">Meta Description (Recomendado até 160 caracteres)</label>
+                <span className={`text-xs font-bold ${(formData.seoDescription?.length || 0) > 160 ? 'text-red-500' : 'text-green-600'}`}>{formData.seoDescription?.length || 0} / 160</span>
+              </div>
+              <textarea placeholder="Resumo que aparece abaixo do título no Google" rows={2} className="w-full p-3 border border-gray-200 rounded-xl resize-none" value={formData.seoDescription || ''} onChange={e => setFormData({...formData, seoDescription: e.target.value})}></textarea>
+            </div>
+            <div>
+              <label className="text-xs text-gray-500 font-bold mb-1 block">Tags (separadas por vírgula)</label>
+              <input type="text" placeholder="vendas, marketing, liderança" className="w-full p-3 border border-gray-200 rounded-xl" value={formData.tags?.join(', ') || ''} onChange={e => setFormData({...formData, tags: e.target.value.split(',').map((t: string) => t.trim()).filter(Boolean)})} />
+            </div>
+          </div>
+
           <div className="bg-white">
             <ReactQuill theme="snow" value={formData.content || ''} onChange={val => setFormData({...formData, content: val})} modules={quillModules} className="h-[300px] mb-12" />
           </div>

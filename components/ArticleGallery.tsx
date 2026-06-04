@@ -29,7 +29,7 @@ const ArticleGallery: React.FC<Props> = ({ limit = 12 }) => {
 
   const filteredArticles = selectedPillar === 'all' 
     ? articles 
-    : articles.filter(a => a.pillarId === selectedPillar);
+    : articles.filter(a => a.pillarIds && a.pillarIds.includes(selectedPillar));
 
   return (
     <section className="py-24 px-6 bg-white">
@@ -82,7 +82,7 @@ const ArticleGallery: React.FC<Props> = ({ limit = 12 }) => {
                   />
                 </div>
                 <p className="text-[10px] font-bold text-blue-600 uppercase tracking-[0.2em] mb-3">
-                  {pillars.find(p => p.id === article.pillarId)?.title}
+                  {pillars.find(p => p.id === (article.pillarIds?.[0] || 'prof-paulo'))?.title}
                 </p>
                 <h3 className="text-2xl font-bold mb-4 group-hover:text-blue-600 transition-colors line-clamp-2 leading-tight">{article.title}</h3>
                 <p className="text-gray-500 leading-relaxed mb-6 line-clamp-2 text-sm font-medium">

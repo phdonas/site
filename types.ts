@@ -4,13 +4,19 @@ export type PillarId = 'prof-paulo' | 'consultoria-imobiliaria' | '4050oumais' |
 export interface Article {
   id: string;
   title: string;
-  pillarId: PillarId;
+  pillarIds: PillarId[];
   category: string;
   excerpt: string;
   content: string;
   date: string;
   publishDate?: string;
   imageUrl: string;
+  // SEO Fields (Substituindo Yoast)
+  slug?: string;
+  seoTitle?: string;
+  seoDescription?: string;
+  focusKeyword?: string;
+  tags?: string[];
 }
 
 export interface Video {

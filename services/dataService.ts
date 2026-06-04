@@ -9,16 +9,50 @@ const CACHE_KEY_VIDEOS = 'phd_vid_v41';
 const mapWPPostToArticle = (post: any): Article => {
   const content = post.content?.rendered || '';
   const wpCategories = post._embedded?.['wp:term']?.[0] || [];
+  const wpTags = post._embedded?.['wp:term']?.[1] || [];
   
+  const decode = (txt: string) => {
+    if (!txt) return '';
+    const textArea = document.createElement('textarea');
+    textArea.innerHTML = txt;
+    return textArea.value;
+  };
+
+  const title = decode(post.title?.rendered || 'Sem Título');
+  const excerptRaw = post.excerpt?.rendered?.replace(/<[^>]*>?/gm, '').substring(0, 160) + '...';
+  const excerpt = decode(excerptRaw);
+
+  const pillarMapping: Record<string, PillarId> = {
+    'Consultoria': 'consultoria-imobiliaria',
+    'Consultoria Imobiliária': 'consultoria-imobiliaria',
+    '4050 ou mais': '4050oumais',
+    '40/50 ou mais': '4050oumais',
+    'Academia do Gás': 'academia-do-gas'
+  };
+
+  const pillarIds: PillarId[] = [];
+  wpCategories.forEach((cat: any) => {
+    const pId = pillarMapping[decode(cat.name)];
+    if (pId && !pillarIds.includes(pId)) pillarIds.push(pId);
+  });
+  if (pillarIds.length === 0) pillarIds.push('prof-paulo'); // Default
+
+  const yoast = post.yoast_head_json || {};
+
   return {
     id: post.id.toString(),
-    title: post.title?.rendered || 'Sem Título',
-    pillarId: 'prof-paulo', 
-    category: wpCategories[0]?.name || 'Geral', 
-    excerpt: post.excerpt?.rendered?.replace(/<[^>]*>?/gm, '').substring(0, 160) + '...',
+    title: title,
+    pillarIds: pillarIds, 
+    category: wpCategories.map((c: any) => decode(c.name)).join(', ') || 'Geral', 
+    excerpt: excerpt,
     content: content,
     date: post.date,
-    imageUrl: post._embedded?.['wp:featuredmedia']?.[0]?.source_url || 'https://images.unsplash.com/photo-1501504905252-473c47e087f8?auto=format&fit=crop&q=80&w=1200'
+    imageUrl: post._embedded?.['wp:featuredmedia']?.[0]?.source_url || 'https://images.unsplash.com/photo-1501504905252-473c47e087f8?auto=format&fit=crop&q=80&w=1200',
+    slug: post.slug || '',
+    seoTitle: yoast.title || title,
+    seoDescription: yoast.description || excerpt,
+    focusKeyword: yoast.focuskw || yoast.focus_keyword || '',
+    tags: wpTags.map((t: any) => decode(t.name))
   };
 };
 
@@ -93,7 +127,7 @@ export const DataService = {
 
   async getArticlesByPillar(pillarId: PillarId, limit = 3): Promise<Article[]> {
     const all = await this.getArticles(500);
-    return all.filter(a => a.pillarId === pillarId).slice(0, limit);
+    return all.filter(a => a.pillarIds && a.pillarIds.includes(pillarId)).slice(0, limit);
   },
 
   async getCourses(): Promise<Course[]> { 

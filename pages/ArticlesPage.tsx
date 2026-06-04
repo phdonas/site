@@ -27,7 +27,7 @@ const ArticlesPage: React.FC = () => {
   }, []);
 
   const filteredArticles = articles.filter(article => {
-    const matchesPillar = selectedPillar === 'all' || article.pillarId === selectedPillar;
+    const matchesPillar = selectedPillar === 'all' || (article.pillarIds && article.pillarIds.includes(selectedPillar));
     const matchesSearch = article.title.toLowerCase().includes(search.toLowerCase()) || 
                           article.excerpt.toLowerCase().includes(search.toLowerCase());
     return matchesPillar && matchesSearch;

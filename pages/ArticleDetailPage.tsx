@@ -30,7 +30,7 @@ const ArticleDetailPage: React.FC<Props> = ({ articleId }) => {
         
         if (data) {
           setArticle(data);
-          const pData = await DataService.getPillarById(data.pillarId);
+          const pData = await DataService.getPillarById(data.pillarIds?.[0] || 'prof-paulo');
           if (pData) setPillar(pData);
         } else {
           setError("Artigo não encontrado ou erro na conexão com o WordPress.");
@@ -47,11 +47,27 @@ const ArticleDetailPage: React.FC<Props> = ({ articleId }) => {
     return () => { isMounted = false; };
   }, [articleId]);
 
+  useEffect(() => {
+    if (article) {
+      document.title = article.seoTitle || `${article.title} | PH Donassolo`;
+      
+      const metaDesc = document.querySelector('meta[name="description"]');
+      if (metaDesc) {
+        metaDesc.setAttribute("content", article.seoDescription || article.excerpt);
+      } else {
+        const meta = document.createElement('meta');
+        meta.name = "description";
+        meta.content = article.seoDescription || article.excerpt;
+        document.head.appendChild(meta);
+      }
+    }
+  }, [article]);
+
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-[#fbfbfd]">
         <div className="w-10 h-10 border-2 border-gray-200 border-t-blue-600 rounded-full animate-spin mb-4"></div>
-        <p className="text-gray-400 text-sm font-medium tracking-tight animate-pulse">Sincronizando com WordPress...</p>
+        <p className="text-gray-400 text-sm font-medium tracking-tight animate-pulse">Carregando artigo...</p>
       </div>
     );
   }
@@ -143,6 +159,15 @@ const ArticleDetailPage: React.FC<Props> = ({ articleId }) => {
           className="wp-content-render prose prose-lg md:prose-xl prose-slate max-w-none text-[#1d1d1f]" 
           dangerouslySetInnerHTML={{ __html: article.content }} 
         />
+        
+        {/* Tags de SEO */}
+        {article.tags && article.tags.length > 0 && (
+          <div className="mt-12 flex flex-wrap gap-2">
+            {article.tags.map(tag => (
+              <span key={tag} className="px-3 py-1 bg-gray-100 text-gray-600 text-xs font-bold rounded-full uppercase tracking-wider">{tag}</span>
+            ))}
+          </div>
+        )}
         
         {/* Rodapé do Artigo */}
         <footer className="mt-24 border-t border-gray-100 pt-16">
