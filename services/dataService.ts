@@ -151,7 +151,7 @@ export const DataService = {
       }
 
       // 2. Bater na API do WP PELA ÚLTIMA VEZ para resgatar os Artigos e Vídeos Históricos
-      const posts = await secureFetch('/posts?per_page=100');
+      const posts = await secureFetch('/posts&per_page=100');
       if (posts && Array.isArray(posts)) {
           // Artigos
           const mappedArticles = posts.map(mapWPPostToArticle);
