@@ -137,11 +137,11 @@ export const SiteEditor: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-bold text-gray-500 mb-1 uppercase">Título</label>
-                  <input type="text" className="w-full p-3 border border-gray-200 rounded-xl bg-gray-50" value={formData.sections.pillars.title} onChange={e => handleChange('sections.pillars.title', e.target.value)} />
+                  <input type="text" className="w-full p-3 border border-gray-200 rounded-xl bg-gray-50" value={formData.sections?.pillars?.title || ''} onChange={e => handleChange('sections.pillars.title', e.target.value)} />
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-gray-500 mb-1 uppercase">Subtítulo</label>
-                  <input type="text" className="w-full p-3 border border-gray-200 rounded-xl bg-gray-50" value={formData.sections.pillars.subtitle} onChange={e => handleChange('sections.pillars.subtitle', e.target.value)} />
+                  <input type="text" className="w-full p-3 border border-gray-200 rounded-xl bg-gray-50" value={formData.sections?.pillars?.subtitle || ''} onChange={e => handleChange('sections.pillars.subtitle', e.target.value)} />
                 </div>
               </div>
             </div>
@@ -153,11 +153,11 @@ export const SiteEditor: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-bold text-gray-500 mb-1 uppercase">Título</label>
-                  <input type="text" className="w-full p-3 border border-gray-200 rounded-xl bg-gray-50" value={formData.sections.services.title} onChange={e => handleChange('sections.services.title', e.target.value)} />
+                  <input type="text" className="w-full p-3 border border-gray-200 rounded-xl bg-gray-50" value={formData.sections?.services?.title || ''} onChange={e => handleChange('sections.services.title', e.target.value)} />
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-gray-500 mb-1 uppercase">Subtítulo</label>
-                  <input type="text" className="w-full p-3 border border-gray-200 rounded-xl bg-gray-50" value={formData.sections.services.subtitle} onChange={e => handleChange('sections.services.subtitle', e.target.value)} />
+                  <input type="text" className="w-full p-3 border border-gray-200 rounded-xl bg-gray-50" value={formData.sections?.services?.subtitle || ''} onChange={e => handleChange('sections.services.subtitle', e.target.value)} />
                 </div>
               </div>
             </div>
@@ -167,8 +167,8 @@ export const SiteEditor: React.FC = () => {
               <h3 className="font-bold text-xl mb-4 text-blue-600">Bloco de Vídeos Recentes</h3>
               {renderToggle('sections.videos.visible', 'Exibir bloco de Vídeos')}
               <div className="grid grid-cols-1 gap-4">
-                <input type="text" className="w-full p-3 border border-gray-200 rounded-xl bg-gray-50" placeholder="Título" value={formData.sections.videos.title} onChange={e => handleChange('sections.videos.title', e.target.value)} />
-                <input type="text" className="w-full p-3 border border-gray-200 rounded-xl bg-gray-50" placeholder="Subtítulo" value={formData.sections.videos.subtitle} onChange={e => handleChange('sections.videos.subtitle', e.target.value)} />
+                <input type="text" className="w-full p-3 border border-gray-200 rounded-xl bg-gray-50" placeholder="Título" value={formData.sections?.videos?.title || ''} onChange={e => handleChange('sections.videos.title', e.target.value)} />
+                <input type="text" className="w-full p-3 border border-gray-200 rounded-xl bg-gray-50" placeholder="Subtítulo" value={formData.sections?.videos?.subtitle || ''} onChange={e => handleChange('sections.videos.subtitle', e.target.value)} />
               </div>
             </div>
             

@@ -23,16 +23,22 @@ const mapWPPostToArticle = (post: any): Article => {
   const excerpt = decode(excerptRaw);
 
   const pillarMapping: Record<string, PillarId> = {
-    'Consultoria': 'consultoria-imobiliaria',
-    'Consultoria Imobiliária': 'consultoria-imobiliaria',
+    'consultoria': 'consultoria-imobiliaria',
+    'consultoria imobiliária': 'consultoria-imobiliaria',
+    'sou consultor imobiliário': 'consultoria-imobiliaria',
     '4050 ou mais': '4050oumais',
     '40/50 ou mais': '4050oumais',
-    'Academia do Gás': 'academia-do-gas'
+    '4050oumais': '4050oumais',
+    'academia do gás': 'academia-do-gas',
+    'academia do gas': 'academia-do-gas',
+    'prof. paulo': 'prof-paulo',
+    'prof paulo': 'prof-paulo'
   };
 
   const pillarIds: PillarId[] = [];
   wpCategories.forEach((cat: any) => {
-    const pId = pillarMapping[decode(cat.name)];
+    const normalizedName = decode(cat.name).toLowerCase().trim();
+    const pId = pillarMapping[normalizedName];
     if (pId && !pillarIds.includes(pId)) pillarIds.push(pId);
   });
   if (pillarIds.length === 0) pillarIds.push('prof-paulo'); // Default
