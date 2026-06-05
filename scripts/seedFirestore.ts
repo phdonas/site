@@ -1,6 +1,6 @@
 import { doc, setDoc, Firestore } from 'firebase/firestore';
 
-export type PageId = 'home' | 'mentoria' | 'consultoria' | 'prof_paulo' | 'servicos' | 'fale_comigo' | 'area_do_aluno';
+export type PageId = 'home' | 'mentoria' | 'consultoria' | 'prof_paulo' | 'servicos' | 'fale_comigo' | 'area_do_aluno' | 'recursos';
 
 // ─── DEFAULT CONTENT ──────────────────────────────────────────────────────────
 
@@ -536,6 +536,54 @@ export const PAGE_DEFAULTS: Record<PageId, Record<string, any>> = {
         { pergunta: 'A primeira conversa é gratuita?', resposta: 'Sim. A conversa de diagnóstico inicial é sempre gratuita e sem compromisso.', ordem: 2 },
         { pergunta: 'Atende empresas fora do Brasil?', resposta: 'Sim. Atendo empresas no Brasil e em Portugal. As sessões são online.', ordem: 3 },
       ],
+    },
+  },
+
+  // ── RECURSOS ─────────────────────────────────────────────────────────────
+  recursos: {
+    hero: {
+      visivel: true,
+      eyebrow: 'Recursos & Acesso',
+      titulo_linha1: 'Tudo num só lugar.',
+      titulo_destaque: 'Acesso direto.',
+      subtexto: 'Recursos práticos para gestores e equipes comerciais — livros, templates e ferramentas para aplicar no dia a dia.',
+    },
+    card_area_aluno: {
+      visivel: true,
+      marker: 'Plataforma exclusiva',
+      titulo: 'Área do Aluno',
+      descricao: 'Acesse os materiais dos programas e formações com login seguro.',
+      link_texto: 'Acessar plataforma',
+      link_url: '#/area-do-aluno',
+    },
+    card_udemy: {
+      visivel: true,
+      marker: 'Cursos online',
+      titulo: 'Cursos na Udemy',
+      descricao: 'Formações práticas disponíveis nas principais plataformas de ensino.',
+      link_texto: 'Ver cursos na Udemy',
+      link_url: '',
+    },
+    card_amazon: {
+      visivel: true,
+      marker: 'Publicações',
+      titulo: 'Livros na Amazon',
+      descricao: 'Três livros publicados sobre gestão de vendas, liderança e performance comercial.',
+      link_texto: 'Ver na Amazon',
+      link_url: '',
+      livro_1_titulo: 'Gestão de Equipes Comerciais',
+      livro_2_titulo: 'Vendas B2B: Processo e Método',
+      livro_3_titulo: 'A Arte da Negociação Comercial',
+    },
+    cta_final: {
+      visivel: true,
+      eyebrow: 'Próximo passo',
+      titulo: 'Vamos conversar sobre o seu desafio?',
+      subtexto: 'Uma conversa de 30 minutos para entender o que está travando seu time e como podemos resolver juntos.',
+      cta_primario_texto: 'Fale Comigo',
+      cta_primario_link: '#/fale-comigo',
+      cta_secundario_texto: 'Ver serviços',
+      cta_secundario_link: '#/servicos',
     },
   },
 

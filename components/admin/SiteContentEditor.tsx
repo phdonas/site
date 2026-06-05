@@ -12,8 +12,9 @@ import { ProfPauloEditor } from './editors/ProfPauloEditor';
 import { ServicosEditor } from './editors/ServicosEditor';
 import { FaleComigoeEditor } from './editors/FaleComigoeEditor';
 import { AreaAlunoEditor } from './editors/AreaAlunoEditor';
+import { RecursosEditor } from './editors/RecursosEditor';
 
-type PageId = 'home' | 'mentoria' | 'consultoria' | 'prof_paulo' | 'servicos' | 'fale_comigo' | 'area_do_aluno';
+type PageId = 'home' | 'mentoria' | 'consultoria' | 'prof_paulo' | 'servicos' | 'fale_comigo' | 'area_do_aluno' | 'recursos';
 
 const PAGES: { id: PageId; label: string; hash: string }[] = [
   { id: 'home', label: 'Home', hash: '#/' },
@@ -23,6 +24,7 @@ const PAGES: { id: PageId; label: string; hash: string }[] = [
   { id: 'servicos', label: 'Serviços', hash: '#/servicos' },
   { id: 'fale_comigo', label: 'Fale Comigo', hash: '#/fale-comigo' },
   { id: 'area_do_aluno', label: 'Área do Aluno', hash: '#/area-do-aluno' },
+  { id: 'recursos', label: 'Recursos', hash: '#/recursos' },
 ];
 
 // ---- Home page editor (inline here since it's unique) ----
@@ -310,6 +312,7 @@ export const SiteContentEditor: React.FC = () => {
       case 'servicos': return <ServicosEditor {...props} />;
       case 'fale_comigo': return <FaleComigoeEditor {...props} />;
       case 'area_do_aluno': return <AreaAlunoEditor {...props} />;
+      case 'recursos': return <RecursosEditor {...props} />;
     }
   };
 
