@@ -301,7 +301,7 @@ export const SupabaseService = {
     if (categoria) query = query.eq('categoria', categoria)
 
     const { data, error } = await query
-    if (error) { console.error('Supabase getFerramentas error:', error); return [] }
+    if (error) { console.error('Supabase getFerramentas error:', JSON.stringify(error, null, 2)); return [] }
     return (data as Ferramenta[]) || []
   },
 
@@ -339,12 +339,11 @@ export const SupabaseService = {
       `)
       .eq('visivel_no_site', true)
       .eq('status', 'ativo')
-      .order('ordem_vitrine', { ascending: true })
 
     if (destaque !== undefined) query = query.eq('destaque_vitrine', destaque)
 
     const { data, error } = await query
-    if (error) { console.error('Supabase getRecursos error:', error); return [] }
+    if (error) { console.error('Supabase getRecursos error:', JSON.stringify(error, null, 2)); return [] }
     return (data as Recurso[]) || []
   },
 
