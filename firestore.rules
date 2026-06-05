@@ -2,8 +2,12 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Permite leitura pública para que os visitantes vejam o conteúdo do site
-    // Restringe a escrita apenas para usuários autenticados (Admin logado)
+    // Visitantes podem criar leads (coleta de e-mail para recursos gratuitos)
+    match /leads/{document} {
+      allow create: if true;
+    }
+
+    // Todo o restante: leitura pública, escrita só para admin autenticado
     match /{document=**} {
       allow read: if true;
       allow write: if request.auth != null;

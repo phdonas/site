@@ -29,25 +29,22 @@ export const FerramentaLeadModal: React.FC<Props> = ({ ferramenta, onClose }) =>
       await addDoc(collection(db, 'leads'), {
         nome: nome.trim(),
         email: email.trim(),
-        tipo: 'recurso',
+        tipo: 'ferramenta',
         recurso: ferramenta.titulo,
         lgpd_aceito: true,
         lgpd_data: serverTimestamp(),
-        data: serverTimestamp(),
+        createdAt: serverTimestamp(),
       });
+      console.log('Firestore: lead salvo com sucesso');
+    } catch (firestoreError) {
+      console.error('Firestore error detalhado:', JSON.stringify(firestoreError, Object.getOwnPropertyNames(firestoreError as object)));
+      setErro('Erro ao salvar. Tente novamente.');
+      setEnviando(false);
+      return;
+    }
 
-      sendNotificationEmail({
-        tipo: 'recurso',
-        nome: nome.trim(),
-        email: email.trim(),
-        recurso: ferramenta.titulo,
-      });
-
-      onClose();
-
-      const url = ferramenta.url_entrega || ferramenta.arquivo_url;
-      if (!url) return;
-
+    const url = ferramenta.url_entrega || ferramenta.arquivo_url;
+    if (url) {
       if (ferramenta.tipo_entrega === 'download') {
         const a = document.createElement('a');
         a.href = url;
@@ -56,10 +53,16 @@ export const FerramentaLeadModal: React.FC<Props> = ({ ferramenta, onClose }) =>
       } else {
         window.open(url, '_blank', 'noopener,noreferrer');
       }
-    } catch {
-      setErro('Erro ao enviar. Tente novamente.');
-      setEnviando(false);
     }
+
+    sendNotificationEmail({
+      tipo: 'recurso',
+      nome: nome.trim(),
+      email: email.trim(),
+      recurso: ferramenta.titulo,
+    }).catch(e => console.warn('Email falhou (não bloqueante):', e));
+
+    onClose();
   };
 
   const resetAndClose = () => {
