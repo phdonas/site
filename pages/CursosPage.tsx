@@ -1,19 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import ScrollReveal from '../components/ui/ScrollReveal';
 import SupabaseService, { Curso } from '../services/supabaseService';
+import { getCursosExternos, CursoExterno } from '../services/cursosExternosService';
+
+// ── Filtro ────────────────────────────────────────────────────────────────────
 
 const TIPOS = ['Todos', 'LMS', 'Udemy', 'ESPM'] as const;
 type FiltroTipo = typeof TIPOS[number];
 
+// ── Card LMS (Supabase) ───────────────────────────────────────────────────────
+
 const tipoLabel: Record<string, string> = { lms: 'Plataforma Própria', udemy: 'Udemy', espm: 'ESPM' };
 
 const CursoCard: React.FC<{ curso: Curso; delay: 1 | 2 | 3 }> = ({ curso, delay }) => {
-  const href = curso.tipo === 'lms'
-    ? `#/curso/${curso.slug}`
-    : (curso.url_checkout || '#/cursos');
-  const isExterno = curso.tipo !== 'lms';
-  const ctaLabel = curso.tipo === 'lms' ? 'Ver o curso' : `Ver na ${tipoLabel[curso.tipo] ?? curso.tipo} ↗`;
-
+  const href = `#/curso/${curso.slug}`;
   const preco = curso.preco_vitrine_brl;
   const precoOriginal = curso.preco_original_brl;
   const isGratis = curso.is_gratis || curso.is_free;
@@ -22,15 +22,13 @@ const CursoCard: React.FC<{ curso: Curso; delay: 1 | 2 | 3 }> = ({ curso, delay 
     <ScrollReveal delay={delay}>
       <div style={{
         background: 'rgba(243,239,230,.04)', border: '1px solid rgba(243,239,230,.07)',
-        padding: '0', display: 'flex', flexDirection: 'column', overflow: 'hidden',
+        display: 'flex', flexDirection: 'column', overflow: 'hidden',
       }}>
-        {/* Capa */}
         <div style={{ aspectRatio: '16/9', background: 'var(--navy)', position: 'relative', overflow: 'hidden' }}>
           {curso.thumb_url
             ? <img src={curso.thumb_url} alt={curso.titulo} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             : <div style={{ width: '100%', height: '100%', background: 'rgba(243,239,230,.04)' }} />
           }
-          {/* Badge plataforma */}
           <div style={{
             position: 'absolute', top: '.8rem', left: '.8rem',
             fontFamily: 'var(--fm)', fontSize: '.45rem', letterSpacing: '.18em', textTransform: 'uppercase',
@@ -49,7 +47,6 @@ const CursoCard: React.FC<{ curso: Curso; delay: 1 | 2 | 3 }> = ({ curso, delay 
           )}
         </div>
 
-        {/* Conteúdo */}
         <div style={{ padding: '1.6rem', display: 'flex', flexDirection: 'column', gap: '.8rem', flexGrow: 1 }}>
           <div style={{ display: 'flex', gap: '.5rem', flexWrap: 'wrap' }}>
             {curso.nivel && (
@@ -91,14 +88,8 @@ const CursoCard: React.FC<{ curso: Curso; delay: 1 | 2 | 3 }> = ({ curso, delay 
                 </div>
               ) : null}
             </div>
-            <a
-              href={href}
-              target={isExterno ? '_blank' : undefined}
-              rel={isExterno ? 'noopener noreferrer' : undefined}
-              className="btn-primary"
-              style={{ fontSize: '.6rem', padding: '.5rem 1.1rem' }}
-            >
-              {ctaLabel}
+            <a href={href} className="btn-primary" style={{ fontSize: '.6rem', padding: '.5rem 1.1rem' }}>
+              Ver o curso →
             </a>
           </div>
         </div>
@@ -107,51 +98,157 @@ const CursoCard: React.FC<{ curso: Curso; delay: 1 | 2 | 3 }> = ({ curso, delay 
   );
 };
 
+// ── Card Externo (Firestore — Udemy / ESPM) ───────────────────────────────────
+
+const platLabel: Record<'udemy' | 'espm', string> = { udemy: 'Udemy', espm: 'ESPM' };
+
+const CursoExternoCard: React.FC<{ curso: CursoExterno; delay: 1 | 2 | 3 }> = ({ curso, delay }) => (
+  <ScrollReveal delay={delay}>
+    <div style={{
+      background: 'rgba(243,239,230,.04)', border: '1px solid rgba(243,239,230,.07)',
+      display: 'flex', flexDirection: 'column', overflow: 'hidden',
+    }}>
+      <div style={{ aspectRatio: '16/9', background: 'var(--navy)', position: 'relative', overflow: 'hidden' }}>
+        {curso.thumb_url
+          ? <img src={curso.thumb_url} alt={curso.titulo} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          : <div style={{ width: '100%', height: '100%', background: 'rgba(243,239,230,.04)' }} />
+        }
+        <div style={{
+          position: 'absolute', top: '.8rem', left: '.8rem',
+          fontFamily: 'var(--fm)', fontSize: '.45rem', letterSpacing: '.18em', textTransform: 'uppercase',
+          color: 'var(--gold)', background: 'rgba(12,24,36,.85)', padding: '.2rem .6rem',
+        }}>
+          {platLabel[curso.plataforma]}
+        </div>
+        {curso.gratuito && (
+          <div style={{
+            position: 'absolute', top: '.8rem', right: '.8rem',
+            fontFamily: 'var(--fm)', fontSize: '.45rem', letterSpacing: '.14em', textTransform: 'uppercase',
+            color: '#fff', background: '#27ae60', padding: '.2rem .6rem',
+          }}>
+            Grátis
+          </div>
+        )}
+      </div>
+
+      <div style={{ padding: '1.6rem', display: 'flex', flexDirection: 'column', gap: '.8rem', flexGrow: 1 }}>
+        <div style={{ display: 'flex', gap: '.5rem', flexWrap: 'wrap' }}>
+          {curso.nivel && (
+            <span style={{ fontFamily: 'var(--fm)', fontSize: '.44rem', letterSpacing: '.1em', color: 'rgba(243,239,230,.3)', border: '1px solid rgba(243,239,230,.1)', padding: '.2rem .5rem' }}>
+              {curso.nivel}
+            </span>
+          )}
+          {curso.categoria && (
+            <span style={{ fontFamily: 'var(--fm)', fontSize: '.44rem', letterSpacing: '.1em', color: 'rgba(243,239,230,.3)', border: '1px solid rgba(243,239,230,.1)', padding: '.2rem .5rem' }}>
+              {curso.categoria}
+            </span>
+          )}
+          {curso.carga_horaria && (
+            <span style={{ fontFamily: 'var(--fm)', fontSize: '.44rem', letterSpacing: '.1em', color: 'rgba(243,239,230,.3)', border: '1px solid rgba(243,239,230,.1)', padding: '.2rem .5rem' }}>
+              {curso.carga_horaria}
+            </span>
+          )}
+        </div>
+
+        <h3 style={{ fontFamily: 'var(--fd)', fontSize: '1.15rem', fontWeight: 700, color: 'rgba(243,239,230,.85)', lineHeight: 1.25 }}>
+          {curso.titulo}
+        </h3>
+
+        {curso.descricao && (
+          <p style={{ fontSize: '.8rem', color: 'rgba(243,239,230,.35)', lineHeight: 1.6, flexGrow: 1 }}>
+            {curso.descricao.substring(0, 120)}{curso.descricao.length > 120 ? '…' : ''}
+          </p>
+        )}
+
+        <div style={{ marginTop: 'auto', paddingTop: '.8rem', borderTop: '1px solid rgba(243,239,230,.06)' }}>
+          <a
+            href={curso.url_externo || '#'}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn-primary"
+            style={{ fontSize: '.6rem', padding: '.5rem 1.1rem', display: 'inline-block' }}
+          >
+            Ver na {platLabel[curso.plataforma]} ↗
+          </a>
+        </div>
+      </div>
+    </div>
+  </ScrollReveal>
+);
+
+// ── Grid section helper ───────────────────────────────────────────────────────
+
+const Section: React.FC<{ eyebrow: string; children: React.ReactNode }> = ({ eyebrow, children }) => (
+  <div style={{ marginBottom: '4rem' }}>
+    <ScrollReveal>
+      <div className="eyebrow" style={{ color: 'rgba(243,239,230,.35)', borderColor: 'var(--gold)', marginBottom: '2rem' }}>
+        {eyebrow}
+      </div>
+    </ScrollReveal>
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem' }}>
+      {children}
+    </div>
+  </div>
+);
+
+// ── Programas corporativos (estático) ─────────────────────────────────────────
+
+const programas = [
+  {
+    titulo: 'Gestão Comercial para Líderes',
+    desc: 'Formação intensiva para gestores que querem implementar um processo comercial estruturado na sua empresa.',
+    formato: 'Turmas abertas · Corporativo in company',
+    duracao: '16h (2 dias)',
+  },
+  {
+    titulo: 'Vendas B2B: Método e Processo',
+    desc: 'Capacitação de equipes de vendas para indústria e distribuição. Focado na prática, não na teoria.',
+    formato: 'Corporativo in company',
+    duracao: '8h (1 dia)',
+  },
+  {
+    titulo: 'Liderança Comercial',
+    desc: 'Para supervisores e gerentes que precisam desenvolver as habilidades de gestão de pessoas e processos.',
+    formato: 'Turmas abertas · Corporativo in company',
+    duracao: '24h (3 dias)',
+  },
+];
+
+// ── Page ─────────────────────────────────────────────────────────────────────
+
 const CursosPage: React.FC = () => {
-  const [cursos, setCursos] = useState<Curso[]>([]);
-  const [stats, setStats] = useState({ total: 0, gratuitos: 0 });
+  const [cursosLMS, setCursosLMS] = useState<Curso[]>([]);
+  const [cursosUdemy, setCursosUdemy] = useState<CursoExterno[]>([]);
+  const [cursosESPM, setCursosESPM] = useState<CursoExterno[]>([]);
   const [loading, setLoading] = useState(true);
   const [filtro, setFiltro] = useState<FiltroTipo>('Todos');
 
   useEffect(() => {
     Promise.all([
-      SupabaseService.getCursos(),
-      SupabaseService.getCursosStats(),
-    ]).then(([data, s]) => {
-      setCursos(data);
-      setStats(s);
+      SupabaseService.getCursos({ tipo: 'lms' }),
+      getCursosExternos(),
+    ]).then(([lms, externos]) => {
+      setCursosLMS(lms);
+      setCursosUdemy(externos.filter(c => c.plataforma === 'udemy'));
+      setCursosESPM(externos.filter(c => c.plataforma === 'espm'));
       setLoading(false);
-    });
+    }).catch(() => setLoading(false));
   }, []);
 
-  const filtrados = filtro === 'Todos'
-    ? cursos
-    : cursos.filter(c => c.tipo === filtro.toLowerCase());
+  const total = cursosLMS.length + cursosUdemy.length + cursosESPM.length;
+  const gratuitos = cursosLMS.filter(c => c.is_gratis || c.is_free).length
+    + cursosUdemy.filter(c => c.gratuito).length
+    + cursosESPM.filter(c => c.gratuito).length;
 
-  const lms   = filtrados.filter(c => c.tipo === 'lms');
-  const udemy = filtrados.filter(c => c.tipo === 'udemy');
-  const espm  = filtrados.filter(c => c.tipo === 'espm');
+  const showLMS   = filtro === 'Todos' || filtro === 'LMS';
+  const showUdemy = filtro === 'Todos' || filtro === 'Udemy';
+  const showESPM  = filtro === 'Todos' || filtro === 'ESPM';
 
-  const programas = [
-    {
-      titulo: 'Gestão Comercial para Líderes',
-      desc: 'Formação intensiva para gestores que querem implementar um processo comercial estruturado na sua empresa.',
-      formato: 'Turmas abertas · Corporativo in company',
-      duracao: '16h (2 dias)',
-    },
-    {
-      titulo: 'Vendas B2B: Método e Processo',
-      desc: 'Capacitação de equipes de vendas para indústria e distribuição. Focado na prática, não na teoria.',
-      formato: 'Corporativo in company',
-      duracao: '8h (1 dia)',
-    },
-    {
-      titulo: 'Liderança Comercial',
-      desc: 'Para supervisores e gerentes que precisam desenvolver as habilidades de gestão de pessoas e processos.',
-      formato: 'Turmas abertas · Corporativo in company',
-      duracao: '24h (3 dias)',
-    },
-  ];
+  const nenhum = !loading && (
+    (showLMS && cursosLMS.length === 0) &&
+    (showUdemy && cursosUdemy.length === 0) &&
+    (showESPM && cursosESPM.length === 0)
+  );
 
   return (
     <main>
@@ -172,11 +269,10 @@ const CursosPage: React.FC = () => {
             <p style={{ fontSize: '1rem', color: 'rgba(243,239,230,.45)', lineHeight: 1.75, maxWidth: 520, marginBottom: '2.5rem' }}>
               Cursos online nas principais plataformas e formações presenciais para times e líderes comerciais. Com método, não com motivação.
             </p>
-            {/* Stats */}
             <div style={{ display: 'flex', gap: '3rem', flexWrap: 'wrap' }}>
               {[
-                { n: loading ? '—' : String(stats.total), label: 'cursos disponíveis' },
-                { n: loading ? '—' : String(stats.gratuitos), label: 'gratuitos' },
+                { n: loading ? '—' : String(total), label: 'cursos disponíveis' },
+                { n: loading ? '—' : String(gratuitos), label: 'gratuitos' },
                 { n: '20+', label: 'anos ensinando' },
               ].map(s => (
                 <div key={s.label}>
@@ -189,7 +285,7 @@ const CursosPage: React.FC = () => {
         </div>
       </section>
 
-      {/* Filtro de tipo */}
+      {/* Filtro */}
       <section style={{ background: 'var(--navy)', borderBottom: '1px solid rgba(243,239,230,.07)', padding: '.8rem 0', position: 'sticky', top: 62, zIndex: 50 }}>
         <div className="sec-wrap">
           <div style={{ display: 'flex', gap: '.6rem', flexWrap: 'wrap' }}>
@@ -208,7 +304,7 @@ const CursosPage: React.FC = () => {
         </div>
       </section>
 
-      {/* Cursos online */}
+      {/* Cursos */}
       <section style={{ background: 'var(--navy)', padding: '5rem 0' }}>
         <div className="sec-wrap">
           {loading ? (
@@ -217,7 +313,7 @@ const CursosPage: React.FC = () => {
                 <div key={i} style={{ background: 'rgba(243,239,230,.04)', aspectRatio: '3/4' }} />
               ))}
             </div>
-          ) : filtrados.length === 0 ? (
+          ) : nenhum ? (
             <div style={{ textAlign: 'center', padding: '4rem 0' }}>
               <p style={{ fontFamily: 'var(--fd)', fontSize: '1.4rem', color: 'rgba(243,239,230,.35)', fontStyle: 'italic' }}>
                 Nenhum curso encontrado.
@@ -225,43 +321,22 @@ const CursosPage: React.FC = () => {
             </div>
           ) : (
             <>
-              {(filtro === 'Todos' || filtro === 'LMS') && lms.length > 0 && (
-                <div style={{ marginBottom: '4rem' }}>
-                  <ScrollReveal>
-                    <div className="eyebrow" style={{ color: 'rgba(243,239,230,.35)', borderColor: 'var(--gold)', marginBottom: '2rem' }}>
-                      Plataforma PHDonassolo
-                    </div>
-                  </ScrollReveal>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem' }}>
-                    {lms.map((c, i) => <CursoCard key={c.id} curso={c} delay={((i % 3) + 1) as 1 | 2 | 3} />)}
-                  </div>
-                </div>
+              {showLMS && cursosLMS.length > 0 && (
+                <Section eyebrow="Plataforma própria · phdonassolo.com">
+                  {cursosLMS.map((c, i) => <CursoCard key={c.id} curso={c} delay={((i % 3) + 1) as 1 | 2 | 3} />)}
+                </Section>
               )}
 
-              {(filtro === 'Todos' || filtro === 'Udemy') && udemy.length > 0 && (
-                <div style={{ marginBottom: '4rem' }}>
-                  <ScrollReveal>
-                    <div className="eyebrow" style={{ color: 'rgba(243,239,230,.35)', borderColor: 'var(--gold)', marginBottom: '2rem' }}>
-                      Udemy
-                    </div>
-                  </ScrollReveal>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem' }}>
-                    {udemy.map((c, i) => <CursoCard key={c.id} curso={c} delay={((i % 3) + 1) as 1 | 2 | 3} />)}
-                  </div>
-                </div>
+              {showUdemy && cursosUdemy.length > 0 && (
+                <Section eyebrow="Plataforma externa · Udemy">
+                  {cursosUdemy.map((c, i) => <CursoExternoCard key={c.id} curso={c} delay={((i % 3) + 1) as 1 | 2 | 3} />)}
+                </Section>
               )}
 
-              {(filtro === 'Todos' || filtro === 'ESPM') && espm.length > 0 && (
-                <div>
-                  <ScrollReveal>
-                    <div className="eyebrow" style={{ color: 'rgba(243,239,230,.35)', borderColor: 'var(--gold)', marginBottom: '2rem' }}>
-                      ESPM
-                    </div>
-                  </ScrollReveal>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem' }}>
-                    {espm.map((c, i) => <CursoCard key={c.id} curso={c} delay={((i % 3) + 1) as 1 | 2 | 3} />)}
-                  </div>
-                </div>
+              {showESPM && cursosESPM.length > 0 && (
+                <Section eyebrow="Pós-graduação e MBA · ESPM">
+                  {cursosESPM.map((c, i) => <CursoExternoCard key={c.id} curso={c} delay={((i % 3) + 1) as 1 | 2 | 3} />)}
+                </Section>
               )}
             </>
           )}

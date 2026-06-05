@@ -13,10 +13,11 @@ import { ServicosEditor } from './editors/ServicosEditor';
 import { FaleComigoeEditor } from './editors/FaleComigoeEditor';
 import { AreaAlunoEditor } from './editors/AreaAlunoEditor';
 import { RecursosEditor } from './editors/RecursosEditor';
+import { CursosExternosManager } from './CursosExternosManager';
 
-type PageId = 'home' | 'mentoria' | 'consultoria' | 'prof_paulo' | 'servicos' | 'fale_comigo' | 'area_do_aluno' | 'recursos';
+type PageId = 'home' | 'mentoria' | 'consultoria' | 'prof_paulo' | 'servicos' | 'fale_comigo' | 'area_do_aluno' | 'recursos' | 'cursos_externos';
 
-const PAGES: { id: PageId; label: string; hash: string }[] = [
+const PAGES: { id: PageId; label: string; hash: string; isCrud?: boolean }[] = [
   { id: 'home', label: 'Home', hash: '#/' },
   { id: 'mentoria', label: 'Mentoria', hash: '#/mentoria' },
   { id: 'consultoria', label: 'Consultoria', hash: '#/consultoria' },
@@ -25,6 +26,7 @@ const PAGES: { id: PageId; label: string; hash: string }[] = [
   { id: 'fale_comigo', label: 'Fale Comigo', hash: '#/fale-comigo' },
   { id: 'area_do_aluno', label: 'Área do Aluno', hash: '#/area-do-aluno' },
   { id: 'recursos', label: 'Recursos', hash: '#/recursos' },
+  { id: 'cursos_externos', label: 'Cursos Externos', hash: '#/cursos', isCrud: true },
 ];
 
 // ---- Home page editor (inline here since it's unique) ----
@@ -265,7 +267,10 @@ export const SiteContentEditor: React.FC = () => {
     setLoading(false);
   }, []);
 
-  useEffect(() => { loadPage(activePage); }, [activePage, loadPage]);
+  useEffect(() => {
+    if (activePage === 'cursos_externos') { setPageData({}); return; }
+    loadPage(activePage);
+  }, [activePage, loadPage]);
 
   const handleChange = (path: string, value: any) => {
     setPageData((prev: any) => {
@@ -313,6 +318,7 @@ export const SiteContentEditor: React.FC = () => {
       case 'fale_comigo': return <FaleComigoeEditor {...props} />;
       case 'area_do_aluno': return <AreaAlunoEditor {...props} />;
       case 'recursos': return <RecursosEditor {...props} />;
+      case 'cursos_externos': return <CursosExternosManager />;
     }
   };
 
@@ -354,28 +360,30 @@ export const SiteContentEditor: React.FC = () => {
               {activePageMeta.label}
             </h2>
           </div>
-          <div style={{ display: 'flex', gap: '.6rem', flexWrap: 'wrap' }}>
-            <button
-              type="button"
-              onClick={handleRestoreDefaults}
-              style={{ ...aS.btnSecondary, fontSize: '.5rem' }}
-              title="Carrega os valores padrão nos campos sem salvar no Firestore"
-            >
-              <RefreshCw size={11} /> Restaurar padrões
-            </button>
-            <a
-              href={activePageMeta.hash}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ ...aS.btnSecondary, textDecoration: 'none', fontSize: '.5rem' }}
-            >
-              <ExternalLink size={11} /> Pré-visualizar
-            </a>
-          </div>
+          {!activePageMeta.isCrud && (
+            <div style={{ display: 'flex', gap: '.6rem', flexWrap: 'wrap' }}>
+              <button
+                type="button"
+                onClick={handleRestoreDefaults}
+                style={{ ...aS.btnSecondary, fontSize: '.5rem' }}
+                title="Carrega os valores padrão nos campos sem salvar no Firestore"
+              >
+                <RefreshCw size={11} /> Restaurar padrões
+              </button>
+              <a
+                href={activePageMeta.hash}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ ...aS.btnSecondary, textDecoration: 'none', fontSize: '.5rem' }}
+              >
+                <ExternalLink size={11} /> Pré-visualizar
+              </a>
+            </div>
+          )}
         </div>
 
         {/* Empty state warning banner */}
-        {!loading && empty && (
+        {!loading && empty && !activePageMeta.isCrud && (
           <div style={{
             background: 'rgba(180,83,9,.06)',
             border: '1px solid rgba(180,83,9,.3)',

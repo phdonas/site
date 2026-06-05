@@ -1,4 +1,4 @@
-import { doc, setDoc, Firestore } from 'firebase/firestore';
+import { doc, setDoc, addDoc, collection, Firestore } from 'firebase/firestore';
 
 export type PageId = 'home' | 'mentoria' | 'consultoria' | 'prof_paulo' | 'servicos' | 'fale_comigo' | 'area_do_aluno' | 'recursos';
 
@@ -626,6 +626,67 @@ export async function seedPage(
       { [section]: sectionData },
       opts.overwrite ? undefined : { merge: true }
     );
+  }
+}
+
+// ─── CURSOS EXTERNOS ──────────────────────────────────────────────────────────
+
+const CURSOS_EXTERNOS_SEED = [
+  // Udemy — preencher url_externo com o link real do curso
+  {
+    titulo: 'Gestão de Equipes Comerciais na Prática',
+    descricao: 'Como estruturar, liderar e desenvolver times de alta performance em vendas. Método aplicado, com exemplos reais do mercado B2B.',
+    plataforma: 'udemy',
+    categoria: 'Gestão Comercial',
+    carga_horaria: '9h',
+    nivel: 'Intermediário',
+    thumb_url: '',
+    url_externo: '',
+    gratuito: false,
+    publicado: false,
+    ordem: 1,
+  },
+  {
+    titulo: 'Vendas B2B: Processo, Método e Gestão',
+    descricao: 'Estruture o funil de vendas, defina indicadores relevantes e implante rituais de gestão que geram resultado consistente.',
+    plataforma: 'udemy',
+    categoria: 'Vendas',
+    carga_horaria: '6h',
+    nivel: 'Intermediário',
+    thumb_url: '',
+    url_externo: '',
+    gratuito: false,
+    publicado: false,
+    ordem: 2,
+  },
+  // ESPM — preencher url_externo com o link real da instituição
+  {
+    titulo: 'Gestão Comercial e Liderança de Times',
+    descricao: 'Disciplina de MBA e pós-graduação focada na estruturação do processo comercial, liderança e desenvolvimento de equipes de vendas.',
+    plataforma: 'espm',
+    categoria: 'Gestão Comercial',
+    carga_horaria: '40h',
+    nivel: 'Avançado',
+    thumb_url: '',
+    url_externo: '',
+    gratuito: false,
+    publicado: false,
+    ordem: 1,
+  },
+];
+
+export async function seedCursosExternos(
+  db: Firestore,
+  opts: { overwrite?: boolean } = {}
+): Promise<void> {
+  if (opts.overwrite) {
+    for (const curso of CURSOS_EXTERNOS_SEED) {
+      await addDoc(collection(db, 'cursos_externos'), curso);
+    }
+  } else {
+    for (const curso of CURSOS_EXTERNOS_SEED) {
+      await addDoc(collection(db, 'cursos_externos'), curso);
+    }
   }
 }
 
