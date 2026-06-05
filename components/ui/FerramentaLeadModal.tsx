@@ -3,6 +3,7 @@ import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../services/firebase';
 import { Modal } from './Modal';
 import { Recurso } from '../../services/supabaseService';
+import { sendNotificationEmail } from '../../services/emailService';
 
 interface Props {
   ferramenta: Recurso | null;
@@ -12,6 +13,7 @@ interface Props {
 export const FerramentaLeadModal: React.FC<Props> = ({ ferramenta, onClose }) => {
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
+  const [lgpdAceito, setLgpdAceito] = useState(false);
   const [enviando, setEnviando] = useState(false);
   const [erro, setErro] = useState('');
 
@@ -29,7 +31,16 @@ export const FerramentaLeadModal: React.FC<Props> = ({ ferramenta, onClose }) =>
         email: email.trim(),
         tipo: 'recurso',
         recurso: ferramenta.titulo,
+        lgpd_aceito: true,
+        lgpd_data: serverTimestamp(),
         data: serverTimestamp(),
+      });
+
+      sendNotificationEmail({
+        tipo: 'recurso',
+        nome: nome.trim(),
+        email: email.trim(),
+        recurso: ferramenta.titulo,
       });
 
       onClose();
@@ -43,7 +54,6 @@ export const FerramentaLeadModal: React.FC<Props> = ({ ferramenta, onClose }) =>
         a.download = '';
         a.click();
       } else {
-        // 'externo', 'html', ou qualquer outro — sempre abre em nova aba
         window.open(url, '_blank', 'noopener,noreferrer');
       }
     } catch {
@@ -55,6 +65,7 @@ export const FerramentaLeadModal: React.FC<Props> = ({ ferramenta, onClose }) =>
   const resetAndClose = () => {
     setNome('');
     setEmail('');
+    setLgpdAceito(false);
     setErro('');
     onClose();
   };
@@ -113,6 +124,23 @@ export const FerramentaLeadModal: React.FC<Props> = ({ ferramenta, onClose }) =>
           </div>
         </div>
 
+        <div className="flex items-start gap-3 mt-2" style={{ marginBottom: '1rem' }}>
+          <input
+            type="checkbox"
+            id="lgpd-recurso"
+            required
+            checked={lgpdAceito}
+            onChange={e => setLgpdAceito(e.target.checked)}
+            className="mt-1 accent-gold"
+          />
+          <label htmlFor="lgpd-recurso" className="text-xs text-ink-light leading-relaxed">
+            Concordo com o tratamento dos meus dados conforme a{' '}
+            <a href="#/privacy" className="text-gold underline">Política de Privacidade</a>
+            {' '}e autorizo o contato por email do{' '}
+            <strong>Prof. Paulo H. Donassolo</strong>.
+          </label>
+        </div>
+
         {erro && (
           <p style={{ fontFamily: 'var(--fm)', fontSize: '.55rem', letterSpacing: '.06em', color: '#c0392b', marginBottom: '.8rem' }}>
             {erro}
@@ -121,9 +149,9 @@ export const FerramentaLeadModal: React.FC<Props> = ({ ferramenta, onClose }) =>
 
         <button
           type="submit"
-          disabled={enviando}
+          disabled={enviando || !lgpdAceito}
           className="btn-navy"
-          style={{ width: '100%', justifyContent: 'center', opacity: enviando ? .6 : 1 }}
+          style={{ width: '100%', justifyContent: 'center', opacity: (enviando || !lgpdAceito) ? .6 : 1 }}
         >
           {enviando ? 'Enviando…' : 'Acessar ferramenta →'}
         </button>

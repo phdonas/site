@@ -3,12 +3,14 @@ import { DataService } from '../services/dataService';
 import { collection, addDoc, getDoc, doc, serverTimestamp, updateDoc, increment } from 'firebase/firestore';
 import { db } from '../services/firebase';
 import { Mail, CheckCircle2, ChevronRight, Lock, ShieldCheck, ArrowRight } from 'lucide-react';
+import { sendNotificationEmail } from '../services/emailService';
 
 // ---- CMS Landing Page view (uses new landing_pages collection) ----
 
 const CmsLPView: React.FC<{ lp: any; slug: string }> = ({ lp, slug }) => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [lgpdAceito, setLgpdAceito] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
@@ -25,8 +27,11 @@ const CmsLPView: React.FC<{ lp: any; slug: string }> = ({ lp, slug }) => {
         email: email.trim(),
         tipo: `lp_${slug}`,
         origem: slug,
+        lgpd_aceito: true,
+        lgpd_data: serverTimestamp(),
         createdAt: serverTimestamp(),
       });
+      sendNotificationEmail({ tipo: 'lp', nome: name.trim(), email: email.trim(), slug });
       setSubmitted(true);
     } catch {
       alert('Erro ao enviar. Tente novamente.');
@@ -106,10 +111,18 @@ const CmsLPView: React.FC<{ lp: any; slug: string }> = ({ lp, slug }) => {
                       <label style={{ fontFamily: 'var(--fm)', fontSize: '.48rem', letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--ink-3)', display: 'block', marginBottom: '.4rem' }}>Email</label>
                       <input required type="email" style={{ width: '100%', padding: '.65rem .9rem', background: 'var(--cream-d)', border: '1px solid var(--rule)', fontFamily: 'var(--fb)', fontSize: '.85rem', color: 'var(--ink)', outline: 'none', boxSizing: 'border-box' as const }} value={email} onChange={e => setEmail(e.target.value)} placeholder="seu@email.com" />
                     </div>
+                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: '.5rem', marginBottom: '1rem' }}>
+                      <input type="checkbox" id="lgpd-lp-cms" required checked={lgpdAceito} onChange={e => setLgpdAceito(e.target.checked)} style={{ marginTop: '2px', accentColor: 'var(--gold)', flexShrink: 0 }} />
+                      <label htmlFor="lgpd-lp-cms" style={{ fontFamily: 'var(--fb)', fontSize: '.72rem', color: 'var(--ink-3)', lineHeight: 1.5 }}>
+                        Concordo com o tratamento dos meus dados conforme a{' '}
+                        <a href="#/privacy" style={{ color: 'var(--gold)', textDecoration: 'underline' }}>Política de Privacidade</a>
+                        {' '}e autorizo o contato do <strong>Prof. Paulo H. Donassolo</strong>.
+                      </label>
+                    </div>
                     <button
                       type="submit"
-                      disabled={submitting}
-                      style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '.5rem', fontFamily: 'var(--fm)', fontSize: '.52rem', letterSpacing: '.12em', textTransform: 'uppercase', background: 'var(--navy)', color: 'var(--cream)', border: 'none', padding: '1rem', cursor: submitting ? 'not-allowed' : 'pointer', opacity: submitting ? .6 : 1 }}
+                      disabled={submitting || !lgpdAceito}
+                      style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '.5rem', fontFamily: 'var(--fm)', fontSize: '.52rem', letterSpacing: '.12em', textTransform: 'uppercase', background: 'var(--navy)', color: 'var(--cream)', border: 'none', padding: '1rem', cursor: (submitting || !lgpdAceito) ? 'not-allowed' : 'pointer', opacity: (submitting || !lgpdAceito) ? .6 : 1 }}
                     >
                       {submitting ? 'Enviando...' : <>{lp.cta_texto || 'Confirmar inscrição'} <ArrowRight size={13} /></>}
                     </button>
@@ -217,6 +230,7 @@ const DynamicLPPage = () => {
     }, []); 
 
     const [acceptedTerms, setAcceptedTerms] = useState(false);
+    const [lgpdAceito, setLgpdAceito] = useState(false);
 
     // Formatação de telefone BR
     const formatBRNumber = (value: string) => {
@@ -278,9 +292,20 @@ const DynamicLPPage = () => {
                 materialTitle: lp.pageTitle || 'Material',
                 origem: origem || 'direto',
                 timeSpent: timeSpent,
+                lgpd_aceito: true,
+                lgpd_data: serverTimestamp(),
                 createdAt: serverTimestamp()
             });
-            
+
+            sendNotificationEmail({
+                tipo: 'lp',
+                nome: name.trim(),
+                email: email.trim(),
+                whatsapp: fullWhatsapp,
+                origem: origem || 'direto',
+                slug: lp.materialId || lp.pageTitle,
+            });
+
             console.log("Lead salvo com sucesso no Firebase!");
 
             setSubmitted(true);
@@ -454,9 +479,25 @@ const DynamicLPPage = () => {
                                         </div>
                                     )}
 
+                                    <div className="flex gap-3 px-1 py-1">
+                                        <input
+                                            type="checkbox"
+                                            id="lgpd-lp-legacy"
+                                            required
+                                            checked={lgpdAceito}
+                                            onChange={e => setLgpdAceito(e.target.checked)}
+                                            className="mt-1 w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                        />
+                                        <label htmlFor="lgpd-lp-legacy" className="text-[11px] text-gray-500 leading-tight">
+                                            Concordo com o tratamento dos meus dados conforme a{' '}
+                                            <a href="#/privacy" className="underline text-blue-600">Política de Privacidade</a>
+                                            {' '}e autorizo o contato do <strong>Prof. Paulo H. Donassolo</strong>.
+                                        </label>
+                                    </div>
+
                                     <button
                                         type="submit"
-                                        disabled={isSubmitting}
+                                        disabled={isSubmitting || !lgpdAceito}
                                         className={`${lp.buttonSize} w-full font-bold flex items-center justify-center gap-3 transition-all active:scale-95 shadow-xl hover:brightness-110 disabled:opacity-50`}
                                         style={{ backgroundColor: lp.buttonBgColor, color: lp.buttonTextColor, borderRadius: lp.buttonRadius || '16px' }}
                                     >

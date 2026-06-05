@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import { CheckCircle2, AlertCircle, Loader2, Mail, User, Phone, ArrowRight } from 'lucide-react';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { db } from '../services/firebase';
+import { sendNotificationEmail } from '../services/emailService';
 import { useSiteContent } from '../hooks/useSiteContent';
 
 const AreaAlunoEmBreve = () => {
@@ -13,44 +16,33 @@ const AreaAlunoEmBreve = () => {
     setErrorMessage('');
 
     const formData = new FormData(e.currentTarget);
-    const params = new URLSearchParams();
-    params.append('unm', formData.get('name') as string);
-    params.append('uem', formData.get('email') as string);
-    params.append('utel', formData.get('phone') as string);
-    params.append('umsg', 'Pre-cadastro Area Aluno - Maio 2026');
+    const nome = (formData.get('name') as string || '').trim();
+    const email = (formData.get('email') as string || '').trim();
+    const phone = (formData.get('phone') as string || '').trim();
 
     try {
-      const response = await fetch('./form-handler.php', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'Accept': 'application/json'
-        },
-        body: params.toString()
+      await addDoc(collection(db, 'leads'), {
+        nome,
+        email,
+        whatsapp: phone || undefined,
+        tipo: 'pre_lancamento_lms',
+        lgpd_aceito: true,
+        lgpd_data: serverTimestamp(),
+        data: serverTimestamp(),
       });
 
-      const text = await response.text();
-      let result;
-      
-      try {
-        result = JSON.parse(text);
-      } catch (e) {
-        console.error('Resposta não-JSON do servidor:', text);
-        setStatus('error');
-        setErrorMessage('O servidor retornou uma resposta inválida. Por favor, tente novamente.');
-        return;
-      }
+      sendNotificationEmail({
+        tipo: 'pre_lancamento_lms',
+        nome,
+        email,
+        whatsapp: phone || undefined,
+      });
 
-      if (result.success) {
-        setStatus('success');
-      } else {
-        setStatus('error');
-        setErrorMessage(result.message || 'Ocorreu um erro ao enviar seus dados.');
-      }
+      setStatus('success');
     } catch (error) {
-      console.error('Erro de conexão:', error);
+      console.error('Erro ao salvar lead:', error);
       setStatus('error');
-      setErrorMessage('Erro de conexão. Por favor, verifique sua internet ou tente novamente.');
+      setErrorMessage('Erro ao enviar. Por favor, tente novamente.');
     }
   };
 
@@ -89,7 +81,7 @@ const AreaAlunoEmBreve = () => {
               <p className="text-gray-500">
                 {g('conteudo', 'mensagem_confirmacao') || 'Obrigado pelo seu interesse. Você será o primeiro a saber quando a plataforma estiver liberada.'}
               </p>
-              <button 
+              <button
                 onClick={() => setStatus('idle')}
                 className="mt-8 text-sm font-bold text-blue-600 hover:underline transition-all"
               >
@@ -168,7 +160,10 @@ const AreaAlunoEmBreve = () => {
                     />
                   </div>
                   <label htmlFor="consent" className="text-[11px] leading-tight text-gray-500 cursor-pointer select-none">
-                    Concordo em fornecer meus dados para que o PH Donassolo possa entrar em contato comigo para avisar sobre a liberação da Área do Aluno e outras comunicações relevantes (LGPD).
+                    Concordo com o tratamento dos meus dados pessoais conforme a{' '}
+                    <a href="#/privacy" className="underline text-blue-600">Política de Privacidade</a>
+                    {' '}e autorizo o contato por email e WhatsApp relacionado aos serviços do{' '}
+                    <strong>Prof. Paulo H. Donassolo</strong> (LGPD).
                   </label>
                 </div>
 

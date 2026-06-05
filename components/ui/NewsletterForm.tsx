@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../services/firebase';
+import { sendNotificationEmail } from '../../services/emailService';
 
 export const NewsletterForm: React.FC = () => {
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
+  const [lgpdAceito, setLgpdAceito] = useState(false);
   const [status, setStatus] = useState<'idle' | 'loading' | 'ok' | 'err'>('idle');
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -16,8 +18,11 @@ export const NewsletterForm: React.FC = () => {
         nome: nome.trim(),
         email: email.trim(),
         tipo: 'newsletter',
+        lgpd_aceito: true,
+        lgpd_data: serverTimestamp(),
         data: serverTimestamp(),
       });
+      sendNotificationEmail({ tipo: 'newsletter', nome: nome.trim(), email: email.trim() });
       setStatus('ok');
       setNome('');
       setEmail('');
@@ -52,7 +57,24 @@ export const NewsletterForm: React.FC = () => {
         onChange={e => setEmail(e.target.value)}
         required
       />
-      <button className="nl-btn" type="submit" disabled={status === 'loading'}>
+
+      <div className="flex items-start gap-3 mt-1">
+        <input
+          type="checkbox"
+          id="lgpd-newsletter"
+          required
+          checked={lgpdAceito}
+          onChange={e => setLgpdAceito(e.target.checked)}
+          className="mt-1 accent-gold"
+        />
+        <label htmlFor="lgpd-newsletter" className="text-xs leading-relaxed" style={{ color: 'rgba(243,239,230,.4)' }}>
+          Concordo com o tratamento dos meus dados conforme a{' '}
+          <a href="#/privacy" style={{ color: 'var(--gold)', textDecoration: 'underline' }}>Política de Privacidade</a>
+          {' '}e autorizo o contato por email do <strong>Prof. Paulo H. Donassolo</strong>.
+        </label>
+      </div>
+
+      <button className="nl-btn" type="submit" disabled={status === 'loading' || !lgpdAceito}>
         {status === 'loading' ? 'Enviando...' : 'Quero receber'}
       </button>
       {status === 'err' && (

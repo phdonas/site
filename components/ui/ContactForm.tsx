@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../services/firebase';
+import { sendNotificationEmail } from '../../services/emailService';
 
 const ASSUNTOS = [
   'Mentoria',
@@ -16,6 +17,7 @@ interface ContactFormProps {
 
 export const ContactForm: React.FC<ContactFormProps> = ({ initialMessage }) => {
   const [form, setForm] = useState({ nome: '', email: '', whatsapp: '', assunto: ASSUNTOS[0], mensagem: initialMessage || '' });
+  const [lgpdAceito, setLgpdAceito] = useState(false);
   const [status, setStatus] = useState<'idle' | 'loading' | 'ok' | 'err'>('idle');
 
   const set = (k: string, v: string) => setForm(p => ({ ...p, [k]: v }));
@@ -27,7 +29,17 @@ export const ContactForm: React.FC<ContactFormProps> = ({ initialMessage }) => {
       await addDoc(collection(db, 'leads'), {
         ...form,
         tipo: 'contato',
+        lgpd_aceito: true,
+        lgpd_data: serverTimestamp(),
         data: serverTimestamp(),
+      });
+      sendNotificationEmail({
+        tipo: 'contato',
+        nome: form.nome,
+        email: form.email,
+        whatsapp: form.whatsapp || undefined,
+        assunto: form.assunto,
+        mensagem: form.mensagem,
       });
       setStatus('ok');
     } catch {
@@ -61,10 +73,28 @@ export const ContactForm: React.FC<ContactFormProps> = ({ initialMessage }) => {
         </select>
       </div>
       <textarea className="field-light" placeholder="Sua mensagem" rows={5} value={form.mensagem} onChange={e => set('mensagem', e.target.value)} required style={{ resize: 'vertical' }} />
+
+      <div className="flex items-start gap-3 mt-2">
+        <input
+          type="checkbox"
+          id="lgpd-contato"
+          required
+          checked={lgpdAceito}
+          onChange={e => setLgpdAceito(e.target.checked)}
+          className="mt-1 accent-gold"
+        />
+        <label htmlFor="lgpd-contato" className="text-xs text-ink-light leading-relaxed">
+          Concordo com o tratamento dos meus dados pessoais conforme a{' '}
+          <a href="#/privacy" className="text-gold underline">Política de Privacidade</a>
+          {' '}e autorizo o contato por email e WhatsApp relacionado aos serviços do{' '}
+          <strong>Prof. Paulo H. Donassolo</strong>.
+        </label>
+      </div>
+
       <button
         type="submit"
         className="btn-navy"
-        disabled={status === 'loading'}
+        disabled={status === 'loading' || !lgpdAceito}
         style={{ alignSelf: 'flex-start' }}
       >
         {status === 'loading' ? 'Enviando...' : 'Enviar mensagem'}
