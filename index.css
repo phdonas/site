@@ -465,6 +465,8 @@ body::before {
   transform-origin: left;
   transition: transform 0.45s var(--ease);
 }
+.svc-title { transition: color 0.35s var(--ease); }
+.svc-desc  { transition: color 0.35s var(--ease); }
 .svc-card:hover {
   background: var(--white);
   border-color: transparent;
@@ -472,10 +474,10 @@ body::before {
   box-shadow: 0 20px 48px rgba(0, 0, 0, 0.35);
 }
 .svc-card:hover::before { transform: scaleX(1); }
-.svc-card:hover .svc-title { color: var(--ink); }
-.svc-card:hover .svc-desc { color: var(--ink-3); }
-.svc-card:hover .svc-link { gap: 0.7rem; color: var(--gold); }
-.svc-card:hover .svc-n { color: rgba(168, 120, 40, 0.35); }
+.svc-card:hover .svc-title { color: var(--ink) !important; }
+.svc-card:hover .svc-desc  { color: var(--ink-3) !important; }
+.svc-card:hover .svc-link  { gap: 0.7rem; color: var(--gold); }
+.svc-card:hover .svc-n     { color: rgba(168, 120, 40, 0.35); }
 
 /* ── GENERIC CARD WITH HOVER LINE ── */
 .card-hover {

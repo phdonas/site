@@ -370,10 +370,10 @@ const Servicos: React.FC = () => (
               <div style={{ fontFamily: 'var(--fm)', fontSize: '.48rem', letterSpacing: '.18em', textTransform: 'uppercase', color: 'var(--gold)', opacity: .6, marginBottom: '1.2rem' }}>
                 {s.tag}
               </div>
-              <h3 style={{ fontFamily: 'var(--fd)', fontSize: '1.4rem', fontWeight: 700, color: 'rgba(243,239,230,.85)', marginBottom: '1rem', lineHeight: 1.2 }}>
+              <h3 className="svc-title" style={{ fontFamily: 'var(--fd)', fontSize: '1.4rem', fontWeight: 700, color: 'rgba(243,239,230,.85)', marginBottom: '1rem', lineHeight: 1.2 }}>
                 {s.titulo}
               </h3>
-              <p style={{ fontSize: '.82rem', color: 'rgba(243,239,230,.35)', lineHeight: 1.65, flexGrow: 1 }}>
+              <p className="svc-desc" style={{ fontSize: '.82rem', color: 'rgba(243,239,230,.35)', lineHeight: 1.65, flexGrow: 1 }}>
                 {s.desc}
               </p>
               <div style={{ marginTop: '2rem', fontFamily: 'var(--fm)', fontSize: '.55rem', letterSpacing: '.18em', textTransform: 'uppercase', color: 'var(--gold)' }}>
