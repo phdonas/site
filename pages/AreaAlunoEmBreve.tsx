@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { CheckCircle2, AlertCircle, Loader2, Mail, User, Phone, ArrowRight } from 'lucide-react';
+import { useSiteContent } from '../hooks/useSiteContent';
 
 const AreaAlunoEmBreve = () => {
+  const { g } = useSiteContent('area_do_aluno');
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
 
@@ -66,11 +68,13 @@ const AreaAlunoEmBreve = () => {
             <span className="text-xs font-bold tracking-[0.2em] text-gray-400 uppercase">PH Donassolo • PHD Academy</span>
           </div>
           <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-gray-900 mb-4">
-            Área do Aluno <span className="text-blue-600">em Breve</span>
+            {g('conteudo', 'titulo') || 'Área do Aluno em Breve'}
           </h1>
           <p className="text-lg text-gray-500 leading-relaxed">
-            Estamos preparando uma experiência de aprendizado transformadora. 
-            A liberação oficial ocorrerá na <span className="text-gray-900 font-bold underline decoration-blue-600/30">primeira semana de maio de 2026</span>.
+            {g('conteudo', 'subtitulo') || 'A plataforma de ensino do Prof. Paulo H. Donassolo estará disponível em breve.'}
+            {g('conteudo', 'paragrafo') && (
+              <><br /><span className="text-gray-900 font-medium">{g('conteudo', 'paragrafo')}</span></>
+            )}
           </p>
         </div>
 
@@ -83,7 +87,7 @@ const AreaAlunoEmBreve = () => {
               </div>
               <h2 className="text-2xl font-bold mb-2">Inscrição Confirmada!</h2>
               <p className="text-gray-500">
-                Obrigado pelo seu interesse. Você será o primeiro a saber quando a plataforma estiver liberada.
+                {g('conteudo', 'mensagem_confirmacao') || 'Obrigado pelo seu interesse. Você será o primeiro a saber quando a plataforma estiver liberada.'}
               </p>
               <button 
                 onClick={() => setStatus('idle')}
@@ -187,7 +191,7 @@ const AreaAlunoEmBreve = () => {
                     </>
                   ) : (
                     <>
-                      <span>Quero receber o aviso de liberação</span>
+                      <span>{g('conteudo', 'botao_texto') || 'Quero receber o aviso de liberação'}</span>
                       <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                     </>
                   )}

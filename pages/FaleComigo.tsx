@@ -2,12 +2,14 @@ import React, { useEffect, useState } from 'react';
 import ScrollReveal from '../components/ui/ScrollReveal';
 import { ContactForm } from '../components/ui/ContactForm';
 import WhatsAppFloat from '../components/WhatsAppFloat';
+import { useSiteContent } from '../hooks/useSiteContent';
 
 interface Props {
   initialMessage?: string;
 }
 
 const FaleComigo: React.FC<Props> = ({ initialMessage }) => {
+  const { g, visible } = useSiteContent('fale_comigo');
   const [showWhatsApp, setShowWhatsApp] = useState(false);
 
   useEffect(() => {
@@ -18,22 +20,22 @@ const FaleComigo: React.FC<Props> = ({ initialMessage }) => {
   return (
     <main>
       {/* Hero */}
-      <section style={{ background: 'var(--cream)', paddingTop: '8rem', paddingBottom: '4rem' }}>
-        <div className="sec-wrap" style={{ maxWidth: 900, margin: '0 auto', padding: '0 5vw' }}>
-          <ScrollReveal>
-            <div className="eyebrow" style={{ marginBottom: '1.5rem' }}>Fale Comigo</div>
-            <h1 style={{
-              fontFamily: 'var(--fd)', fontSize: 'clamp(2.4rem, 5vw, 3.6rem)', fontWeight: 700,
-              lineHeight: 1.12, color: 'var(--ink)', letterSpacing: '-.02em', marginBottom: '1.2rem',
-            }}>
-              Vamos conversar sobre<br />o seu desafio.
-            </h1>
-            <p style={{ fontSize: '1rem', color: 'var(--ink-3)', lineHeight: 1.75, maxWidth: 520 }}>
-              Preencha o formulário abaixo e retornarei em até 48 horas úteis. Se preferir, entre em contato diretamente pelo WhatsApp.
-            </p>
-          </ScrollReveal>
-        </div>
-      </section>
+      {visible('hero') && (
+        <section style={{ background: 'var(--cream)', paddingTop: '8rem', paddingBottom: '4rem' }}>
+          <div className="sec-wrap" style={{ maxWidth: 900, margin: '0 auto', padding: '0 5vw' }}>
+            <ScrollReveal>
+              <div className="eyebrow" style={{ marginBottom: '1.5rem' }}>{g('hero', 'eyebrow')}</div>
+              <h1 style={{ fontFamily: 'var(--fd)', fontSize: 'clamp(2.4rem, 5vw, 3.6rem)', fontWeight: 700, lineHeight: 1.12, color: 'var(--ink)', letterSpacing: '-.02em', marginBottom: '1.2rem' }}>
+                {g('hero', 'titulo_linha1')}<br />
+                <em style={{ color: 'var(--navy)' }}>{g('hero', 'titulo_destaque')}</em>
+              </h1>
+              <p style={{ fontSize: '1rem', color: 'var(--ink-3)', lineHeight: 1.75, maxWidth: 520 }}>
+                {g('hero', 'subtexto')}
+              </p>
+            </ScrollReveal>
+          </div>
+        </section>
+      )}
 
       {/* Main content */}
       <section style={{ background: 'var(--cream)', paddingBottom: '7rem' }}>
@@ -51,16 +53,12 @@ const FaleComigo: React.FC<Props> = ({ initialMessage }) => {
                   { href: '#/cursos', label: 'Cursos e Formações', desc: 'Programas para times e líderes' },
                   { href: '#/conteudo', label: 'Palestra / Aula', desc: 'Para eventos, empresas e instituições' },
                 ].map(s => (
-                  <a key={s.href} href={s.href} style={{ display: 'block', padding: '1rem 0', borderBottom: '1px solid var(--rule)', textDecoration: 'none' }}
+                  <a key={s.href} href={s.href} style={{ display: 'block', padding: '1rem 0', borderBottom: '1px solid var(--rule)', textDecoration: 'none', transition: 'padding .2s' }}
                     onMouseEnter={e => (e.currentTarget.style.paddingLeft = '.5rem')}
                     onMouseLeave={e => (e.currentTarget.style.paddingLeft = '0')}
                   >
-                    <div style={{ transition: 'padding .2s' }}>
-                      <div style={{ fontFamily: 'var(--fd)', fontSize: '1rem', fontWeight: 700, color: 'var(--navy)', marginBottom: '.2rem' }}>
-                        {s.label}
-                      </div>
-                      <div style={{ fontSize: '.82rem', color: 'var(--ink-3)' }}>{s.desc}</div>
-                    </div>
+                    <div style={{ fontFamily: 'var(--fd)', fontSize: '1rem', fontWeight: 700, color: 'var(--navy)', marginBottom: '.2rem' }}>{s.label}</div>
+                    <div style={{ fontSize: '.82rem', color: 'var(--ink-3)' }}>{s.desc}</div>
                   </a>
                 ))}
               </div>
@@ -72,9 +70,7 @@ const FaleComigo: React.FC<Props> = ({ initialMessage }) => {
                 <p style={{ fontSize: '.85rem', color: 'rgba(243,239,230,.5)', lineHeight: 1.65, marginBottom: '1.2rem' }}>
                   Para questões urgentes, contate diretamente pelo WhatsApp.
                 </p>
-                {showWhatsApp && (
-                  <WhatsAppFloat expanded />
-                )}
+                {showWhatsApp && <WhatsAppFloat expanded />}
               </div>
             </div>
           </ScrollReveal>
