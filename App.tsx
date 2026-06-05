@@ -12,6 +12,7 @@ import ServicesPage from './pages/ServicesPage';
 import MentoriaPage from './pages/MentoriaPage.tsx';
 import ConsultoriaPage from './pages/ConsultoriaPage';
 import CursosPage from './pages/CursosPage';
+import CursoVendaPage from './pages/CursoVendaPage';
 import ConteudoPage from './pages/ConteudoPage';
 import ArticleDetailPage from './pages/ArticleDetailPage';
 import RecursosPage from './pages/RecursosPage';
@@ -60,6 +61,11 @@ const App: React.FC = () => {
     }
 
     if (path.startsWith('#/lp/')) return <DynamicLPPage />;
+
+    if (path.startsWith('#/curso/')) {
+      const cursoSlug = path.split('/curso/')[1];
+      if (cursoSlug) return <CursoVendaPage slug={cursoSlug} />;
+    }
 
     switch (path) {
       case '#/':
