@@ -24,7 +24,7 @@ jobs:
       run: npm ci --legacy-peer-deps
 
     - name: 🚀 Build do Projeto
-      run: npm run build
+      run: npm run build  # test: verificar VITE_RESEND_API_KEY
       env:
         VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
         VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
