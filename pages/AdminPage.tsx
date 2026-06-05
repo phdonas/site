@@ -4,9 +4,8 @@ import { DataService } from '../services/dataService';
 import { SITE_CONFIG } from '../config/site-config';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { auth } from '../services/firebase';
-import { 
-  Settings, Activity, CheckCircle, XCircle, 
-  Database, ExternalLink, LogOut, Save, RefreshCw, AlertTriangle, Info, HardDrive, Trash2, Cpu, Clock, BookOpen, FileCode, MessageSquare, ShieldCheck, FolderEdit, Users, Layout
+import {
+  Database, LogOut, RefreshCw, FolderEdit, Layout, Users, Activity,
 } from 'lucide-react';
 import { ContentManager } from '../components/admin/ContentManager';
 import { LeadsManager } from '../components/admin/LeadsManager';
@@ -19,7 +18,7 @@ const AdminPage: React.FC = () => {
   const [syncing, setSyncing] = useState(false);
   const [lastError, setLastError] = useState<string | null>(null);
   const [isAuth, setIsAuth] = useState(false);
-  
+
   const [config, setConfig] = useState(SITE_CONFIG);
 
   useEffect(() => {
@@ -75,98 +74,183 @@ const AdminPage: React.FC = () => {
     }, 800);
   };
 
+  const tabs: { id: typeof activeTab; label: string; icon: React.ReactNode }[] = [
+    { id: 'content', label: 'Conteúdo', icon: <FolderEdit size={14} /> },
+    { id: 'editor', label: 'Editor CMS', icon: <Layout size={14} /> },
+    { id: 'leads', label: 'Leads', icon: <Users size={14} /> },
+    { id: 'status', label: 'Conexão API', icon: <Activity size={14} /> },
+  ];
+
   return (
-    <main className="min-h-screen pt-24 bg-[#f5f5f7]">
-      <div className="max-w-6xl mx-auto px-4 md:px-6 pb-20">
-        <div className="flex items-center justify-between mb-8">
+    <main style={{ minHeight: '100vh', paddingTop: '7rem', paddingBottom: '5rem', background: 'var(--cream-d)' }}>
+      <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 5vw' }}>
+
+        {/* Header */}
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '3rem' }}>
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Painel de Controle</h1>
-            <p className="text-gray-500 font-medium text-sm">Monitoramento do Ecossistema PH Donassolo.</p>
+            <div style={{ fontFamily: 'var(--fm)', fontSize: '.55rem', letterSpacing: '.2em', textTransform: 'uppercase', color: 'var(--gold)', marginBottom: '.6rem' }}>
+              Painel de Controle
+            </div>
+            <h1 style={{ fontFamily: 'var(--fd)', fontSize: 'clamp(1.8rem, 3vw, 2.4rem)', fontWeight: 700, color: 'var(--ink)', letterSpacing: '-.02em', lineHeight: 1.1 }}>
+              Ecossistema PHD
+            </h1>
           </div>
-          <button onClick={handleLogout} className="p-3 bg-white border border-gray-200 text-red-500 rounded-2xl hover:bg-red-50 transition-colors shadow-sm" title="Sair">
-            <LogOut size={20} />
+          <button
+            onClick={handleLogout}
+            style={{
+              display: 'flex', alignItems: 'center', gap: '.5rem',
+              fontFamily: 'var(--fm)', fontSize: '.55rem', letterSpacing: '.12em', textTransform: 'uppercase',
+              color: 'var(--ink-3)', background: 'var(--cream)', border: '1px solid var(--rule)',
+              padding: '.6rem 1rem', cursor: 'pointer', transition: 'border-color .2s, color .2s',
+            }}
+            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--gold)'; (e.currentTarget as HTMLElement).style.color = 'var(--ink)'; }}
+            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--rule)'; (e.currentTarget as HTMLElement).style.color = 'var(--ink-3)'; }}
+            title="Sair"
+          >
+            <LogOut size={14} /> Sair
           </button>
         </div>
 
-        <div className="flex bg-gray-200/50 p-1 rounded-2xl border border-gray-200 shadow-sm overflow-x-auto mb-8 no-scrollbar">
-          <button onClick={() => setActiveTab('content')} className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${activeTab === 'content' ? 'bg-white shadow-sm text-black' : 'text-gray-500'}`}>
-            <FolderEdit size={16} /> Gestão de Conteúdo
-          </button>
-          <button onClick={() => setActiveTab('editor')} className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${activeTab === 'editor' ? 'bg-white shadow-sm text-black text-blue-600' : 'text-gray-500'}`}>
-            <Layout size={16} /> Editor Visual (CMS)
-          </button>
-          <button onClick={() => setActiveTab('leads')} className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${activeTab === 'leads' ? 'bg-white shadow-sm text-black' : 'text-gray-500'}`}>
-            <Users size={16} /> Meus Leads
-          </button>
-          <button onClick={() => setActiveTab('status')} className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${activeTab === 'status' ? 'bg-white shadow-sm text-black' : 'text-gray-500'}`}>
-            <Activity size={16} /> Conexão API
-          </button>
+        {/* Tabs */}
+        <div style={{ display: 'flex', gap: 0, borderBottom: '1px solid var(--rule)', marginBottom: '2.5rem', overflowX: 'auto' }}>
+          {tabs.map(t => (
+            <button
+              key={t.id}
+              onClick={() => setActiveTab(t.id)}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '.4rem',
+                fontFamily: 'var(--fm)', fontSize: '.55rem', letterSpacing: '.12em', textTransform: 'uppercase',
+                padding: '.9rem 1.4rem', border: 'none', background: 'transparent', cursor: 'pointer',
+                color: activeTab === t.id ? 'var(--ink)' : 'var(--ink-3)',
+                borderBottom: activeTab === t.id ? '2px solid var(--gold)' : '2px solid transparent',
+                marginBottom: -1,
+                transition: 'color .2s',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {t.icon} {t.label}
+            </button>
+          ))}
         </div>
 
+        {/* Tab content */}
         {activeTab === 'content' && <ContentManager />}
         {activeTab === 'editor' && <SiteEditor />}
         {activeTab === 'leads' && <LeadsManager />}
 
         {activeTab === 'status' && (
-          <div className="grid grid-cols-1 gap-6 animate-in fade-in duration-500">
-            <div className="bg-white p-8 rounded-[32px] card-shadow border border-gray-100 flex flex-col md:flex-row items-center justify-between gap-6">
-              <div>
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="p-3 bg-blue-50 rounded-2xl"><Database className="text-blue-600" /></div>
-                  <h3 className="text-2xl font-bold">Base de Dados Nativa (Firebase)</h3>
+          <div style={{ background: 'var(--cream)', border: '1px solid var(--rule)', padding: '3rem' }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '2rem', flexWrap: 'wrap' }}>
+              <div style={{ flex: 1, minWidth: 260 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '.8rem', marginBottom: '1.2rem' }}>
+                  <Database size={18} style={{ color: 'var(--gold)' }} />
+                  <h3 style={{ fontFamily: 'var(--fd)', fontSize: '1.4rem', fontWeight: 700, color: 'var(--ink)' }}>
+                    Base de Dados Nativa (Firebase)
+                  </h3>
                 </div>
-                <p className="text-sm text-gray-500 max-w-xl leading-relaxed">
+                <p style={{ fontSize: '.85rem', color: 'var(--ink-3)', lineHeight: 1.7, maxWidth: 520, marginBottom: '1.5rem' }}>
                   O site foi desconectado do WordPress e agora todas as edições são locais. Para resgatar os artigos e vídeos antigos pela última vez e upar o resto do site pro banco de dados, clique em Sincronizar.
                 </p>
+                {lastError && (
+                  <p style={{ fontFamily: 'var(--fm)', fontSize: '.55rem', letterSpacing: '.06em', color: '#c0392b', background: 'rgba(192,57,43,.06)', border: '1px solid rgba(192,57,43,.2)', padding: '.6rem .9rem', marginTop: '.5rem' }}>
+                    {lastError}
+                  </p>
+                )}
               </div>
-              <button 
+
+              <button
                 onClick={async () => {
-                  if(window.confirm('Tem certeza? Isso fará o download final do WP e enviará tudo para o Firebase. Essa operação não tem volta.')) {
+                  if (window.confirm('Tem certeza? Isso fará o download final do WP e enviará tudo para o Firebase. Essa operação não tem volta.')) {
                     setSyncing(true);
                     const success = await DataService.migrateDataToFirestore();
-                    if(success) alert('Migração finalizada! Todos os seus dados agora são locais no Firebase.');
+                    if (success) alert('Migração finalizada! Todos os seus dados agora são locais no Firebase.');
                     else alert('Erro durante a migração. Verifique os logs.');
                     setSyncing(false);
                   }
                 }}
                 disabled={syncing}
-                className="bg-blue-600 text-white px-8 py-4 rounded-xl font-bold hover:bg-blue-700 transition-all flex items-center justify-center gap-3 w-full md:w-auto shadow-lg shadow-blue-500/20"
+                style={{
+                  display: 'flex', alignItems: 'center', gap: '.6rem', flexShrink: 0,
+                  fontFamily: 'var(--fm)', fontSize: '.55rem', letterSpacing: '.12em', textTransform: 'uppercase',
+                  background: 'var(--navy)', color: 'var(--cream)', border: 'none',
+                  padding: '.9rem 2rem', cursor: syncing ? 'not-allowed' : 'pointer',
+                  opacity: syncing ? .6 : 1, transition: 'opacity .2s',
+                }}
               >
-                {syncing ? <><RefreshCw size={20} className="animate-spin" /> Processando...</> : <><Database size={20} /> Sincronizar Tudo</>}
+                {syncing
+                  ? <><RefreshCw size={14} style={{ animation: 'spin 1s linear infinite' }} /> Processando...</>
+                  : <><Database size={14} /> Sincronizar Tudo</>
+                }
+              </button>
+            </div>
+
+            <div style={{ marginTop: '2.5rem', paddingTop: '2rem', borderTop: '1px solid var(--rule)', display: 'flex', alignItems: 'center', gap: '.8rem' }}>
+              <div style={{
+                width: 8, height: 8, borderRadius: '50%',
+                background: isWpConnected === null ? 'var(--gold)' : isWpConnected ? '#27ae60' : '#c0392b',
+              }} />
+              <span style={{ fontFamily: 'var(--fm)', fontSize: '.55rem', letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--ink-3)' }}>
+                {isWpConnected === null ? 'Verificando conexão...' : isWpConnected ? 'Conexão ativa' : 'Sem conexão com WordPress'}
+              </span>
+              <button
+                onClick={checkConn}
+                style={{
+                  marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '.4rem',
+                  fontFamily: 'var(--fm)', fontSize: '.5rem', letterSpacing: '.1em', textTransform: 'uppercase',
+                  background: 'transparent', border: '1px solid var(--rule)', color: 'var(--ink-3)',
+                  padding: '.4rem .8rem', cursor: 'pointer',
+                }}
+              >
+                <RefreshCw size={11} /> Testar
               </button>
             </div>
           </div>
         )}
 
         {activeTab === 'guide' && (
-          <div className="bg-white rounded-[40px] p-8 md:p-12 border border-gray-100 shadow-sm animate-in slide-in-from-right-4 duration-500">
-            <h2 className="text-3xl font-bold mb-8">Guia de Manutenção</h2>
-            <div className="space-y-12">
-              <section>
-                <h4 className="font-bold text-blue-600 uppercase tracking-widest text-xs mb-6">Arquivos do Projeto</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="p-6 bg-gray-50 rounded-3xl border border-gray-100">
-                    <h5 className="font-bold mb-2">Cursos, Livros e Downloads</h5>
-                    <p className="text-xs text-gray-500 leading-relaxed mb-4">Para adicionar novos links da Hotmart, capas de livros ou PDFs para baixar:</p>
-                    <code className="text-[10px] bg-white px-2 py-1 rounded border text-blue-600 block">constants.tsx</code>
-                  </div>
-                  <div className="p-6 bg-gray-50 rounded-3xl border border-gray-100">
-                    <h5 className="font-bold mb-2">Configurações Gerais</h5>
-                    <p className="text-xs text-gray-500 leading-relaxed mb-4">Para mudar o número do WhatsApp, e-mail de contato ou nome do site:</p>
-                    <code className="text-[10px] bg-white px-2 py-1 rounded border text-blue-600 block">config/site-config.ts</code>
-                  </div>
-                </div>
-              </section>
+          <div style={{ background: 'var(--cream)', border: '1px solid var(--rule)', padding: '3rem' }}>
+            <div className="eyebrow" style={{ marginBottom: '1rem' }}>Referência</div>
+            <h2 style={{ fontFamily: 'var(--fd)', fontSize: 'clamp(1.4rem, 2.5vw, 2rem)', fontWeight: 700, color: 'var(--ink)', letterSpacing: '-.02em', marginBottom: '2.5rem' }}>
+              Guia de Manutenção
+            </h2>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1.5rem' }}>
+              <div style={{ background: 'var(--cream-d)', border: '1px solid var(--rule)', padding: '1.8rem' }}>
+                <h5 style={{ fontFamily: 'var(--fd)', fontSize: '1rem', fontWeight: 700, color: 'var(--ink)', marginBottom: '.6rem' }}>
+                  Cursos, Livros e Downloads
+                </h5>
+                <p style={{ fontSize: '.78rem', color: 'var(--ink-3)', lineHeight: 1.65, marginBottom: '1rem' }}>
+                  Para adicionar novos links da Hotmart, capas de livros ou PDFs para baixar:
+                </p>
+                <code style={{ fontFamily: 'var(--fm)', fontSize: '.5rem', letterSpacing: '.06em', color: 'var(--gold)', background: 'var(--cream)', border: '1px solid var(--rule)', padding: '.3rem .6rem', display: 'inline-block' }}>
+                  constants.tsx
+                </code>
+              </div>
+              <div style={{ background: 'var(--cream-d)', border: '1px solid var(--rule)', padding: '1.8rem' }}>
+                <h5 style={{ fontFamily: 'var(--fd)', fontSize: '1rem', fontWeight: 700, color: 'var(--ink)', marginBottom: '.6rem' }}>
+                  Configurações Gerais
+                </h5>
+                <p style={{ fontSize: '.78rem', color: 'var(--ink-3)', lineHeight: 1.65, marginBottom: '1rem' }}>
+                  Para mudar o número do WhatsApp, e-mail de contato ou nome do site:
+                </p>
+                <code style={{ fontFamily: 'var(--fm)', fontSize: '.5rem', letterSpacing: '.06em', color: 'var(--gold)', background: 'var(--cream)', border: '1px solid var(--rule)', padding: '.3rem .6rem', display: 'inline-block' }}>
+                  config/site-config.ts
+                </code>
+              </div>
             </div>
           </div>
         )}
 
         {activeTab === 'server' && (
-          <div className="bg-white rounded-[40px] p-8 md:p-12 border border-gray-100 shadow-sm animate-in slide-in-from-right-4 duration-500">
-            <h2 className="text-3xl font-bold mb-6">Ajuste na Hostgator</h2>
-            <p className="text-gray-500 mb-10 leading-relaxed">Para evitar bloqueios de segurança (CORS):</p>
-            <div className="bg-gray-900 rounded-3xl p-8 overflow-hidden relative group">
-              <pre className="text-blue-400 text-xs font-mono overflow-x-auto leading-relaxed">
+          <div style={{ background: 'var(--cream)', border: '1px solid var(--rule)', padding: '3rem' }}>
+            <div className="eyebrow" style={{ marginBottom: '1rem' }}>Hostgator</div>
+            <h2 style={{ fontFamily: 'var(--fd)', fontSize: 'clamp(1.4rem, 2.5vw, 2rem)', fontWeight: 700, color: 'var(--ink)', letterSpacing: '-.02em', marginBottom: '1rem' }}>
+              Ajuste no Servidor
+            </h2>
+            <p style={{ fontSize: '.85rem', color: 'var(--ink-3)', lineHeight: 1.7, marginBottom: '2rem' }}>
+              Para evitar bloqueios de segurança (CORS), adicione ao <code style={{ fontFamily: 'var(--fm)', fontSize: '.7em', color: 'var(--gold)' }}>.htaccess</code>:
+            </p>
+            <div style={{ background: 'var(--navy)', padding: '2rem', overflow: 'auto' }}>
+              <pre style={{ fontFamily: 'var(--fm)', fontSize: '.6rem', color: 'rgba(243,239,230,.7)', lineHeight: 1.7, margin: 0 }}>
 {`<IfModule mod_headers.c>
     Header set Access-Control-Allow-Origin "*"
     Header set Access-Control-Allow-Methods "GET, POST, OPTIONS"
@@ -177,33 +261,11 @@ const AdminPage: React.FC = () => {
           </div>
         )}
 
-        {activeTab === 'editor' && (
-          <div className="bg-white rounded-[32px] p-8 md:p-10 card-shadow border border-gray-100 animate-in fade-in duration-500">
-            <h2 className="text-2xl font-bold mb-8">Configurações Rápidas</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-               <div className="space-y-6">
-                 <div>
-                   <label className="block text-xs font-bold mb-2 uppercase text-gray-400">Nome do Site</label>
-                   <input type="text" value={config.name} onChange={(e) => setConfig({...config, name: e.target.value})} className="w-full p-4 bg-gray-50 rounded-xl border border-gray-100 font-medium" />
-                 </div>
-                 <div>
-                   <label className="block text-xs font-bold mb-2 uppercase text-gray-400">WhatsApp Oficial</label>
-                   <input type="text" value={config.whatsapp} onChange={(e) => setConfig({...config, whatsapp: e.target.value})} className="w-full p-4 bg-gray-50 rounded-xl border border-gray-100 font-medium" />
-                 </div>
-               </div>
-               <div>
-                 <label className="block text-xs font-bold mb-2 uppercase text-gray-400">Personalidade da IA (Prompt)</label>
-                 <textarea value={config.assistant.instructions} onChange={(e) => setConfig({...config, assistant: {...config.assistant, instructions: e.target.value}})} rows={5} className="w-full p-4 bg-gray-50 rounded-xl border border-gray-100 resize-none text-xs leading-relaxed font-medium"></textarea>
-               </div>
-            </div>
-            <div className="mt-10 flex justify-end">
-              <button onClick={handleSave} disabled={saving} className="bg-black text-white px-10 py-4 rounded-2xl font-bold hover:bg-gray-800 transition-all disabled:opacity-50 flex items-center gap-2">
-                <Save size={20} /> {saving ? 'Gravando...' : 'Salvar no Navegador'}
-              </button>
-            </div>
-          </div>
-        )}
       </div>
+
+      <style>{`
+        @keyframes spin { to { transform: rotate(360deg); } }
+      `}</style>
     </main>
   );
 };

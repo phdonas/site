@@ -107,7 +107,7 @@ const ProfPauloPage: React.FC = () => (
                 padding: '2rem 0', borderBottom: i < trajetoria.length - 1 ? '1px solid var(--rule-n)' : 'none',
               }}>
                 <div style={{
-                  fontFamily: 'var(--fm)', fontSize: '.5rem', letterSpacing: '.1em',
+                  fontFamily: 'var(--fm)', fontSize: '.75rem', letterSpacing: '.1em',
                   color: 'var(--gold)', paddingTop: '.3rem',
                 }}>
                   {t.ano}

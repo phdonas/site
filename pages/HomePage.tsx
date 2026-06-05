@@ -115,34 +115,52 @@ const Metodologia: React.FC = () => (
         </h2>
       </ScrollReveal>
 
+      {/* Círculos + conectores */}
+      <ScrollReveal delay={1}>
+        <div style={{ display: 'flex', alignItems: 'center', marginBottom: '2.5rem' }}>
+          {passos.map((p, i) => (
+            <React.Fragment key={p.num}>
+              <div style={{ flex: '0 0 auto', display: 'flex', justifyContent: 'center' }}>
+                <div style={{
+                  width: 80, height: 80, borderRadius: '50%', border: '1.5px solid var(--gold)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  background: i === passos.length - 1 ? 'rgba(168,120,40,.1)' : 'transparent',
+                  boxShadow: i === passos.length - 1 ? '0 0 0 6px rgba(168,120,40,.08)' : 'none',
+                }}>
+                  <span style={{ fontFamily: 'var(--fd)', fontSize: '2.8rem', fontWeight: 700, color: 'var(--gold)', lineHeight: 1 }}>
+                    {p.num}
+                  </span>
+                </div>
+              </div>
+              {i < passos.length - 1 && (
+                <div style={{
+                  background: 'linear-gradient(to right, #A87828, rgba(168,120,40,0.2))',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  fontSize: '1.2rem',
+                  letterSpacing: '-0.1em',
+                  flex: 1,
+                  textAlign: 'center',
+                  userSelect: 'none',
+                }}>
+                  {'›'.repeat(9)}
+                </div>
+              )}
+            </React.Fragment>
+          ))}
+        </div>
+      </ScrollReveal>
+
+      {/* Labels e descrições */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '2rem' }}>
         {passos.map((p, i) => (
           <ScrollReveal key={p.num} delay={(i + 1) as 1 | 2 | 3 | 4}>
-            <div style={{ position: 'relative', paddingTop: '1.5rem' }}>
-              {i < passos.length - 1 && (
-                <div style={{
-                  position: 'absolute', top: '2.5rem', left: '50%', width: '100%', height: '1px',
-                  background: 'rgba(168,120,40,.3)', zIndex: 0,
-                }} />
-              )}
-              <div style={{
-                width: 80, height: 80, borderRadius: '50%', border: '1.5px solid var(--gold)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                background: i === passos.length - 1 ? 'rgba(168,120,40,.1)' : 'transparent',
-                marginBottom: '1.5rem', position: 'relative', zIndex: 1,
-                boxShadow: i === passos.length - 1 ? '0 0 0 6px rgba(168,120,40,.08)' : 'none',
-              }}>
-                <span style={{ fontFamily: 'var(--fm)', fontSize: '.55rem', letterSpacing: '.22em', color: 'var(--gold)' }}>
-                  {p.num}
-                </span>
-              </div>
-              <div style={{ fontFamily: 'var(--fd)', fontSize: '1.2rem', fontWeight: 700, color: 'rgba(243,239,230,.85)', marginBottom: '.6rem' }}>
-                {p.label}
-              </div>
-              <p style={{ fontSize: '.82rem', color: 'rgba(243,239,230,.4)', lineHeight: 1.65 }}>
-                {p.desc}
-              </p>
+            <div style={{ fontFamily: 'var(--fd)', fontSize: '1.2rem', fontWeight: 700, color: 'rgba(243,239,230,.85)', marginBottom: '.6rem' }}>
+              {p.label}
             </div>
+            <p style={{ fontSize: '.82rem', color: 'rgba(243,239,230,.4)', lineHeight: 1.65 }}>
+              {p.desc}
+            </p>
           </ScrollReveal>
         ))}
       </div>
@@ -286,10 +304,10 @@ const Situacoes: React.FC = () => (
               <div style={{ fontFamily: 'var(--fm)', fontSize: '.5rem', letterSpacing: '.18em', textTransform: 'uppercase', color: 'var(--gold)', opacity: .6, marginBottom: '1rem' }}>
                 {s.tag}
               </div>
-              <h3 style={{ fontFamily: 'var(--fd)', fontSize: '1.2rem', fontWeight: 700, color: 'var(--ink)', marginBottom: '.8rem', lineHeight: 1.3 }}>
+              <h3 style={{ fontFamily: 'var(--fd)', fontSize: '1.3rem', fontWeight: 700, color: 'var(--ink)', marginBottom: '.8rem', lineHeight: 1.3 }}>
                 {s.titulo}
               </h3>
-              <p style={{ fontSize: '.85rem', color: 'var(--ink-2)', lineHeight: 1.65 }}>{s.desc}</p>
+              <p style={{ fontSize: '.95rem', color: 'var(--ink-2)', lineHeight: 1.65 }}>{s.desc}</p>
             </div>
           </ScrollReveal>
         ))}

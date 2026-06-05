@@ -118,7 +118,7 @@ const ConsultoriaPage: React.FC = () => (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem' }}>
           {areas.map((a, i) => (
             <ScrollReveal key={a.titulo} delay={((i % 3) + 1) as 1 | 2 | 3}>
-              <div style={{
+              <div className="area-card" style={{
                 background: 'rgba(243,239,230,.04)', border: '1px solid rgba(243,239,230,.07)',
                 padding: '2rem', position: 'relative', overflow: 'hidden',
               }}>
@@ -126,17 +126,26 @@ const ConsultoriaPage: React.FC = () => (
                   position: 'absolute', top: 0, left: 0, right: 0, height: 2,
                   background: 'linear-gradient(90deg, var(--gold), var(--gold-2))',
                 }} />
-                <h3 style={{ fontFamily: 'var(--fd)', fontSize: '1.1rem', fontWeight: 700, color: 'rgba(243,239,230,.85)', marginBottom: '.8rem' }}>
+                <h3 className="area-card-title" style={{ fontFamily: 'var(--fd)', fontSize: '1.1rem', fontWeight: 700, color: 'rgba(243,239,230,.85)', marginBottom: '.8rem' }}>
                   {a.titulo}
                 </h3>
-                <p style={{ fontSize: '.82rem', color: 'rgba(243,239,230,.35)', lineHeight: 1.65 }}>{a.desc}</p>
+                <p className="area-card-desc" style={{ fontSize: '.82rem', color: 'rgba(243,239,230,.35)', lineHeight: 1.65 }}>{a.desc}</p>
               </div>
             </ScrollReveal>
           ))}
         </div>
       </div>
 
-      <style>{`@media(max-width:768px){.cons-areas{grid-template-columns:1fr 1fr!important}}`}</style>
+      <style>{`
+        @media(max-width:768px){.cons-areas{grid-template-columns:1fr 1fr!important}}
+        .area-card { transition: background .3s, border-color .3s, box-shadow .3s; cursor: default; }
+        .area-card:hover { background: var(--white) !important; border-color: transparent !important; box-shadow: 0 12px 40px rgba(0,0,0,.25); transform: translateY(-4px); }
+        .area-card { transition: background .3s, border-color .3s, box-shadow .3s, transform .3s; }
+        .area-card-title { transition: color .3s; }
+        .area-card:hover .area-card-title { color: var(--ink) !important; }
+        .area-card-desc { transition: color .3s; }
+        .area-card:hover .area-card-desc { color: var(--ink-3) !important; }
+      `}</style>
     </section>
 
     {/* Metodologia */}
