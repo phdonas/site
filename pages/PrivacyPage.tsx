@@ -1,62 +1,69 @@
-
 import React from 'react';
+import ScrollReveal from '../components/ui/ScrollReveal';
 
-const PrivacyPage: React.FC = () => {
-  return (
-    <main className="pt-32 pb-20 px-6 bg-white min-h-screen">
-      <div className="max-w-3xl mx-auto prose prose-slate">
-        <h1 className="text-5xl font-bold tracking-tight mb-8">Política de Privacidade</h1>
-        <p className="text-gray-500 font-medium mb-12 italic text-lg">Última atualização: Março de 2024</p>
+const PrivacyPage: React.FC = () => (
+  <main style={{ background: 'var(--cream)', paddingTop: '8rem', paddingBottom: '7rem' }}>
+    <div style={{ maxWidth: 760, margin: '0 auto', padding: '0 5vw' }}>
+      <ScrollReveal>
+        <div className="eyebrow" style={{ marginBottom: '1.5rem' }}>Legal</div>
+        <h1 style={{
+          fontFamily: 'var(--fd)', fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: 700,
+          color: 'var(--ink)', letterSpacing: '-.02em', marginBottom: '.8rem',
+        }}>
+          Política de Privacidade
+        </h1>
+        <p style={{ fontFamily: 'var(--fm)', fontSize: '.5rem', letterSpacing: '.1em', color: 'var(--ink-3)', marginBottom: '3.5rem' }}>
+          Última atualização: Março de 2024
+        </p>
+      </ScrollReveal>
 
-        <section className="mb-12">
-          <h2 className="text-2xl font-bold mb-4">1. Introdução</h2>
-          <p>Esta Política de Privacidade descreve como o site <strong>PH Donassolo</strong> coleta, utiliza e protege suas informações. Ao utilizar nosso site, você concorda com as práticas descritas aqui.</p>
-        </section>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>
+        {[
+          {
+            titulo: '1. Introdução',
+            conteudo: 'Esta Política de Privacidade descreve como o site Prof. Paulo H. Donassolo coleta, utiliza e protege suas informações. Ao utilizar nosso site, você concorda com as práticas descritas aqui.',
+          },
+          {
+            titulo: '2. Coleta de Dados',
+            conteudo: 'Coletamos informações que você nos fornece voluntariamente, como nome e e-mail via formulários de contato ou newsletter, e dados de navegação anônimos (cookies) para melhorar a experiência do usuário via Google Analytics.',
+          },
+          {
+            titulo: '3. Uso das Informações',
+            conteudo: 'Os dados coletados são utilizados para fornecer suporte e responder a dúvidas sobre cursos e consultoria, e para enviar atualizações sobre novos conteúdos (caso inscrito na newsletter).',
+          },
+          {
+            titulo: '4. Segurança',
+            conteudo: 'Implementamos medidas de segurança técnicas e organizacionais para proteger seus dados pessoais contra acesso não autorizado ou perda.',
+          },
+          {
+            titulo: '5. Seus Direitos',
+            conteudo: 'Conforme a LGPD, você tem o direito de acessar, corrigir ou solicitar a exclusão de seus dados pessoais a qualquer momento através do e-mail paulo@phdonassolo.com.',
+          },
+        ].map((s, i) => (
+          <ScrollReveal key={s.titulo} delay={((i % 4) + 1) as 1 | 2 | 3 | 4}>
+            <div style={{ borderTop: '1px solid var(--rule)', paddingTop: '2rem' }}>
+              <h2 style={{ fontFamily: 'var(--fd)', fontSize: '1.2rem', fontWeight: 700, color: 'var(--ink)', marginBottom: '1rem' }}>
+                {s.titulo}
+              </h2>
+              <p style={{ fontSize: '.9rem', color: 'var(--ink-3)', lineHeight: 1.8 }}>{s.conteudo}</p>
+            </div>
+          </ScrollReveal>
+        ))}
+      </div>
 
-        <section className="mb-12">
-          <h2 className="text-2xl font-bold mb-4">2. Coleta de Dados</h2>
-          <p>Coletamos informações que você nos fornece voluntariamente, como:</p>
-          <ul className="list-disc pl-6 space-y-2">
-            <li>Nome e e-mail via formulários de contato ou newsletter.</li>
-            <li>Informações enviadas através de interações com nosso Assistente Digital.</li>
-            <li>Dados de navegação anônimos (cookies) para melhorar a experiência do usuário via Google Analytics.</li>
-          </ul>
-        </section>
-
-        <section className="mb-12">
-          <h2 className="text-2xl font-bold mb-4">3. Uso das Informações</h2>
-          <p>Os dados coletados são utilizados para:</p>
-          <ul className="list-disc pl-6 space-y-2">
-            <li>Fornecer suporte e responder a dúvidas sobre cursos e consultoria.</li>
-            <li>Enviar atualizações sobre novos conteúdos (caso inscrito na newsletter).</li>
-            <li>Personalizar a experiência do aluno em nossa futura área restrita.</li>
-          </ul>
-        </section>
-
-        <section className="mb-12">
-          <h2 className="text-2xl font-bold mb-4">4. Segurança</h2>
-          <p>Implementamos medidas de segurança técnicas e organizacionais para proteger seus dados pessoais contra acesso não autorizado ou perda.</p>
-        </section>
-
-        <section className="mb-12">
-          <h2 className="text-2xl font-bold mb-4">5. Seus Direitos</h2>
-          <p>Conforme a LGPD, você tem o direito de acessar, corrigir ou solicitar a exclusão de seus dados pessoais a qualquer momento através do e-mail <strong>paulo@phdonassolo.com</strong>.</p>
-        </section>
-
-        <div className="mt-20 p-8 bg-gray-50 rounded-[32px] border border-gray-100">
-          <p className="text-sm text-gray-500 leading-relaxed m-0">
+      <ScrollReveal>
+        <div style={{ marginTop: '4rem', padding: '2rem', background: 'var(--cream-d)', border: '1px solid var(--rule)' }}>
+          <p style={{ fontSize: '.82rem', color: 'var(--ink-3)', lineHeight: 1.75 }}>
             Esta política pode ser atualizada periodicamente. Recomendamos a revisão desta página regularmente para se manter informado sobre como protegemos seus dados.
           </p>
         </div>
-        
-        <div className="mt-8">
-          <a href="#/" className="text-blue-600 font-bold hover:underline inline-flex items-center gap-2">
-            ← Voltar para o início
-          </a>
+
+        <div style={{ marginTop: '2rem' }}>
+          <a href="#/" className="btn-ghost-ink">← Voltar para o início</a>
         </div>
-      </div>
-    </main>
-  );
-};
+      </ScrollReveal>
+    </div>
+  </main>
+);
 
 export default PrivacyPage;

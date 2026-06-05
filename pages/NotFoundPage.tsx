@@ -1,30 +1,23 @@
-
 import React from 'react';
-import { Search } from 'lucide-react';
 
-const NotFoundPage: React.FC = () => {
-  return (
-    <main className="min-h-screen pt-32 px-6 flex flex-col items-center justify-center bg-white text-center">
-      <div className="max-w-md">
-        <div className="w-20 h-20 bg-gray-50 text-gray-300 rounded-full flex items-center justify-center mx-auto mb-8">
-          <Search size={32} />
-        </div>
-        <h1 className="text-6xl font-bold tracking-tight mb-6">404</h1>
-        <h2 className="text-2xl font-bold mb-4">Página não encontrada.</h2>
-        <p className="text-gray-500 font-medium mb-12 leading-relaxed">
-          O conteúdo que você procura pode ter sido movido, excluído ou o link digitado está incorreto.
-        </p>
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <a href="#/" className="bg-blue-600 text-white px-10 py-4 rounded-full font-bold hover:bg-blue-700 transition-all">
-            Ir para a Home
-          </a>
-          <a href="#/contato" className="bg-gray-100 text-black px-10 py-4 rounded-full font-bold hover:bg-gray-200 transition-all">
-            Falar conosco
-          </a>
-        </div>
+const NotFoundPage: React.FC = () => (
+  <main style={{ minHeight: '100vh', background: 'var(--cream)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '8rem 5vw', textAlign: 'center' }}>
+    <div style={{ maxWidth: 440 }}>
+      <div style={{ fontFamily: 'var(--fd)', fontSize: '5rem', fontWeight: 700, color: 'rgba(168,120,40,.18)', lineHeight: 1, marginBottom: '1.5rem' }}>
+        404
       </div>
-    </main>
-  );
-};
+      <h1 style={{ fontFamily: 'var(--fd)', fontSize: 'clamp(1.6rem, 3vw, 2.2rem)', fontWeight: 700, color: 'var(--ink)', letterSpacing: '-.02em', marginBottom: '1rem' }}>
+        Página não encontrada.
+      </h1>
+      <p style={{ fontSize: '.9rem', color: 'var(--ink-3)', lineHeight: 1.75, marginBottom: '2.5rem' }}>
+        O conteúdo que você procura pode ter sido movido ou o link está incorreto.
+      </p>
+      <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+        <a href="#/" className="btn-navy">Ir para a Home</a>
+        <a href="#/fale-comigo" className="btn-ghost-ink">Falar comigo →</a>
+      </div>
+    </div>
+  </main>
+);
 
 export default NotFoundPage;

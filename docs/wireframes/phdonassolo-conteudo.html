@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Conteúdo — Prof. Paulo H. Donassolo</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@400;500;600&family=Space+Mono&display=swap" rel="stylesheet">
+<style>
+:root {
+  --cream:     #F3EFE6;
+  --cream-d:   #EAE3D5;
+  --cream-dd:  #DDD4BF;
+  --white:     #FDFBF7;
+  --ink:       #17130E;
+  --ink-2:     #3A3025;
+  --ink-3:     #6B5E50;
+  --navy:      #0C1824;
+  --navy-2:    #122030;
+  --gold:      #A87828;
+  --gold-2:    #C8983C;
+  --gold-pale: #EDE0C0;
+  --gold-fio:  rgba(168,120,40,0.5);
+  --rule:      rgba(23,19,14,0.1);
+  --fd: 'Cormorant Garamond', Georgia, serif;
+  --fb: 'DM Sans', sans-serif;
+  --fm: 'Space Mono', monospace;
+  --ease: cubic-bezier(0.16,1,0.3,1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--fb);background:var(--cream);color:var(--ink);font-size:17px;line-height:1.65;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");opacity:.025}
+
+.fio{position:fixed;left:calc(5vw - 1px);top:0;bottom:0;width:1px;background:linear-gradient(to bottom,transparent 0%,var(--gold-fio) 8%,var(--gold-fio) 92%,transparent 100%);z-index:50;pointer-events:none}
+.fio-no{position:fixed;left:calc(5vw - 5px);top:50%;width:10px;height:10px;background:var(--gold);border-radius:50%;transform:translateY(-50%);z-index:51;pointer-events:none;box-shadow:0 0 12px rgba(168,120,40,.5)}
+
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .85s var(--ease),transform .85s var(--ease)}
+.reveal.on{opacity:1;transform:none}
+.d1{transition-delay:.1s}.d2{transition-delay:.2s}.d3{transition-delay:.3s}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;height:62px;background:rgba(243,239,230,.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--rule)}
+nav.scrolled{box-shadow:0 2px 20px rgba(23,19,14,.08)}
+.nav-in{max-width:1240px;margin:0 auto;padding:0 5vw;height:100%;display:flex;align-items:center;justify-content:space-between}
+.nav-logo{font-family:var(--fd);font-size:1.12rem;font-weight:700;color:var(--ink);text-decoration:none;line-height:1}
+.nav-links{display:flex;align-items:center;gap:2rem;list-style:none}
+.nav-links a{font-size:.8rem;font-weight:500;color:var(--ink-2);text-decoration:none;letter-spacing:.01em;position:relative;transition:color .2s}
+.nav-links a::after{content:'';position:absolute;bottom:-3px;left:0;right:0;height:1px;background:var(--gold);transform:scaleX(0);transform-origin:left;transition:transform .3s var(--ease)}
+.nav-links a:hover{color:var(--ink)}
+.nav-links a:hover::after{transform:scaleX(1)}
+.n-back{font-size:.78rem;font-weight:500;color:var(--ink-3);text-decoration:none;display:flex;align-items:center;gap:.4rem;transition:color .2s}
+.n-back:hover{color:var(--ink)}
+.n-cta{font-size:.78rem;font-weight:600;color:var(--navy) !important;border:1.5px solid var(--navy) !important;padding:.45rem 1.1rem;transition:background .2s,color .2s !important}
+.n-cta:hover{background:var(--navy) !important;color:var(--cream) !important}
+.n-cta::after{display:none !important}
+
+/* ══════════════════════
+   HERO — navy compacto
+══════════════════════ */
+.hero{padding-top:62px;background:var(--navy);position:relative;overflow:hidden}
+.hero-geo{position:absolute;right:-60px;top:50%;transform:translateY(-50%);width:400px;height:400px;border:1px solid rgba(168,120,40,.05);border-radius:50%;pointer-events:none}
+.hero-wrap{max-width:1240px;margin:0 auto;padding:5rem 5vw 5.5rem;position:relative;z-index:2;display:grid;grid-template-columns:3fr 2fr;gap:5rem;align-items:end}
+.hero-eyebrow{font-family:var(--fm);font-size:.78rem;letter-spacing:.2em;font-weight:700;text-transform:uppercase;color:var(--gold);display:flex;align-items:center;gap:.7rem;margin-bottom:1.5rem;opacity:0;animation:up .8s var(--ease) .2s forwards}
+.hero-eyebrow::before{content:'';display:block;width:20px;height:1px;background:var(--gold)}
+.hero-h1{font-family:var(--fd);font-size:clamp(2.4rem,4.2vw,3.8rem);font-weight:700;line-height:1.05;color:rgba(243,239,230,.95);letter-spacing:-.02em;margin-bottom:1.2rem;opacity:0;animation:up 1s var(--ease) .35s forwards}
+.hero-h1 em{font-style:italic;font-weight:400;color:var(--gold)}
+.hero-sub{font-size:.95rem;color:rgba(243,239,230,.52);line-height:1.75;max-width:480px;opacity:0;animation:up 1s var(--ease) .55s forwards}
+
+/* contadores de conteúdo */
+.hero-counts{
+  display:flex;flex-direction:column;gap:.8rem;
+  opacity:0;animation:up 1s var(--ease) .7s forwards;
+  align-self:flex-end;padding-bottom:.3rem;
+}
+.hc-row{
+  display:flex;align-items:center;gap:1.2rem;
+  padding:.8rem 1rem;
+  border:1px solid rgba(243,239,230,.07);
+  background:rgba(255,255,255,.04);
+}
+.hc-n{font-family:var(--fd);font-size:1.8rem;font-weight:700;color:var(--gold-2);line-height:1;flex-shrink:0;width:48px}
+.hc-txt strong{font-family:var(--fd);font-size:.95rem;font-weight:700;color:rgba(243,239,230,.85);display:block;line-height:1.1}
+.hc-txt span{font-size:.72rem;color:rgba(243,239,230,.38)}
+
+/* ══════════════════════
+   BARRA DE FILTROS
+   sticky, cream
+══════════════════════ */
+.hero-to-cream{height:80px;background:linear-gradient(to bottom,var(--navy) 0%,#1e3040 40%,var(--cream-dd) 100%)}
+
+.filtros-bar{
+  position:sticky;top:62px;z-index:80;
+  background:rgba(243,239,230,.97);
+  backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--rule);
+  padding:0 5vw;
+}
+.filtros-inner{
+  max-width:1240px;margin:0 auto;
+  padding:1rem 0;
+  display:flex;align-items:center;gap:1.5rem;
+  flex-wrap:wrap;
+}
+
+/* grupos de filtro */
+.filtro-grupo{display:flex;align-items:center;gap:.4rem;flex-wrap:wrap}
+.filtro-label{
+  font-family:var(--fm);font-size:.55rem;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--gold);font-weight:700;
+  flex-shrink:0;margin-right:.2rem;
+}
+.filtro-btn{
+  font-family:var(--fm);font-size:.58rem;letter-spacing:.1em;
+  text-transform:uppercase;
+  color:var(--ink-3);
+  border:1px solid var(--rule);
+  background:transparent;
+  padding:.35rem .75rem;
+  cursor:pointer;
+  transition:background .2s,color .2s,border-color .2s;
+  white-space:nowrap;
+}
+.filtro-btn:hover{border-color:var(--gold);color:var(--gold)}
+.filtro-btn.ativo{background:var(--gold);color:var(--white);border-color:var(--gold)}
+
+/* separador vertical */
+.filtro-sep{width:1px;height:24px;background:var(--rule);flex-shrink:0;margin:0 .3rem}
+
+/* toggle de visualização */
+.view-toggle{margin-left:auto;display:flex;gap:0;border:1px solid var(--rule)}
+.view-btn{
+  padding:.4rem .7rem;background:transparent;
+  border:none;cursor:pointer;
+  color:var(--ink-3);font-size:.85rem;
+  transition:background .2s,color .2s;
+}
+.view-btn.ativo{background:var(--navy);color:var(--gold)}
+.view-btn:hover:not(.ativo){background:var(--cream-d)}
+
+/* contador de resultados */
+.filtros-count{
+  width:100%;padding-top:.5rem;
+  font-family:var(--fm);font-size:.58rem;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--ink-3);opacity:.6;
+  border-top:1px solid var(--rule);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.limpar-btn{
+  background:none;border:none;cursor:pointer;
+  font-family:var(--fm);font-size:.55rem;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--gold);
+  transition:opacity .2s;
+}
+.limpar-btn:hover{opacity:.7}
+
+/* ══════════════════════
+   CONTEÚDO — VIEW EDITORIAL
+   destaque + grade lateral
+══════════════════════ */
+.conteudo-area{padding:5rem 5vw 8rem;background:var(--cream-d)}
+.cnt-wrap{max-width:1240px;margin:0 auto}
+
+/* ── VIEW EDITORIAL ── */
+.view-editorial{}
+
+/* item destaque — largura total */
+.destaque-item{
+  display:grid;grid-template-columns:3fr 2fr;
+  gap:0;background:var(--white);
+  border:1px solid var(--rule);
+  margin-bottom:1.5px;
+  overflow:hidden;
+  transition:box-shadow .3s;
+  cursor:pointer;
+  text-decoration:none;color:inherit;
+  position:relative;
+}
+.destaque-item::before{content:'';position:absolute;top:0;left:0;bottom:0;width:3px;background:linear-gradient(to bottom,var(--gold),var(--gold-2));transform:scaleX(0);transform-origin:top;transition:transform .35s var(--ease)}
+.destaque-item:hover{box-shadow:0 8px 32px rgba(23,19,14,.1)}
+.destaque-item:hover::before{transform:scaleX(1)}
+
+.di-body{padding:3rem 3rem}
+.di-meta{display:flex;align-items:center;gap:.8rem;margin-bottom:1.2rem;flex-wrap:wrap}
+.di-tipo{font-family:var(--fm);font-size:.55rem;letter-spacing:.14em;text-transform:uppercase;color:var(--white);background:var(--navy);padding:.2rem .6rem}
+.di-tema{font-family:var(--fm);font-size:.55rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);background:var(--gold-pale);padding:.2rem .6rem}
+.di-pilar{font-family:var(--fm);font-size:.52rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);opacity:.6}
+.di-date{font-family:var(--fm);font-size:.52rem;letter-spacing:.1em;color:var(--ink-3);opacity:.5;margin-left:auto}
+.di-title{font-family:var(--fd);font-size:clamp(1.6rem,2.5vw,2.2rem);font-weight:700;color:var(--ink);line-height:1.15;margin-bottom:.8rem;letter-spacing:-.01em}
+.di-excerpt{font-size:.88rem;color:var(--ink-3);line-height:1.7;margin-bottom:1.5rem;max-width:520px}
+.di-link{font-family:var(--fm);font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);display:flex;align-items:center;gap:.4rem;transition:gap .2s}
+.di-link::after{content:'→'}
+.destaque-item:hover .di-link{gap:.7rem}
+
+.di-visual{
+  background:var(--cream-d);
+  border-left:1px solid var(--rule);
+  display:flex;align-items:center;justify-content:center;
+  flex-direction:column;gap:.6rem;
+  font-family:var(--fm);font-size:.5rem;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-3);opacity:.4;
+  min-height:280px;
+  position:relative;
+}
+.di-visual-num{
+  font-family:var(--fd);font-size:8rem;font-weight:700;
+  color:rgba(23,19,14,.04);
+  position:absolute;bottom:-1rem;right:1rem;
+  line-height:1;
+}
+
+/* grid 3 colunas para itens secundários */
+.editorial-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:1.5px;background:var(--rule);
+  margin-bottom:1.5px;
+}
+.ed-card{
+  background:var(--white);padding:2.2rem;
+  cursor:pointer;text-decoration:none;color:inherit;
+  transition:background .3s;
+  position:relative;overflow:hidden;
+}
+.ed-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--gold),var(--gold-2));transform:scaleX(0);transform-origin:left;transition:transform .35s var(--ease)}
+.ed-card:hover{background:var(--cream)}
+.ed-card:hover::before{transform:scaleX(1)}
+.ec-meta{display:flex;align-items:center;gap:.6rem;margin-bottom:.9rem;flex-wrap:wrap}
+.ec-tipo{font-family:var(--fm);font-size:.52rem;letter-spacing:.12em;text-transform:uppercase;padding:.15rem .5rem}
+.ec-tipo.artigo{color:var(--navy);background:rgba(12,24,36,.08)}
+.ec-tipo.video{color:var(--white);background:var(--navy)}
+.ec-tipo.ferramenta{color:var(--gold);background:var(--gold-pale)}
+.ec-tema{font-family:var(--fm);font-size:.5rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);opacity:.55}
+.ec-date{font-family:var(--fm);font-size:.5rem;letter-spacing:.08em;color:var(--ink-3);opacity:.4;margin-left:auto}
+.ec-title{font-family:var(--fd);font-size:1.2rem;font-weight:700;color:var(--ink);line-height:1.2;margin-bottom:.5rem}
+.ec-excerpt{font-size:.82rem;color:var(--ink-3);line-height:1.6;margin-bottom:1rem}
+.ec-link{font-family:var(--fm);font-size:.55rem;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);display:flex;align-items:center;gap:.3rem;transition:gap .2s}
+.ec-link::after{content:'→'}
+.ed-card:hover .ec-link{gap:.6rem}
+
+/* card ferramenta — lead gate */
+.ed-card.ferramenta-card{border:1px solid rgba(168,120,40,.2)}
+.fer-lock{
+  display:inline-flex;align-items:center;gap:.4rem;
+  font-family:var(--fm);font-size:.52rem;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-3);
+  margin-bottom:.8rem;opacity:.6;
+}
+
+/* card vídeo */
+.ed-card.video-card .ec-visual{
+  height:120px;background:var(--navy);
+  display:flex;align-items:center;justify-content:center;
+  margin:-2.2rem -2.2rem 1.5rem;
+  border-bottom:1px solid rgba(243,239,230,.06);
+  position:relative;
+}
+.video-play{
+  width:44px;height:44px;
+  border:2px solid rgba(243,239,230,.3);
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:.8rem;color:rgba(243,239,230,.6);
+  transition:border-color .2s,color .2s;
+}
+.ed-card:hover .video-play{border-color:var(--gold);color:var(--gold)}
+
+/* ── VIEW GRADE ── (oculta por padrão) */
+.view-grade{display:none}
+.grade-grid{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  gap:1.5px;background:var(--rule);
+}
+.gr-card{
+  background:var(--white);padding:1.8rem;
+  cursor:pointer;text-decoration:none;color:inherit;
+  transition:background .3s;
+  position:relative;overflow:hidden;
+}
+.gr-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--gold);transform:scaleX(0);transform-origin:left;transition:transform .35s var(--ease)}
+.gr-card:hover{background:var(--cream)}
+.gr-card:hover::before{transform:scaleX(1)}
+.gr-meta{display:flex;align-items:center;gap:.5rem;margin-bottom:.7rem;flex-wrap:wrap}
+.gr-tipo{font-family:var(--fm);font-size:.5rem;letter-spacing:.1em;text-transform:uppercase;padding:.12rem .45rem}
+.gr-tipo.artigo{color:var(--navy);background:rgba(12,24,36,.08)}
+.gr-tipo.video{color:var(--white);background:var(--navy)}
+.gr-tipo.ferramenta{color:var(--gold);background:var(--gold-pale)}
+.gr-date{font-family:var(--fm);font-size:.48rem;letter-spacing:.08em;color:var(--ink-3);opacity:.4;margin-left:auto}
+.gr-title{font-family:var(--fd);font-size:1rem;font-weight:700;color:var(--ink);line-height:1.25;margin-bottom:.4rem}
+.gr-tema{font-family:var(--fm);font-size:.48rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);opacity:.5}
+
+/* paginação / carregar mais */
+.load-more{
+  display:flex;justify-content:center;
+  margin-top:3rem;
+}
+.load-btn{
+  font-family:var(--fm);font-size:.62rem;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--gold);
+  border:1px solid rgba(168,120,40,.35);
+  background:transparent;padding:.7rem 2rem;
+  cursor:pointer;transition:background .2s,border-color .2s;
+}
+.load-btn:hover{background:var(--gold-pale);border-color:var(--gold)}
+
+/* ══════════════════════
+   MODAL LEAD — FERRAMENTA
+   overlay para captura
+══════════════════════ */
+.modal-overlay{
+  position:fixed;inset:0;z-index:200;
+  background:rgba(12,24,36,.75);
+  backdrop-filter:blur(8px);
+  display:flex;align-items:center;justify-content:center;
+  padding:1rem;
+  opacity:0;pointer-events:none;
+  transition:opacity .3s;
+}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{
+  background:var(--white);
+  max-width:480px;width:100%;
+  padding:3rem;
+  position:relative;
+}
+.modal::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--gold),var(--gold-2))}
+.modal-close{
+  position:absolute;top:1rem;right:1rem;
+  background:none;border:none;cursor:pointer;
+  font-size:1.2rem;color:var(--ink-3);
+  transition:color .2s;
+}
+.modal-close:hover{color:var(--ink)}
+.modal-eyebrow{font-family:var(--fm);font-size:.6rem;letter-spacing:.2em;font-weight:700;text-transform:uppercase;color:var(--gold);display:flex;align-items:center;gap:.6rem;margin-bottom:1rem}
+.modal-eyebrow::before{content:'';display:block;width:16px;height:1px;background:var(--gold)}
+.modal-title{font-family:var(--fd);font-size:1.5rem;font-weight:700;color:var(--ink);margin-bottom:.5rem;line-height:1.2}
+.modal-desc{font-size:.84rem;color:var(--ink-3);line-height:1.65;margin-bottom:2rem}
+.modal-form{display:flex;flex-direction:column;gap:1rem}
+.modal-input{
+  font-family:var(--fb);font-size:.9rem;
+  background:var(--cream);border:1px solid var(--rule);
+  color:var(--ink);padding:.8rem 1rem;
+  outline:none;transition:border-color .2s;
+}
+.modal-input:focus{border-color:var(--gold)}
+.modal-input::placeholder{color:var(--ink-3);opacity:.5}
+.modal-submit{
+  font-family:var(--fb);font-size:.84rem;font-weight:600;
+  color:var(--ink);background:var(--gold);
+  padding:.85rem;border:none;cursor:pointer;
+  transition:background .2s;
+}
+.modal-submit:hover{background:var(--gold-2)}
+.modal-nota{font-family:var(--fm);font-size:.5rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);opacity:.5;text-align:center}
+
+/* ══════════════════════
+   NEWSLETTER INLINE
+   navy
+══════════════════════ */
+.cream-to-navy{height:80px;background:linear-gradient(to bottom,var(--cream-d) 0%,#e0d8c8 30%,var(--navy) 100%)}
+
+.newsletter{padding:6rem 5vw;background:var(--navy);position:relative}
+.nl-geo{position:absolute;right:-60px;top:50%;transform:translateY(-50%);width:320px;height:320px;border:1px solid rgba(168,120,40,.06);border-radius:50%;pointer-events:none}
+.nl-wrap{max-width:840px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:center;position:relative;z-index:1}
+.nl-eyebrow{font-family:var(--fm);font-size:.78rem;letter-spacing:.2em;font-weight:700;text-transform:uppercase;color:var(--gold);display:flex;align-items:center;gap:.7rem;margin-bottom:1rem}
+.nl-eyebrow::before{content:'';display:block;width:20px;height:1px;background:var(--gold)}
+.nl-h3{font-family:var(--fd);font-size:clamp(1.6rem,2.5vw,2.2rem);font-weight:700;color:rgba(243,239,230,.92);line-height:1.15;margin-bottom:.8rem;letter-spacing:-.01em}
+.nl-h3 em{font-style:italic;font-weight:400;color:rgba(243,239,230,.45)}
+.nl-sub{font-size:.85rem;color:rgba(243,239,230,.48);line-height:1.65}
+.nl-form{display:flex;flex-direction:column;gap:.8rem}
+.nl-input{font-family:var(--fb);font-size:.88rem;background:rgba(243,239,230,.06);border:1px solid rgba(243,239,230,.12);color:rgba(243,239,230,.85);padding:.9rem 1rem;width:100%;outline:none;transition:border-color .2s}
+.nl-input::placeholder{color:rgba(243,239,230,.28)}
+.nl-input:focus{border-color:rgba(168,120,40,.6)}
+.nl-btn{font-family:var(--fb);font-size:.84rem;font-weight:600;background:var(--gold);color:var(--ink);padding:.9rem 1.5rem;border:none;cursor:pointer;transition:background .2s}
+.nl-btn:hover{background:var(--gold-2)}
+.nl-legal{font-family:var(--fm);font-size:.5rem;letter-spacing:.08em;color:rgba(243,239,230,.2);text-align:center}
+
+/* FOOTER */
+.navy-footer{height:60px;background:linear-gradient(to bottom,var(--navy) 0%,#081018 100%)}
+footer{background:#081018;padding:4rem 5vw 2.5rem;border-top:1px solid rgba(168,120,40,.12)}
+.ft-wrap{max-width:1240px;margin:0 auto}
+.ft-top{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:3rem;padding-bottom:3rem;border-bottom:1px solid rgba(243,239,230,.06);margin-bottom:2rem}
+.ft-brand{font-family:var(--fd);font-size:1.1rem;font-weight:700;color:rgba(243,239,230,.82);margin-bottom:.6rem}
+.ft-tag{font-size:.8rem;color:rgba(243,239,230,.28);line-height:1.6;max-width:200px}
+.ft-ct{font-family:var(--fm);font-size:.55rem;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);opacity:.6;margin-bottom:1.2rem}
+.ft-list{list-style:none;display:flex;flex-direction:column;gap:.6rem}
+.ft-list a{font-size:.8rem;color:rgba(243,239,230,.32);text-decoration:none;transition:color .2s}
+.ft-list a:hover{color:rgba(243,239,230,.7)}
+.ft-bottom{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem}
+.ft-copy{font-family:var(--fm);font-size:.52rem;letter-spacing:.08em;color:rgba(243,239,230,.18)}
+.ft-sig{font-family:var(--fm);font-size:.5rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);opacity:.3}
+
+.wa{position:fixed;bottom:1.8rem;right:1.8rem;z-index:200;width:52px;height:52px;background:#25D366;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.4rem;text-decoration:none;box-shadow:0 4px 20px rgba(37,211,102,.3);transition:transform .2s}
+.wa:hover{transform:scale(1.08)}
+
+@keyframes up{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
+
+@media(max-width:960px){
+  .fio,.fio-no{display:none}
+  .hero-wrap{grid-template-columns:1fr}
+  .hero-counts{flex-direction:row;flex-wrap:wrap}
+  .hc-row{flex:1;min-width:140px}
+  .filtros-inner{gap:1rem}
+  .destaque-item{grid-template-columns:1fr}
+  .di-visual{display:none}
+  .editorial-grid,.grade-grid{grid-template-columns:1fr 1fr}
+  .nl-wrap{grid-template-columns:1fr;gap:2.5rem}
+  .ft-top{grid-template-columns:1fr 1fr;gap:2.5rem}
+}
+@media(max-width:600px){
+  .nav-links{gap:1rem}
+  .editorial-grid,.grade-grid{grid-template-columns:1fr}
+  .filtros-inner{gap:.6rem}
+}
+</style>
+</head>
+<body>
+
+<div class="fio" aria-hidden="true"></div>
+<div class="fio-no" id="fio-no" aria-hidden="true"></div>
+
+<!-- MODAL LEAD -->
+<div class="modal-overlay" id="modal-lead">
+  <div class="modal">
+    <button class="modal-close" onclick="fecharModal()">✕</button>
+    <div class="modal-eyebrow">Acesso gratuito</div>
+    <div class="modal-title" id="modal-titulo">Diagnóstico Comercial Rápido</div>
+    <p class="modal-desc">Preencha os campos abaixo para acessar esta ferramenta gratuitamente. Você receberá o link por e-mail imediatamente.</p>
+    <form class="modal-form" onsubmit="return false">
+      <input class="modal-input" type="text" placeholder="Seu nome">
+      <input class="modal-input" type="email" placeholder="Seu melhor e-mail">
+      <button class="modal-submit">Acessar a ferramenta →</button>
+      <p class="modal-nota">Sem spam · Cancelamento em um clique</p>
+    </form>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav id="nav">
+  <div class="nav-in">
+    <a href="#" class="nav-logo">Prof. Paulo H. Donassolo</a>
+    <ul class="nav-links">
+      <li><a href="#" class="n-back">← Início</a></li>
+      <li><a href="#">Serviços</a></li>
+      <li><a href="#">Prof. Paulo</a></li>
+      <li><a href="#" class="n-cta">Fale Comigo</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-geo" aria-hidden="true"></div>
+  <div class="hero-wrap">
+    <div>
+      <div class="hero-eyebrow">Conteúdo</div>
+      <h1 class="hero-h1">
+        Aprenda no<br>
+        seu <em>ritmo.</em>
+      </h1>
+      <p class="hero-sub">Artigos, vídeos e ferramentas sobre gestão comercial, vendas, liderança e negociação. Produzido por quem esteve no campo e continua aprendendo.</p>
+    </div>
+    <div class="hero-counts">
+      <div class="hc-row">
+        <div class="hc-n">42</div>
+        <div class="hc-txt"><strong>Artigos</strong><span>Gestão comercial e vendas</span></div>
+      </div>
+      <div class="hc-row">
+        <div class="hc-n">18</div>
+        <div class="hc-txt"><strong>Vídeos</strong><span>Aulas curtas e insights</span></div>
+      </div>
+      <div class="hc-row">
+        <div class="hc-n">12</div>
+        <div class="hc-txt"><strong>Ferramentas</strong><span>Frameworks e templates</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="hero-to-cream" aria-hidden="true"></div>
+
+<!-- BARRA DE FILTROS -->
+<div class="filtros-bar" id="filtros">
+  <div class="filtros-inner">
+
+    <!-- TIPO -->
+    <div class="filtro-grupo">
+      <span class="filtro-label">Tipo</span>
+      <button class="filtro-btn ativo" onclick="setFiltro(this,'tipo','todos')">Todos</button>
+      <button class="filtro-btn" onclick="setFiltro(this,'tipo','artigo')">Artigo</button>
+      <button class="filtro-btn" onclick="setFiltro(this,'tipo','video')">Vídeo</button>
+      <button class="filtro-btn" onclick="setFiltro(this,'tipo','ferramenta')">Ferramenta</button>
+    </div>
+
+    <div class="filtro-sep" aria-hidden="true"></div>
+
+    <!-- TEMA -->
+    <div class="filtro-grupo">
+      <span class="filtro-label">Tema</span>
+      <button class="filtro-btn ativo" onclick="setFiltro(this,'tema','todos')">Todos</button>
+      <button class="filtro-btn" onclick="setFiltro(this,'tema','vendas')">Vendas</button>
+      <button class="filtro-btn" onclick="setFiltro(this,'tema','gestao')">Gestão</button>
+      <button class="filtro-btn" onclick="setFiltro(this,'tema','lideranca')">Liderança</button>
+      <button class="filtro-btn" onclick="setFiltro(this,'tema','negociacao')">Negociação</button>
+      <button class="filtro-btn" onclick="setFiltro(this,'tema','carreira')">Carreira</button>
+    </div>
+
+    <div class="filtro-sep" aria-hidden="true"></div>
+
+    <!-- PILAR -->
+    <div class="filtro-grupo">
+      <span class="filtro-label">Pilar</span>
+      <button class="filtro-btn ativo" onclick="setFiltro(this,'pilar','todos')">Todos</button>
+      <button class="filtro-btn" onclick="setFiltro(this,'pilar','prof-paulo')">Prof. Paulo</button>
+      <button class="filtro-btn" onclick="setFiltro(this,'pilar','academia-gas')">Academia do Gás</button>
+      <button class="filtro-btn" onclick="setFiltro(this,'pilar','sci')">Sou Consultor</button>
+      <button class="filtro-btn" onclick="setFiltro(this,'pilar','4050')">4050 ou Mais</button>
+    </div>
+
+    <!-- TOGGLE VIEW -->
+    <div class="view-toggle" title="Alternar visualização">
+      <button class="view-btn ativo" id="btn-editorial" onclick="setView('editorial')" title="Vista editorial">≡</button>
+      <button class="view-btn" id="btn-grade" onclick="setView('grade')" title="Vista em grade">⊞</button>
+    </div>
+
+    <!-- CONTADOR -->
+    <div class="filtros-count">
+      <span id="resultado-count">Mostrando 72 itens</span>
+      <button class="limpar-btn" onclick="limparFiltros()">Limpar filtros</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- CONTEÚDO -->
+<section class="conteudo-area">
+  <div class="cnt-wrap">
+
+    <!-- ── VIEW EDITORIAL ── -->
+    <div class="view-editorial" id="view-editorial">
+
+      <!-- Item destaque -->
+      <a class="destaque-item reveal" href="#">
+        <div class="di-body">
+          <div class="di-meta">
+            <span class="di-tipo">Artigo</span>
+            <span class="di-tema">Gestão Comercial</span>
+            <span class="di-pilar">Prof. Paulo</span>
+            <span class="di-date">Jun 2025</span>
+          </div>
+          <div class="di-title">Por que sua equipe não bate a meta — e o que você pode fazer diferente amanhã</div>
+          <p class="di-excerpt">O problema raramente está na equipe. Está na ausência de processo, clareza de papel e gestão de pipeline. Este artigo mapeia as quatro causas mais comuns e as intervenções que funcionam em empresas de médio porte.</p>
+          <div class="di-link">Ler artigo</div>
+        </div>
+        <div class="di-visual">
+          <div class="di-visual-num">01</div>
+          [ Imagem de capa ]
+        </div>
+      </a>
+
+      <!-- Grade 3 colunas -->
+      <div class="editorial-grid">
+
+        <a class="ed-card reveal d1" href="#">
+          <div class="ec-meta">
+            <span class="ec-tipo artigo">Artigo</span>
+            <span class="ec-tema">Vendas</span>
+            <span class="ec-date">Mai 2025</span>
+          </div>
+          <div class="ec-title">SPIN Selling na prática: como aplicar em vendas B2B</div>
+          <p class="ec-excerpt">A metodologia mais usada em vendas consultivas — adaptada para a realidade de PMEs com equipes enxutas.</p>
+          <div class="ec-link">Ler artigo</div>
+        </a>
+
+        <div class="ed-card video-card reveal d2" onclick="window.open('#')">
+          <div class="ec-visual">
+            <div class="video-play">▶</div>
+          </div>
+          <div class="ec-meta">
+            <span class="ec-tipo video">Vídeo</span>
+            <span class="ec-tema">Liderança</span>
+            <span class="ec-date">Mai 2025</span>
+          </div>
+          <div class="ec-title">Reunião de pipeline que gera ação — não só atualização de status</div>
+          <div class="ec-link">Assistir</div>
+        </div>
+
+        <div class="ed-card ferramenta-card reveal d3" onclick="abrirModal('Diagnóstico Comercial Rápido')">
+          <div class="ec-meta">
+            <span class="ec-tipo ferramenta">Ferramenta</span>
+            <span class="ec-tema">Gestão</span>
+            <span class="ec-date">Abr 2025</span>
+          </div>
+          <div class="fer-lock">🔓 Acesso gratuito com cadastro</div>
+          <div class="ec-title">Diagnóstico Comercial Rápido — 20 perguntas</div>
+          <p class="ec-excerpt">Mapeie os principais gargalos da sua área comercial em menos de 15 minutos.</p>
+          <div class="ec-link">Acessar ferramenta</div>
+        </div>
+
+        <a class="ed-card reveal d1" href="#">
+          <div class="ec-meta">
+            <span class="ec-tipo artigo">Artigo</span>
+            <span class="ec-tema">Liderança</span>
+            <span class="ec-date">Abr 2025</span>
+          </div>
+          <div class="ec-title">O gestor que apaga incêndio não tem tempo para gerir</div>
+          <p class="ec-excerpt">Como sair do ciclo de urgências e criar espaço para a gestão que realmente muda resultados.</p>
+          <div class="ec-link">Ler artigo</div>
+        </a>
+
+        <a class="ed-card reveal d2" href="#">
+          <div class="ec-meta">
+            <span class="ec-tipo artigo">Artigo</span>
+            <span class="ec-tema">Negociação</span>
+            <span class="ec-date">Mar 2025</span>
+          </div>
+          <div class="ec-title">BATNA e ZOPA: como usar esses conceitos em negociações reais de PME</div>
+          <p class="ec-excerpt">Teoria de negociação aplicada ao dia a dia comercial — sem academicismo.</p>
+          <div class="ec-link">Ler artigo</div>
+        </a>
+
+        <div class="ed-card video-card reveal d3" onclick="window.open('#')">
+          <div class="ec-visual">
+            <div class="video-play">▶</div>
+          </div>
+          <div class="ec-meta">
+            <span class="ec-tipo video">Vídeo</span>
+            <span class="ec-tema">Vendas</span>
+            <span class="ec-date">Mar 2025</span>
+          </div>
+          <div class="ec-title">Como estruturar um funil de vendas para uma equipe de 5 pessoas</div>
+          <div class="ec-link">Assistir</div>
+        </div>
+
+      </div>
+
+      <div class="load-more">
+        <button class="load-btn">Carregar mais conteúdo</button>
+      </div>
+    </div>
+
+    <!-- ── VIEW GRADE ── -->
+    <div class="view-grade" id="view-grade">
+      <div class="grade-grid">
+
+        <a class="gr-card" href="#">
+          <div class="gr-meta"><span class="gr-tipo artigo">Artigo</span><span class="gr-date">Jun 2025</span></div>
+          <div class="gr-title">Por que sua equipe não bate a meta</div>
+          <div class="gr-tema">Gestão Comercial · Prof. Paulo</div>
+        </a>
+        <a class="gr-card" href="#">
+          <div class="gr-meta"><span class="gr-tipo artigo">Artigo</span><span class="gr-date">Mai 2025</span></div>
+          <div class="gr-title">SPIN Selling na prática: vendas B2B</div>
+          <div class="gr-tema">Vendas · Prof. Paulo</div>
+        </a>
+        <div class="gr-card" onclick="window.open('#')">
+          <div class="gr-meta"><span class="gr-tipo video">Vídeo</span><span class="gr-date">Mai 2025</span></div>
+          <div class="gr-title">Reunião de pipeline que gera ação</div>
+          <div class="gr-tema">Liderança · Prof. Paulo</div>
+        </div>
+        <div class="gr-card" onclick="abrirModal('Diagnóstico Comercial Rápido')">
+          <div class="gr-meta"><span class="gr-tipo ferramenta">Ferramenta</span><span class="gr-date">Abr 2025</span></div>
+          <div class="gr-title">Diagnóstico Comercial Rápido</div>
+          <div class="gr-tema">Gestão · Prof. Paulo</div>
+        </div>
+        <a class="gr-card" href="#">
+          <div class="gr-meta"><span class="gr-tipo artigo">Artigo</span><span class="gr-date">Abr 2025</span></div>
+          <div class="gr-title">O gestor que apaga incêndio</div>
+          <div class="gr-tema">Liderança · Prof. Paulo</div>
+        </a>
+        <a class="gr-card" href="#">
+          <div class="gr-meta"><span class="gr-tipo artigo">Artigo</span><span class="gr-date">Mar 2025</span></div>
+          <div class="gr-title">BATNA e ZOPA em negociações de PME</div>
+          <div class="gr-tema">Negociação · Prof. Paulo</div>
+        </a>
+        <div class="gr-card" onclick="window.open('#')">
+          <div class="gr-meta"><span class="gr-tipo video">Vídeo</span><span class="gr-date">Mar 2025</span></div>
+          <div class="gr-title">Funil de vendas para equipe de 5</div>
+          <div class="gr-tema">Vendas · Prof. Paulo</div>
+        </div>
+        <div class="gr-card" onclick="abrirModal('Plano de Vendas Mensal')">
+          <div class="gr-meta"><span class="gr-tipo ferramenta">Ferramenta</span><span class="gr-date">Fev 2025</span></div>
+          <div class="gr-title">Plano de Vendas Mensal</div>
+          <div class="gr-tema">Gestão · Prof. Paulo</div>
+        </div>
+
+      </div>
+      <div class="load-more">
+        <button class="load-btn">Carregar mais conteúdo</button>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- NEWSLETTER -->
+<div class="cream-to-navy" aria-hidden="true"></div>
+<section class="newsletter">
+  <div class="nl-geo" aria-hidden="true"></div>
+  <div class="nl-wrap">
+    <div class="reveal">
+      <div class="nl-eyebrow">Newsletter</div>
+      <h3 class="nl-h3">Gestão comercial<br>na <em>prática</em></h3>
+      <p class="nl-sub">Uma vez por semana, um artigo curto sobre vendas, liderança e gestão. Sem enrolação.</p>
+    </div>
+    <div class="reveal d2">
+      <form class="nl-form" onsubmit="return false">
+        <input class="nl-input" type="text" placeholder="Seu nome">
+        <input class="nl-input" type="email" placeholder="Seu melhor e-mail">
+        <button class="nl-btn">Quero receber</button>
+        <p class="nl-legal">Sem spam. Cancelamento em um clique.</p>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<div class="navy-footer" aria-hidden="true"></div>
+<footer>
+  <div class="ft-wrap">
+    <div class="ft-top">
+      <div>
+        <div class="ft-brand">Prof. Paulo H. Donassolo</div>
+        <p class="ft-tag">Mentoria · Consultoria · Cursos e Formações · Conteúdo</p>
+      </div>
+      <div>
+        <div class="ft-ct">Serviços</div>
+        <ul class="ft-list">
+          <li><a href="#">Mentoria</a></li>
+          <li><a href="#">Consultoria</a></li>
+          <li><a href="#">Cursos e Formações</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="ft-ct">Acesso</div>
+        <ul class="ft-list">
+          <li><a href="#">Área do Aluno</a></li>
+          <li><a href="#">Cursos Udemy</a></li>
+          <li><a href="#">Livros Amazon</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="ft-ct">Institucional</div>
+        <ul class="ft-list">
+          <li><a href="#">Prof. Paulo</a></li>
+          <li><a href="#">Fale Comigo</a></li>
+          <li><a href="#">Termos de Uso</a></li>
+          <li><a href="#">Privacidade</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="ft-bottom">
+      <div class="ft-copy">© 2025 Prof. Paulo H. Donassolo · Todos os direitos reservados</div>
+      <div class="ft-sig">Pessoas · Processos · Gestão · Resultados</div>
+    </div>
+  </div>
+</footer>
+
+<a href="https://wa.me/351999999999" class="wa" title="WhatsApp">💬</a>
+
+<script>
+// Reveal
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('on') })
+}, { threshold: 0.08, rootMargin: '0px 0px -20px 0px' })
+document.querySelectorAll('.reveal').forEach(el => obs.observe(el))
+
+// Nav
+const nav = document.getElementById('nav')
+window.addEventListener('scroll', () => nav.classList.toggle('scrolled', window.scrollY > 40))
+
+// Fio
+const fioNo = document.getElementById('fio-no')
+window.addEventListener('scroll', () => {
+  const pct = window.scrollY / (document.body.scrollHeight - window.innerHeight)
+  fioNo.style.top = (62 + pct * (window.innerHeight - 124)) + 'px'
+}, { passive: true })
+
+// Filtros
+function setFiltro(btn, grupo, valor) {
+  const grupo_el = btn.closest('.filtro-grupo')
+  grupo_el.querySelectorAll('.filtro-btn').forEach(b => b.classList.remove('ativo'))
+  btn.classList.add('ativo')
+  // Atualizar contador (simulado)
+  const total = Math.floor(Math.random() * 30) + 40
+  document.getElementById('resultado-count').textContent = `Mostrando ${total} itens`
+}
+
+function limparFiltros() {
+  document.querySelectorAll('.filtro-btn').forEach(b => {
+    b.classList.remove('ativo')
+    if(b.textContent.trim() === 'Todos') b.classList.add('ativo')
+  })
+  document.getElementById('resultado-count').textContent = 'Mostrando 72 itens'
+}
+
+// Toggle view
+function setView(view) {
+  const editorial = document.getElementById('view-editorial')
+  const grade = document.getElementById('view-grade')
+  const btnEd = document.getElementById('btn-editorial')
+  const btnGr = document.getElementById('btn-grade')
+
+  if(view === 'editorial') {
+    editorial.style.display = 'block'
+    grade.style.display = 'none'
+    btnEd.classList.add('ativo')
+    btnGr.classList.remove('ativo')
+  } else {
+    editorial.style.display = 'none'
+    grade.style.display = 'block'
+    btnGr.classList.add('ativo')
+    btnEd.classList.remove('ativo')
+  }
+}
+// Inicializar
+document.getElementById('view-editorial').style.display = 'block'
+document.getElementById('view-grade').style.display = 'none'
+
+// Modal lead
+function abrirModal(titulo) {
+  document.getElementById('modal-titulo').textContent = titulo
+  document.getElementById('modal-lead').classList.add('open')
+  document.body.style.overflow = 'hidden'
+}
+function fecharModal() {
+  document.getElementById('modal-lead').classList.remove('open')
+  document.body.style.overflow = ''
+}
+document.getElementById('modal-lead').addEventListener('click', function(e) {
+  if(e.target === this) fecharModal()
+})
+document.addEventListener('keydown', e => { if(e.key === 'Escape') fecharModal() })
+</script>
+</body>
+</html>

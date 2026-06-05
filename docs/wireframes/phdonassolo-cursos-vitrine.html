@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cursos e Formações — Prof. Paulo H. Donassolo</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@400;500;600&family=Space+Mono&display=swap" rel="stylesheet">
+<style>
+:root{
+  --cream:#F3EFE6;--cream-d:#EAE3D5;--cream-dd:#DDD4BF;--white:#FDFBF7;
+  --ink:#17130E;--ink-2:#3A3025;--ink-3:#6B5E50;
+  --navy:#0C1824;--navy-2:#122030;
+  --gold:#A87828;--gold-2:#C8983C;--gold-pale:#EDE0C0;
+  --gold-fio:rgba(168,120,40,0.5);--rule:rgba(23,19,14,0.1);
+  --fd:'Cormorant Garamond',Georgia,serif;
+  --fb:'DM Sans',sans-serif;
+  --fm:'Space Mono',monospace;
+  --ease:cubic-bezier(0.16,1,0.3,1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--fb);background:var(--cream);color:var(--ink);font-size:17px;line-height:1.65;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");opacity:.025}
+.fio{position:fixed;left:calc(5vw - 1px);top:0;bottom:0;width:1px;background:linear-gradient(to bottom,transparent,var(--gold-fio) 8%,var(--gold-fio) 92%,transparent);z-index:50;pointer-events:none}
+.fio-no{position:fixed;left:calc(5vw - 5px);top:50%;width:10px;height:10px;background:var(--gold);border-radius:50%;transform:translateY(-50%);z-index:51;pointer-events:none;box-shadow:0 0 12px rgba(168,120,40,.5)}
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .85s var(--ease),transform .85s var(--ease)}
+.reveal.on{opacity:1;transform:none}
+.d1{transition-delay:.1s}.d2{transition-delay:.2s}.d3{transition-delay:.3s}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;height:62px;background:rgba(243,239,230,.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--rule)}
+nav.scrolled{box-shadow:0 2px 20px rgba(23,19,14,.08)}
+.nav-in{max-width:1240px;margin:0 auto;padding:0 5vw;height:100%;display:flex;align-items:center;justify-content:space-between}
+.nav-logo{font-family:var(--fd);font-size:1.12rem;font-weight:700;color:var(--ink);text-decoration:none}
+.nav-links{display:flex;align-items:center;gap:2rem;list-style:none}
+.nav-links a{font-size:.8rem;font-weight:500;color:var(--ink-2);text-decoration:none;position:relative;transition:color .2s}
+.nav-links a::after{content:'';position:absolute;bottom:-3px;left:0;right:0;height:1px;background:var(--gold);transform:scaleX(0);transform-origin:left;transition:transform .3s var(--ease)}
+.nav-links a:hover{color:var(--ink)}
+.nav-links a:hover::after{transform:scaleX(1)}
+.n-cta{font-size:.78rem !important;font-weight:600 !important;color:var(--navy) !important;border:1.5px solid var(--navy) !important;padding:.45rem 1.1rem !important;transition:background .2s,color .2s !important}
+.n-cta:hover{background:var(--navy) !important;color:var(--cream) !important}
+.n-cta::after{display:none !important}
+
+/* HERO */
+.hero{padding-top:62px;background:var(--navy);position:relative;overflow:hidden}
+.hero-geo{position:absolute;right:-60px;top:50%;transform:translateY(-50%);width:420px;height:420px;border:1px solid rgba(168,120,40,.05);border-radius:50%;pointer-events:none}
+.hero-wrap{max-width:1240px;margin:0 auto;padding:5rem 5vw 6rem;position:relative;z-index:2;display:grid;grid-template-columns:3fr 2fr;gap:5rem;align-items:end}
+.hero-eyebrow{font-family:var(--fm);font-size:.78rem;letter-spacing:.2em;font-weight:700;text-transform:uppercase;color:var(--gold);display:flex;align-items:center;gap:.7rem;margin-bottom:1.5rem;opacity:0;animation:up .8s var(--ease) .2s forwards}
+.hero-eyebrow::before{content:'';display:block;width:20px;height:1px;background:var(--gold)}
+.hero-h1{font-family:var(--fd);font-size:clamp(2.4rem,4.2vw,3.8rem);font-weight:700;line-height:1.05;color:rgba(243,239,230,.95);letter-spacing:-.02em;margin-bottom:1.2rem;opacity:0;animation:up 1s var(--ease) .35s forwards}
+.hero-h1 em{font-style:italic;font-weight:400;color:var(--gold)}
+.hero-sub{font-size:.95rem;color:rgba(243,239,230,.52);line-height:1.75;max-width:480px;opacity:0;animation:up 1s var(--ease) .55s forwards}
+.hero-stats{display:flex;flex-direction:column;gap:.8rem;opacity:0;animation:up 1s var(--ease) .7s forwards;align-self:flex-end}
+.hs-row{display:flex;align-items:center;gap:1.2rem;padding:.8rem 1rem;border:1px solid rgba(243,239,230,.07);background:rgba(255,255,255,.04)}
+.hs-n{font-family:var(--fd);font-size:1.8rem;font-weight:700;color:var(--gold-2);line-height:1;flex-shrink:0;width:44px}
+.hs-txt strong{font-family:var(--fd);font-size:.92rem;font-weight:700;color:rgba(243,239,230,.85);display:block;line-height:1.1}
+.hs-txt span{font-size:.7rem;color:rgba(243,239,230,.38)}
+
+/* FILTROS */
+.hero-to-cream{height:80px;background:linear-gradient(to bottom,var(--navy) 0%,#1e3040 40%,var(--cream-dd) 100%)}
+.filtros-bar{position:sticky;top:62px;z-index:80;background:rgba(243,239,230,.97);backdrop-filter:blur(16px);border-bottom:1px solid var(--rule);padding:0 5vw}
+.filtros-inner{max-width:1240px;margin:0 auto;padding:.9rem 0;display:flex;align-items:center;gap:1.2rem;flex-wrap:wrap}
+.filtro-grupo{display:flex;align-items:center;gap:.4rem;flex-wrap:wrap}
+.filtro-label{font-family:var(--fm);font-size:.55rem;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);font-weight:700;flex-shrink:0}
+.filtro-btn{font-family:var(--fm);font-size:.56rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);border:1px solid var(--rule);background:transparent;padding:.32rem .7rem;cursor:pointer;transition:background .2s,color .2s,border-color .2s;white-space:nowrap}
+.filtro-btn:hover{border-color:var(--gold);color:var(--gold)}
+.filtro-btn.ativo{background:var(--gold);color:var(--white);border-color:var(--gold)}
+.filtro-sep{width:1px;height:22px;background:var(--rule);flex-shrink:0}
+.filtros-count{width:100%;padding-top:.45rem;font-family:var(--fm);font-size:.56rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);opacity:.55;border-top:1px solid var(--rule);display:flex;justify-content:space-between}
+.limpar-btn{background:none;border:none;cursor:pointer;font-family:var(--fm);font-size:.54rem;letter-spacing:.1em;text-transform:uppercase;color:var(--gold)}
+
+/* VITRINE */
+.vitrine{padding:5rem 5vw 8rem;background:var(--cream-d)}
+.vit-wrap{max-width:1240px;margin:0 auto}
+.plat-section{margin-bottom:4rem}
+.plat-label{font-family:var(--fm);font-size:.7rem;letter-spacing:.2em;font-weight:700;text-transform:uppercase;color:var(--ink-3);display:flex;align-items:center;gap:.8rem;margin-bottom:2rem;padding-bottom:1rem;border-bottom:1px solid var(--rule)}
+.plat-label::before{content:'';display:block;width:16px;height:1px;background:var(--ink-3)}
+.plat-label span{color:var(--gold)}
+.cursos-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem}
+
+/* CARD */
+.curso-card{background:var(--white);border:1px solid var(--rule);display:flex;flex-direction:column;position:relative;overflow:hidden;transition:transform .35s var(--ease),box-shadow .35s;box-shadow:0 2px 8px rgba(23,19,14,.04);cursor:pointer}
+.curso-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--gold),var(--gold-2));transform:scaleX(0);transform-origin:left;transition:transform .4s var(--ease)}
+.curso-card:hover{transform:translateY(-6px);box-shadow:0 18px 44px rgba(23,19,14,.11)}
+.curso-card:hover::before{transform:scaleX(1)}
+
+.curso-capa{height:180px;background:linear-gradient(135deg,var(--navy),var(--navy-2));position:relative;display:flex;align-items:center;justify-content:center;border-bottom:1px solid rgba(243,239,230,.06);font-family:var(--fm);font-size:.5rem;letter-spacing:.1em;text-transform:uppercase;color:rgba(243,239,230,.2);overflow:hidden}
+.curso-capa-num{position:absolute;bottom:-.5rem;right:.8rem;font-family:var(--fd);font-size:5rem;font-weight:700;color:rgba(243,239,230,.05);line-height:1}
+.curso-tags-capa{position:absolute;top:.8rem;left:.8rem;display:flex;gap:.4rem;flex-wrap:wrap;z-index:2}
+.tag-gratis{font-family:var(--fm);font-size:.5rem;letter-spacing:.12em;text-transform:uppercase;color:var(--navy);background:#4ade80;padding:.2rem .55rem;font-weight:700}
+.tag-plat{font-family:var(--fm);font-size:.5rem;letter-spacing:.12em;text-transform:uppercase;color:rgba(243,239,230,.8);background:rgba(12,24,36,.7);padding:.2rem .55rem}
+.tag-cat{font-family:var(--fm);font-size:.5rem;letter-spacing:.12em;text-transform:uppercase;color:var(--gold-2);background:rgba(12,24,36,.7);padding:.2rem .55rem}
+
+.curso-info{padding:1.6rem;flex:1;display:flex;flex-direction:column}
+.curso-titulo{font-family:var(--fd);font-size:1.15rem;font-weight:700;color:var(--ink);line-height:1.25;margin-bottom:.5rem}
+.curso-desc{font-size:.82rem;color:var(--ink-3);line-height:1.6;margin-bottom:1rem;flex:1}
+.curso-meta{display:flex;align-items:center;gap:1rem;padding-top:.8rem;border-top:1px solid var(--rule);flex-wrap:wrap}
+.curso-carga,.curso-nivel{font-family:var(--fm);font-size:.54rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);opacity:.6}
+.curso-preco{margin-left:auto;font-family:var(--fd);font-size:1.15rem;font-weight:700;color:var(--gold)}
+.curso-preco.gratis{color:#3d9e60;font-size:.7rem;font-family:var(--fm);letter-spacing:.1em;text-transform:uppercase}
+
+.curso-cta{margin:0 1.6rem 1.6rem;display:flex;align-items:center;justify-content:center;gap:.5rem;font-family:var(--fm);font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink);background:var(--gold);padding:.65rem;font-weight:700;transition:background .2s;text-decoration:none}
+.curso-cta:hover{background:var(--gold-2)}
+.curso-cta.gratis-btn{background:var(--navy);color:var(--cream)}
+.curso-cta.gratis-btn:hover{background:var(--ink)}
+.curso-cta.externo{background:transparent;color:var(--gold);border:1px solid rgba(168,120,40,.35)}
+.curso-cta.externo:hover{background:var(--gold-pale);border-color:var(--gold)}
+.curso-cta.externo::after{content:'↗';margin-left:.2rem}
+
+/* NOTA DINAMICA */
+.nota-dinamica{display:flex;align-items:flex-start;gap:1rem;padding:1.5rem 2rem;background:var(--cream);border:1px solid var(--rule);border-left:3px solid var(--gold);margin-top:3rem}
+.nota-txt{font-size:.84rem;color:var(--ink-2);line-height:1.65}
+.nota-txt strong{font-family:var(--fd);font-size:.95rem;font-weight:700;color:var(--ink);display:block;margin-bottom:.2rem}
+
+/* CTA INCO */
+.inco{padding:6rem 5vw;background:var(--cream)}
+.inco::before{content:'';display:block;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin-bottom:6rem}
+.inco-wrap{max-width:1240px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:center}
+.sec-eyebrow{font-family:var(--fm);font-size:.78rem;letter-spacing:.2em;font-weight:700;text-transform:uppercase;color:var(--gold);display:flex;align-items:center;gap:.7rem;margin-bottom:1.2rem}
+.sec-eyebrow::before{content:'';display:block;width:20px;height:1px;background:var(--gold)}
+.sec-h2{font-family:var(--fd);font-size:clamp(1.8rem,3vw,2.8rem);font-weight:700;color:var(--ink);line-height:1.1;letter-spacing:-.01em;margin-bottom:1rem}
+.sec-h2 em{font-style:italic;font-weight:400;color:var(--ink-3)}
+.sec-sub{font-size:.9rem;color:var(--ink-3);line-height:1.75;margin-bottom:2rem}
+.btn-primary{font-size:.84rem;font-weight:600;color:var(--ink);background:var(--gold);padding:.9rem 2.2rem;text-decoration:none;letter-spacing:.02em;transition:background .25s,transform .2s;display:inline-block}
+.btn-primary:hover{background:var(--gold-2);transform:translateY(-2px)}
+.inco-items{display:flex;flex-direction:column;gap:0}
+.inco-item{display:flex;align-items:flex-start;gap:1rem;padding:1.2rem 0;border-bottom:1px solid var(--rule)}
+.inco-item:last-child{border-bottom:none}
+.inco-n{font-family:var(--fd);font-size:1.6rem;font-weight:700;color:var(--gold-2);line-height:1;flex-shrink:0;width:32px;padding-top:.1rem}
+.inco-txt strong{font-family:var(--fd);font-size:1.05rem;font-weight:700;color:var(--ink);display:block;margin-bottom:.2rem}
+.inco-txt span{font-size:.84rem;color:var(--ink-3);line-height:1.6}
+
+/* FOOTER */
+.cream-to-navy{height:80px;background:linear-gradient(to bottom,var(--cream) 0%,#e0d8c8 30%,var(--navy) 100%)}
+footer{background:#081018;padding:4rem 5vw 2.5rem;border-top:1px solid rgba(168,120,40,.12)}
+.ft-wrap{max-width:1240px;margin:0 auto}
+.ft-top{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:3rem;padding-bottom:3rem;border-bottom:1px solid rgba(243,239,230,.06);margin-bottom:2rem}
+.ft-brand{font-family:var(--fd);font-size:1.1rem;font-weight:700;color:rgba(243,239,230,.82);margin-bottom:.6rem}
+.ft-tag{font-size:.8rem;color:rgba(243,239,230,.28);line-height:1.6;max-width:200px}
+.ft-ct{font-family:var(--fm);font-size:.55rem;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);opacity:.6;margin-bottom:1.2rem}
+.ft-list{list-style:none;display:flex;flex-direction:column;gap:.6rem}
+.ft-list a{font-size:.8rem;color:rgba(243,239,230,.32);text-decoration:none;transition:color .2s}
+.ft-list a:hover{color:rgba(243,239,230,.7)}
+.ft-bottom{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem}
+.ft-copy{font-family:var(--fm);font-size:.52rem;letter-spacing:.08em;color:rgba(243,239,230,.18)}
+.ft-sig{font-family:var(--fm);font-size:.5rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);opacity:.3}
+.wa{position:fixed;bottom:1.8rem;right:1.8rem;z-index:200;width:52px;height:52px;background:#25D366;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.4rem;text-decoration:none;box-shadow:0 4px 20px rgba(37,211,102,.3);transition:transform .2s}
+.wa:hover{transform:scale(1.08)}
+@keyframes up{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
+@media(max-width:960px){
+  .fio,.fio-no{display:none}
+  .hero-wrap{grid-template-columns:1fr}
+  .cursos-grid{grid-template-columns:1fr 1fr}
+  .inco-wrap{grid-template-columns:1fr}
+  .ft-top{grid-template-columns:1fr 1fr;gap:2rem}
+}
+@media(max-width:600px){
+  .cursos-grid{grid-template-columns:1fr}
+  .nav-links{gap:1rem}
+}
+</style>
+</head>
+<body>
+<div class="fio" aria-hidden="true"></div>
+<div class="fio-no" id="fio-no" aria-hidden="true"></div>
+
+<nav id="nav">
+  <div class="nav-in">
+    <a href="#" class="nav-logo">Prof. Paulo H. Donassolo</a>
+    <ul class="nav-links">
+      <li><a href="#">← Início</a></li>
+      <li><a href="#">Serviços</a></li>
+      <li><a href="#">Conteúdo</a></li>
+      <li><a href="#" class="n-cta">Fale Comigo</a></li>
+    </ul>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-geo" aria-hidden="true"></div>
+  <div class="hero-wrap">
+    <div>
+      <div class="hero-eyebrow">Cursos e Formações</div>
+      <h1 class="hero-h1">Aprenda com quem<br><em>viveu o campo.</em></h1>
+      <p class="hero-sub">Cursos online para gestores e profissionais de vendas. Metodologias ativas, casos reais, aplicação imediata. Sem linguagem acadêmica.</p>
+    </div>
+    <div class="hero-stats">
+      <div class="hs-row"><div class="hs-n">12</div><div class="hs-txt"><strong>Cursos disponíveis</strong><span>LMS próprio, Udemy e ESPM</span></div></div>
+      <div class="hs-row"><div class="hs-n">4</div><div class="hs-txt"><strong>Cursos gratuitos</strong><span>Acesso imediato com cadastro</span></div></div>
+      <div class="hs-row"><div class="hs-n">∞</div><div class="hs-txt"><strong>Acesso vitalício</strong><span>Compra uma vez, acessa sempre</span></div></div>
+    </div>
+  </div>
+</section>
+
+<div class="hero-to-cream" aria-hidden="true"></div>
+
+<div class="filtros-bar">
+  <div class="filtros-inner">
+    <div class="filtro-grupo">
+      <span class="filtro-label">Categoria</span>
+      <button class="filtro-btn ativo" onclick="f(this)">Todos</button>
+      <button class="filtro-btn" onclick="f(this)">Gestão Comercial</button>
+      <button class="filtro-btn" onclick="f(this)">Vendas</button>
+      <button class="filtro-btn" onclick="f(this)">Negociação</button>
+      <button class="filtro-btn" onclick="f(this)">Liderança</button>
+    </div>
+    <div class="filtro-sep"></div>
+    <div class="filtro-grupo">
+      <span class="filtro-label">Acesso</span>
+      <button class="filtro-btn ativo" onclick="f(this)">Todos</button>
+      <button class="filtro-btn" onclick="f(this)">Gratuito</button>
+      <button class="filtro-btn" onclick="f(this)">Pago</button>
+    </div>
+    <div class="filtro-sep"></div>
+    <div class="filtro-grupo">
+      <span class="filtro-label">Plataforma</span>
+      <button class="filtro-btn ativo" onclick="f(this)">Todas</button>
+      <button class="filtro-btn" onclick="f(this)">LMS Próprio</button>
+      <button class="filtro-btn" onclick="f(this)">Udemy</button>
+      <button class="filtro-btn" onclick="f(this)">ESPM</button>
+    </div>
+    <div class="filtros-count">
+      <span id="cnt">Mostrando 12 cursos · Lista dinâmica via Supabase</span>
+      <button class="limpar-btn" onclick="limpar()">Limpar filtros</button>
+    </div>
+  </div>
+</div>
+
+<section class="vitrine">
+  <div class="vit-wrap">
+
+    <!-- LMS PRÓPRIO -->
+    <div class="plat-section reveal">
+      <div class="plat-label">Plataforma própria · <span>LMS phdonassolo.com</span></div>
+      <div class="cursos-grid">
+        <div class="curso-card">
+          <div class="curso-capa">
+            <div class="curso-tags-capa"><span class="tag-cat">Gestão Comercial</span></div>
+            <div class="curso-capa-num">01</div>
+            [ Capa — Supabase ]
+          </div>
+          <div class="curso-info">
+            <div class="curso-titulo">Gestão Comercial para PMEs — do Diagnóstico ao Resultado</div>
+            <p class="curso-desc">Estruture sua área comercial com método. Do planejamento à execução, com ferramentas aplicáveis no dia seguinte.</p>
+            <div class="curso-meta">
+              <span class="curso-carga">⏱ 12h</span>
+              <span class="curso-nivel">● Intermediário</span>
+              <span class="curso-preco">R$ 297</span>
+            </div>
+          </div>
+          <a href="#" class="curso-cta">Ver o curso →</a>
+        </div>
+        <div class="curso-card">
+          <div class="curso-capa">
+            <div class="curso-tags-capa"><span class="tag-gratis">Grátis</span><span class="tag-cat">Vendas</span></div>
+            <div class="curso-capa-num">02</div>
+            [ Capa — Supabase ]
+          </div>
+          <div class="curso-info">
+            <div class="curso-titulo">Introdução ao SPIN Selling — Fundamentos</div>
+            <p class="curso-desc">Os conceitos fundamentais da venda consultiva aplicados à realidade de PMEs. Curso de entrada, gratuito.</p>
+            <div class="curso-meta">
+              <span class="curso-carga">⏱ 2h</span>
+              <span class="curso-nivel">● Iniciante</span>
+              <span class="curso-preco gratis">Gratuito</span>
+            </div>
+          </div>
+          <a href="#" class="curso-cta gratis-btn">Acessar grátis →</a>
+        </div>
+        <div class="curso-card">
+          <div class="curso-capa">
+            <div class="curso-tags-capa"><span class="tag-cat">Negociação</span></div>
+            <div class="curso-capa-num">03</div>
+            [ Capa — Supabase ]
+          </div>
+          <div class="curso-info">
+            <div class="curso-titulo">Negociação Estratégica — do BATNA ao Fechamento</div>
+            <p class="curso-desc">Técnicas e frameworks para negociar com método em qualquer contexto comercial.</p>
+            <div class="curso-meta">
+              <span class="curso-carga">⏱ 8h</span>
+              <span class="curso-nivel">● Avançado</span>
+              <span class="curso-preco">R$ 197</span>
+            </div>
+          </div>
+          <a href="#" class="curso-cta">Ver o curso →</a>
+        </div>
+      </div>
+      <div class="nota-dinamica">
+        <div>💡</div>
+        <div class="nota-txt">
+          <strong>Lista dinâmica via Supabase</strong>
+          Novos cursos cadastrados no Supabase aparecem automaticamente aqui — sem deploy. Os campos exibidos (título, descrição, carga, nível, preço, capa, categoria, tipo) são lidos diretamente da tabela de cursos.
+        </div>
+      </div>
+    </div>
+
+    <!-- UDEMY -->
+    <div class="plat-section reveal">
+      <div class="plat-label">Plataforma externa · <span>Udemy</span></div>
+      <div class="cursos-grid">
+        <div class="curso-card">
+          <div class="curso-capa">
+            <div class="curso-tags-capa"><span class="tag-plat">Udemy</span><span class="tag-cat">Liderança</span></div>
+            <div class="curso-capa-num">04</div>
+            [ Capa — Supabase ]
+          </div>
+          <div class="curso-info">
+            <div class="curso-titulo">Liderança e Gestão de Equipes Comerciais</div>
+            <p class="curso-desc">Para gestores que querem transformar equipes de vendedores em times de alta performance com método.</p>
+            <div class="curso-meta">
+              <span class="curso-carga">⏱ 9h</span>
+              <span class="curso-nivel">● Intermediário</span>
+              <span class="curso-preco">Udemy</span>
+            </div>
+          </div>
+          <a href="#" target="_blank" class="curso-cta externo">Ver na Udemy</a>
+        </div>
+        <div class="curso-card">
+          <div class="curso-capa">
+            <div class="curso-tags-capa"><span class="tag-plat">Udemy</span><span class="tag-cat">Vendas</span></div>
+            <div class="curso-capa-num">05</div>
+            [ Capa — Supabase ]
+          </div>
+          <div class="curso-info">
+            <div class="curso-titulo">Operação de Vendas de Alta Performance</div>
+            <p class="curso-desc">Do funil ao fechamento — um curso completo para vendedores e gestores que querem resultados previsíveis.</p>
+            <div class="curso-meta">
+              <span class="curso-carga">⏱ 10h</span>
+              <span class="curso-nivel">● Intermediário</span>
+              <span class="curso-preco">Udemy</span>
+            </div>
+          </div>
+          <a href="#" target="_blank" class="curso-cta externo">Ver na Udemy</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ESPM -->
+    <div class="plat-section reveal">
+      <div class="plat-label">Pós-graduação e MBA · <span>ESPM</span></div>
+      <div class="cursos-grid">
+        <div class="curso-card">
+          <div class="curso-capa">
+            <div class="curso-tags-capa"><span class="tag-plat">ESPM</span><span class="tag-cat">MBA</span></div>
+            <div class="curso-capa-num">06</div>
+            [ Capa — ESPM ]
+          </div>
+          <div class="curso-info">
+            <div class="curso-titulo">MBA em Gestão Comercial e Vendas — ESPM</div>
+            <p class="curso-desc">Programa de especialização com módulo de Gestão Comercial ministrado pelo Prof. Paulo H. Donassolo.</p>
+            <div class="curso-meta">
+              <span class="curso-carga">⏱ 360h</span>
+              <span class="curso-nivel">● MBA</span>
+              <span class="curso-preco">ESPM</span>
+            </div>
+          </div>
+          <a href="#" target="_blank" class="curso-cta externo">Ver na ESPM</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- IN-COMPANY -->
+<section class="inco">
+  <div class="inco-wrap">
+    <div class="reveal">
+      <div class="sec-eyebrow">Treinamento in-company</div>
+      <h2 class="sec-h2">Para a sua <em>equipe,</em><br>no seu contexto.</h2>
+      <p class="sec-sub">Programas de capacitação presenciais ou online, customizados para a realidade da sua empresa. Da equipe de vendas à liderança comercial.</p>
+      <a href="#" class="btn-primary">Falar sobre um treinamento →</a>
+    </div>
+    <div class="inco-items reveal d2">
+      <div class="inco-item">
+        <div class="inco-n">01</div>
+        <div class="inco-txt"><strong>Diagnóstico das necessidades</strong><span>Conversa inicial para entender o contexto, os desafios e os objetivos da equipe</span></div>
+      </div>
+      <div class="inco-item">
+        <div class="inco-n">02</div>
+        <div class="inco-txt"><strong>Programa customizado</strong><span>Conteúdo, carga horária e formato definidos para a realidade da sua empresa</span></div>
+      </div>
+      <div class="inco-item">
+        <div class="inco-n">03</div>
+        <div class="inco-txt"><strong>Execução e acompanhamento</strong><span>Presencial ou online, com materiais de apoio e follow-up pós-treinamento</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="cream-to-navy" aria-hidden="true"></div>
+<footer>
+  <div class="ft-wrap">
+    <div class="ft-top">
+      <div><div class="ft-brand">Prof. Paulo H. Donassolo</div><p class="ft-tag">Mentoria · Consultoria · Cursos e Formações · Conteúdo</p></div>
+      <div><div class="ft-ct">Serviços</div><ul class="ft-list"><li><a href="#">Mentoria</a></li><li><a href="#">Consultoria</a></li><li><a href="#">Cursos</a></li></ul></div>
+      <div><div class="ft-ct">Acesso</div><ul class="ft-list"><li><a href="#">Área do Aluno</a></li><li><a href="#">Udemy</a></li><li><a href="#">Amazon</a></li></ul></div>
+      <div><div class="ft-ct">Institucional</div><ul class="ft-list"><li><a href="#">Prof. Paulo</a></li><li><a href="#">Fale Comigo</a></li><li><a href="#">Privacidade</a></li></ul></div>
+    </div>
+    <div class="ft-bottom">
+      <div class="ft-copy">© 2025 Prof. Paulo H. Donassolo · Todos os direitos reservados</div>
+      <div class="ft-sig">Pessoas · Processos · Gestão · Resultados</div>
+    </div>
+  </div>
+</footer>
+<a href="https://wa.me/351999999999" class="wa">💬</a>
+<script>
+const obs=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting)x.target.classList.add('on')})},{threshold:.08})
+document.querySelectorAll('.reveal').forEach(el=>obs.observe(el))
+const nav=document.getElementById('nav')
+window.addEventListener('scroll',()=>nav.classList.toggle('scrolled',window.scrollY>40))
+const fioNo=document.getElementById('fio-no')
+window.addEventListener('scroll',()=>{const p=window.scrollY/(document.body.scrollHeight-window.innerHeight);fioNo.style.top=(62+p*(window.innerHeight-124))+'px'},{passive:true})
+function f(btn){btn.closest('.filtro-grupo').querySelectorAll('.filtro-btn').forEach(b=>b.classList.remove('ativo'));btn.classList.add('ativo')}
+function limpar(){document.querySelectorAll('.filtro-btn').forEach(b=>{b.classList.remove('ativo');if(b.textContent.trim()==='Todos'||b.textContent.trim()==='Todas')b.classList.add('ativo')})}
+</script>
+</body>
+</html>

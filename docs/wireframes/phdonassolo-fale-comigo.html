@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fale Comigo — Prof. Paulo H. Donassolo</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@400;500;600&family=Space+Mono&display=swap" rel="stylesheet">
+<style>
+:root {
+  --cream:     #F3EFE6;
+  --cream-d:   #EAE3D5;
+  --cream-dd:  #DDD4BF;
+  --white:     #FDFBF7;
+  --ink:       #17130E;
+  --ink-2:     #3A3025;
+  --ink-3:     #6B5E50;
+  --navy:      #0C1824;
+  --navy-2:    #122030;
+  --gold:      #A87828;
+  --gold-2:    #C8983C;
+  --gold-pale: #EDE0C0;
+  --gold-fio:  rgba(168,120,40,0.5);
+  --rule:      rgba(23,19,14,0.1);
+  --fd: 'Cormorant Garamond', Georgia, serif;
+  --fb: 'DM Sans', sans-serif;
+  --fm: 'Space Mono', monospace;
+  --ease: cubic-bezier(0.16,1,0.3,1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--fb);background:var(--cream);color:var(--ink);font-size:17px;line-height:1.65;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");opacity:.025}
+
+.fio{position:fixed;left:calc(5vw - 1px);top:0;bottom:0;width:1px;background:linear-gradient(to bottom,transparent 0%,var(--gold-fio) 8%,var(--gold-fio) 92%,transparent 100%);z-index:50;pointer-events:none}
+.fio-no{position:fixed;left:calc(5vw - 5px);top:50%;width:10px;height:10px;background:var(--gold);border-radius:50%;transform:translateY(-50%);z-index:51;pointer-events:none;box-shadow:0 0 12px rgba(168,120,40,.5)}
+
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .85s var(--ease),transform .85s var(--ease)}
+.reveal.on{opacity:1;transform:none}
+.d1{transition-delay:.1s}.d2{transition-delay:.2s}.d3{transition-delay:.3s}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;height:62px;background:rgba(243,239,230,.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--rule)}
+nav.scrolled{box-shadow:0 2px 20px rgba(23,19,14,.08)}
+.nav-in{max-width:1240px;margin:0 auto;padding:0 5vw;height:100%;display:flex;align-items:center;justify-content:space-between}
+.nav-logo{font-family:var(--fd);font-size:1.12rem;font-weight:700;color:var(--ink);text-decoration:none;line-height:1}
+.nav-links{display:flex;align-items:center;gap:2rem;list-style:none}
+.nav-links a{font-size:.8rem;font-weight:500;color:var(--ink-2);text-decoration:none;letter-spacing:.01em;position:relative;transition:color .2s}
+.nav-links a::after{content:'';position:absolute;bottom:-3px;left:0;right:0;height:1px;background:var(--gold);transform:scaleX(0);transform-origin:left;transition:transform .3s var(--ease)}
+.nav-links a:hover{color:var(--ink)}
+.nav-links a:hover::after{transform:scaleX(1)}
+.n-back{font-size:.78rem;font-weight:500;color:var(--ink-3);text-decoration:none;display:flex;align-items:center;gap:.4rem;transition:color .2s}
+.n-back:hover{color:var(--ink)}
+.n-cta::after{display:none !important}
+
+/* ══════════════════════
+   HERO — compacto navy
+══════════════════════ */
+.hero{
+  padding-top:62px;background:var(--navy);
+  position:relative;overflow:hidden;
+}
+.hero-geo{position:absolute;right:-60px;top:50%;transform:translateY(-50%);width:380px;height:380px;border:1px solid rgba(168,120,40,.06);border-radius:50%;pointer-events:none}
+.hero-wrap{max-width:1240px;margin:0 auto;padding:5rem 5vw 6rem;position:relative;z-index:2}
+.hero-eyebrow{font-family:var(--fm);font-size:.78rem;letter-spacing:.2em;font-weight:700;text-transform:uppercase;color:var(--gold);display:flex;align-items:center;gap:.7rem;margin-bottom:1.5rem;opacity:0;animation:up .8s var(--ease) .2s forwards}
+.hero-eyebrow::before{content:'';display:block;width:20px;height:1px;background:var(--gold)}
+.hero-h1{font-family:var(--fd);font-size:clamp(2.6rem,4.5vw,4.2rem);font-weight:700;line-height:1.05;color:rgba(243,239,230,.95);letter-spacing:-.02em;margin-bottom:1.2rem;opacity:0;animation:up 1s var(--ease) .35s forwards;max-width:700px}
+.hero-h1 em{font-style:italic;font-weight:400;color:var(--gold)}
+.hero-sub{font-size:.95rem;color:rgba(243,239,230,.55);line-height:1.75;max-width:560px;opacity:0;animation:up 1s var(--ease) .55s forwards}
+
+/* ══════════════════════
+   CONTATO PRINCIPAL
+   cream — formulário + info
+══════════════════════ */
+.hero-to-cream{height:100px;background:linear-gradient(to bottom,var(--navy) 0%,#1e3040 40%,var(--cream-dd) 100%)}
+
+.contato{padding:7rem 5vw;background:var(--cream-d)}
+.cnt-wrap{max-width:1240px;margin:0 auto;display:grid;grid-template-columns:3fr 2fr;gap:7rem;align-items:start}
+
+/* FORMULÁRIO */
+.form-section{}
+.form-eyebrow{font-family:var(--fm);font-size:.78rem;letter-spacing:.2em;font-weight:700;text-transform:uppercase;color:var(--gold);display:flex;align-items:center;gap:.7rem;margin-bottom:1.2rem}
+.form-eyebrow::before{content:'';display:block;width:20px;height:1px;background:var(--gold)}
+.form-h2{font-family:var(--fd);font-size:clamp(1.8rem,3vw,2.8rem);font-weight:700;color:var(--ink);line-height:1.1;letter-spacing:-.01em;margin-bottom:.8rem}
+.form-h2 em{font-style:italic;font-weight:400;color:var(--ink-3)}
+.form-sub{font-size:.88rem;color:var(--ink-3);line-height:1.7;margin-bottom:2.5rem}
+
+.form{display:flex;flex-direction:column;gap:1.5rem}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem}
+.form-group{display:flex;flex-direction:column;gap:.5rem}
+.form-label{font-family:var(--fm);font-size:.58rem;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);font-weight:700}
+.form-input,.form-textarea,.form-select{
+  font-family:var(--fb);font-size:.9rem;
+  background:var(--white);
+  border:1px solid var(--rule);
+  color:var(--ink);
+  padding:.85rem 1rem;
+  width:100%;outline:none;
+  transition:border-color .2s,box-shadow .2s;
+  -webkit-appearance:none;
+}
+.form-input:focus,.form-textarea:focus,.form-select:focus{
+  border-color:var(--gold);
+  box-shadow:0 0 0 3px rgba(168,120,40,.08);
+}
+.form-input::placeholder,.form-textarea::placeholder{color:var(--ink-3);opacity:.5}
+.form-textarea{resize:vertical;min-height:140px;line-height:1.6}
+.form-select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23A87828' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 1rem center;padding-right:2.5rem}
+
+.form-submit{
+  display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:1rem;
+  padding-top:.5rem;
+}
+.btn-submit{
+  font-family:var(--fb);font-size:.84rem;font-weight:600;
+  color:var(--ink);background:var(--gold);
+  padding:.9rem 2.5rem;border:none;cursor:pointer;
+  letter-spacing:.02em;
+  transition:background .25s,transform .2s,box-shadow .25s;
+  display:inline-flex;align-items:center;gap:.6rem;
+}
+.btn-submit:hover{background:var(--gold-2);transform:translateY(-2px);box-shadow:0 8px 24px rgba(168,120,40,.3)}
+.btn-submit-arr{transition:transform .2s}
+.btn-submit:hover .btn-submit-arr{transform:translateX(4px)}
+.form-nota{font-family:var(--fm);font-size:.55rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);opacity:.6}
+
+/* SIDEBAR INFO */
+.info-section{display:flex;flex-direction:column;gap:1.5rem}
+
+/* WhatsApp card — destaque */
+.wa-card{
+  background:var(--navy);
+  padding:2.2rem;
+  position:relative;
+  cursor:pointer;
+  transition:box-shadow .3s;
+  text-decoration:none;display:block;
+}
+.wa-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#25D366,#128C7E,transparent)}
+.wa-card:hover{box-shadow:0 8px 32px rgba(0,0,0,.25)}
+.wa-card-label{font-family:var(--fm);font-size:.6rem;letter-spacing:.2em;font-weight:700;text-transform:uppercase;color:#25D366;margin-bottom:1rem;display:flex;align-items:center;gap:.5rem}
+.wa-card-label::before{content:'';display:block;width:12px;height:1px;background:#25D366}
+.wa-card-title{font-family:var(--fd);font-size:1.3rem;font-weight:700;color:rgba(243,239,230,.92);margin-bottom:.5rem;line-height:1.2}
+.wa-card-sub{font-size:.82rem;color:rgba(243,239,230,.48);line-height:1.55;margin-bottom:1.5rem}
+.wa-btn{
+  display:inline-flex;align-items:center;gap:.6rem;
+  font-family:var(--fm);font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--navy);background:#25D366;
+  padding:.55rem 1.1rem;
+  transition:background .2s;
+  font-weight:700;
+}
+.wa-btn:hover{background:#20b858}
+.wa-horario{font-family:var(--fm);font-size:.52rem;letter-spacing:.1em;text-transform:uppercase;color:rgba(243,239,230,.25);margin-top:1rem}
+
+/* info cards */
+.info-card{background:var(--white);border:1px solid var(--rule);padding:1.8rem;position:relative}
+.info-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--gold)}
+.ic-label{font-family:var(--fm);font-size:.58rem;letter-spacing:.18em;font-weight:700;text-transform:uppercase;color:var(--gold);margin-bottom:.8rem}
+.ic-value{font-family:var(--fd);font-size:1.05rem;font-weight:700;color:var(--ink);margin-bottom:.25rem;line-height:1.3}
+.ic-sub{font-size:.82rem;color:var(--ink-3);line-height:1.5}
+
+/* redes sociais */
+.social-card{background:var(--cream);border:1px solid var(--rule);padding:1.8rem}
+.sc-label{font-family:var(--fm);font-size:.58rem;letter-spacing:.18em;font-weight:700;text-transform:uppercase;color:var(--gold);margin-bottom:1.2rem}
+.sc-links{display:flex;flex-direction:column;gap:.8rem}
+.sc-link{
+  display:flex;align-items:center;gap:.8rem;
+  text-decoration:none;
+  font-size:.86rem;color:var(--ink-2);font-weight:500;
+  padding:.6rem 0;border-bottom:1px solid var(--rule);
+  transition:color .2s;
+}
+.sc-link:last-child{border-bottom:none}
+.sc-link:hover{color:var(--gold)}
+.sc-link-icon{width:20px;height:20px;flex-shrink:0;opacity:.5;transition:opacity .2s;font-size:.9rem;display:flex;align-items:center;justify-content:center}
+.sc-link:hover .sc-link-icon{opacity:1}
+.sc-link-arr{margin-left:auto;color:var(--gold);opacity:0;transition:opacity .2s,transform .2s;font-size:.8rem}
+.sc-link:hover .sc-link-arr{opacity:1;transform:translateX(3px)}
+
+/* ══════════════════════
+   ANTES DE ENTRAR EM CONTATO
+   navy — perguntas frequentes
+══════════════════════ */
+.cream-to-navy{height:100px;background:linear-gradient(to bottom,var(--cream-d) 0%,#e0d8c8 30%,var(--navy) 100%)}
+
+.antes{padding:7rem 5vw;background:var(--navy)}
+.antes-wrap{max-width:1240px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:7rem;align-items:start}
+
+.antes-left{}
+.antes-eyebrow{font-family:var(--fm);font-size:.78rem;letter-spacing:.2em;font-weight:700;text-transform:uppercase;color:var(--gold);display:flex;align-items:center;gap:.7rem;margin-bottom:1.2rem}
+.antes-eyebrow::before{content:'';display:block;width:20px;height:1px;background:var(--gold)}
+.antes-h2{font-family:var(--fd);font-size:clamp(1.8rem,3vw,2.8rem);font-weight:700;color:rgba(243,239,230,.95);line-height:1.1;letter-spacing:-.01em;margin-bottom:1rem}
+.antes-h2 em{font-style:italic;font-weight:400;color:var(--gold)}
+.antes-sub{font-size:.88rem;color:rgba(243,239,230,.5);line-height:1.75;margin-bottom:2rem}
+
+/* expectativas */
+.expect-list{display:flex;flex-direction:column;gap:0}
+.expect-item{
+  display:flex;align-items:flex-start;gap:1.2rem;
+  padding:1.3rem 0;border-bottom:1px solid rgba(243,239,230,.06);
+}
+.expect-item:last-child{border-bottom:none}
+.expect-n{font-family:var(--fd);font-size:1.6rem;font-weight:700;color:var(--gold-2);line-height:1;flex-shrink:0;width:36px;padding-top:.1rem}
+.expect-txt strong{font-family:var(--fd);font-size:1.05rem;font-weight:700;color:rgba(243,239,230,.9);display:block;margin-bottom:.2rem;line-height:1.2}
+.expect-txt span{font-size:.84rem;color:rgba(243,239,230,.5);line-height:1.6}
+
+/* perguntas frequentes contato */
+.faq-list{display:flex;flex-direction:column;gap:0}
+.faq-item{border-bottom:1px solid rgba(243,239,230,.06)}
+.faq-btn{width:100%;display:flex;justify-content:space-between;align-items:center;gap:1.5rem;padding:1.4rem 0;background:none;border:none;cursor:pointer;text-align:left}
+.faq-q{font-family:var(--fd);font-size:1.05rem;font-weight:700;color:rgba(243,239,230,.9);line-height:1.3}
+.faq-icon{color:var(--gold);font-size:1.4rem;flex-shrink:0;font-weight:300;line-height:1;transition:transform .25s var(--ease);font-family:var(--fd)}
+.faq-item.open .faq-icon{transform:rotate(45deg)}
+.faq-a{font-size:.86rem;color:rgba(243,239,230,.5);line-height:1.75;padding:0 0 1.4rem;max-width:560px;display:none}
+.faq-item.open .faq-a{display:block}
+
+/* ══════════════════════
+   FOOTER
+══════════════════════ */
+.navy-footer{height:60px;background:linear-gradient(to bottom,var(--navy) 0%,#081018 100%)}
+footer{background:#081018;padding:4rem 5vw 2.5rem;border-top:1px solid rgba(168,120,40,.12)}
+.ft-wrap{max-width:1240px;margin:0 auto}
+.ft-top{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:3rem;padding-bottom:3rem;border-bottom:1px solid rgba(243,239,230,.06);margin-bottom:2rem}
+.ft-brand{font-family:var(--fd);font-size:1.1rem;font-weight:700;color:rgba(243,239,230,.82);margin-bottom:.6rem}
+.ft-tag{font-size:.8rem;color:rgba(243,239,230,.28);line-height:1.6;max-width:200px}
+.ft-ct{font-family:var(--fm);font-size:.55rem;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);opacity:.6;margin-bottom:1.2rem}
+.ft-list{list-style:none;display:flex;flex-direction:column;gap:.6rem}
+.ft-list a{font-size:.8rem;color:rgba(243,239,230,.32);text-decoration:none;transition:color .2s}
+.ft-list a:hover{color:rgba(243,239,230,.7)}
+.ft-bottom{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem}
+.ft-copy{font-family:var(--fm);font-size:.52rem;letter-spacing:.08em;color:rgba(243,239,230,.18)}
+.ft-sig{font-family:var(--fm);font-size:.5rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);opacity:.3}
+
+/* WhatsApp flutuante */
+.wa-float{
+  position:fixed;bottom:1.8rem;right:1.8rem;z-index:200;
+  display:flex;align-items:center;gap:.8rem;
+  background:#25D366;
+  padding:.7rem 1.2rem .7rem .9rem;
+  border-radius:100px;
+  text-decoration:none;
+  box-shadow:0 4px 20px rgba(37,211,102,.35);
+  transition:transform .2s,box-shadow .2s,padding .3s;
+  overflow:hidden;
+  max-width:52px;
+}
+.wa-float:hover{
+  max-width:220px;
+  padding:.7rem 1.4rem .7rem .9rem;
+  box-shadow:0 6px 28px rgba(37,211,102,.45);
+}
+.wa-float-icon{font-size:1.3rem;flex-shrink:0}
+.wa-float-txt{
+  font-family:var(--fb);font-size:.78rem;font-weight:600;
+  color:var(--navy);white-space:nowrap;
+  opacity:0;transition:opacity .2s .1s;
+}
+.wa-float:hover .wa-float-txt{opacity:1}
+
+@keyframes up{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
+
+@media(max-width:960px){
+  .fio,.fio-no{display:none}
+  .cnt-wrap,.antes-wrap{grid-template-columns:1fr}
+  .form-row{grid-template-columns:1fr}
+  .ft-top{grid-template-columns:1fr 1fr;gap:2.5rem}
+}
+@media(max-width:600px){
+  .nav-links{gap:1rem}
+}
+</style>
+</head>
+<body>
+
+<div class="fio" aria-hidden="true"></div>
+<div class="fio-no" id="fio-no" aria-hidden="true"></div>
+
+<!-- NAV -->
+<nav id="nav">
+  <div class="nav-in">
+    <a href="#" class="nav-logo">Prof. Paulo H. Donassolo</a>
+    <ul class="nav-links">
+      <li><a href="#" class="n-back">← Início</a></li>
+      <li><a href="#">Serviços</a></li>
+      <li><a href="#">Prof. Paulo</a></li>
+      <li><a href="#">Conteúdo</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-geo" aria-hidden="true"></div>
+  <div class="hero-wrap">
+    <div class="hero-eyebrow">Fale Comigo</div>
+    <h1 class="hero-h1">
+      Uma conversa resolve.<br>
+      <em>Por onde prefere começar?</em>
+    </h1>
+    <p class="hero-sub">
+      Formulário, WhatsApp ou redes sociais — escolha o canal que for mais cômodo. O tempo de resposta é de até 24 horas em dias úteis.
+    </p>
+  </div>
+</section>
+
+<div class="hero-to-cream" aria-hidden="true"></div>
+
+<!-- CONTATO PRINCIPAL -->
+<section class="contato">
+  <div class="cnt-wrap">
+
+    <!-- FORMULÁRIO -->
+    <div class="form-section reveal">
+      <div class="form-eyebrow">Formulário de contato</div>
+      <h2 class="form-h2">Envie uma <em>mensagem</em></h2>
+      <p class="form-sub">Preencha o formulário e entrarei em contato em até 24 horas em dias úteis. Quanto mais detalhes você incluir, mais objetiva será a minha resposta.</p>
+
+      <form class="form" onsubmit="return false">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Nome</label>
+            <input class="form-input" type="text" placeholder="Seu nome completo">
+          </div>
+          <div class="form-group">
+            <label class="form-label">E-mail</label>
+            <input class="form-input" type="email" placeholder="seu@email.com">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">WhatsApp</label>
+            <input class="form-input" type="tel" placeholder="+55 ou +351...">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Assunto</label>
+            <select class="form-select">
+              <option value="" disabled selected>Selecione o assunto</option>
+              <option>Mentoria Comercial</option>
+              <option>Consultoria</option>
+              <option>Cursos e Formações</option>
+              <option>In-company / Treinamento</option>
+              <option>Palestra ou Workshop</option>
+              <option>Outro assunto</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Mensagem</label>
+          <textarea class="form-textarea" placeholder="Conte um pouco sobre o seu desafio ou o que você está buscando..."></textarea>
+        </div>
+        <div class="form-submit">
+          <button class="btn-submit" type="submit">
+            Enviar mensagem
+            <span class="btn-submit-arr">→</span>
+          </button>
+          <p class="form-nota">Resposta em até 24h · Dias úteis</p>
+        </div>
+      </form>
+    </div>
+
+    <!-- SIDEBAR -->
+    <div class="info-section reveal d2">
+
+      <!-- WhatsApp destaque -->
+      <a href="https://wa.me/351999999999" class="wa-card">
+        <div class="wa-card-label">Resposta mais rápida</div>
+        <div class="wa-card-title">Fale pelo WhatsApp</div>
+        <p class="wa-card-sub">Para uma conversa mais direta e rápida. Ideal para dúvidas pontuais ou para agendar uma conversa inicial.</p>
+        <div class="wa-btn">Abrir WhatsApp →</div>
+        <p class="wa-horario">Seg–Sex · 9h–18h Lisboa / 6h–15h Brasília</p>
+      </a>
+
+      <!-- E-mail -->
+      <div class="info-card">
+        <div class="ic-label">E-mail</div>
+        <div class="ic-value">contato@phdonassolo.com</div>
+        <p class="ic-sub">Para assuntos mais formais ou que exijam troca de documentos</p>
+      </div>
+
+      <!-- Localização -->
+      <div class="info-card">
+        <div class="ic-label">Localização</div>
+        <div class="ic-value">Lisboa, Portugal</div>
+        <p class="ic-sub">Atendimento online para clientes no Brasil, Portugal e outros países de língua portuguesa</p>
+      </div>
+
+      <!-- Redes sociais -->
+      <div class="social-card">
+        <div class="sc-label">Redes sociais</div>
+        <div class="sc-links">
+          <a href="#" class="sc-link">
+            <span class="sc-link-icon">in</span>
+            <span>LinkedIn — Prof. Paulo H. Donassolo</span>
+            <span class="sc-link-arr">↗</span>
+          </a>
+          <a href="#" class="sc-link">
+            <span class="sc-link-icon">▶</span>
+            <span>YouTube — Canal de conteúdo</span>
+            <span class="sc-link-arr">↗</span>
+          </a>
+          <a href="#" class="sc-link">
+            <span class="sc-link-icon">◎</span>
+            <span>Instagram — @phdonassolo</span>
+            <span class="sc-link-arr">↗</span>
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- TRANSIÇÃO -->
+<div class="cream-to-navy" aria-hidden="true"></div>
+
+<!-- ANTES DE ENTRAR EM CONTATO -->
+<section class="antes">
+  <div class="antes-wrap">
+    <div class="antes-left reveal">
+      <div class="antes-eyebrow">O que esperar</div>
+      <h2 class="antes-h2">Como funciona<br><em>a primeira conversa</em></h2>
+      <p class="antes-sub">Não existe roteiro fixo — mas existe uma sequência que funciona bem.</p>
+      <div class="expect-list">
+        <div class="expect-item">
+          <div class="expect-n">01</div>
+          <div class="expect-txt">
+            <strong>Você envia a mensagem</strong>
+            <span>Pelo formulário, WhatsApp ou e-mail — com uma breve descrição do que está buscando</span>
+          </div>
+        </div>
+        <div class="expect-item">
+          <div class="expect-n">02</div>
+          <div class="expect-txt">
+            <strong>Respondo em até 24h</strong>
+            <span>Em dias úteis. Se necessário, peço mais informações antes de sugerir um horário</span>
+          </div>
+        </div>
+        <div class="expect-item">
+          <div class="expect-n">03</div>
+          <div class="expect-txt">
+            <strong>Conversa inicial de 30 minutos</strong>
+            <span>Online, sem compromisso e sem custo. Objetivo: entender o desafio e identificar se — e como — posso ajudar</span>
+          </div>
+        </div>
+        <div class="expect-item">
+          <div class="expect-n">04</div>
+          <div class="expect-txt">
+            <strong>Proposta ou próximo passo</strong>
+            <span>Apenas se fizer sentido para os dois lados. Sem pressão, sem urgência artificial</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="reveal d2">
+      <div class="antes-eyebrow" style="margin-bottom:1.5rem">Perguntas frequentes</div>
+      <div class="faq-list">
+        <div class="faq-item">
+          <button class="faq-btn" onclick="toggleFaq(this)">
+            <span class="faq-q">A conversa inicial tem custo?</span>
+            <span class="faq-icon">+</span>
+          </button>
+          <p class="faq-a">Não. A conversa inicial de 30 minutos é gratuita e sem compromisso. O objetivo é entender o seu desafio e verificar se faz sentido avançarmos juntos.</p>
+        </div>
+        <div class="faq-item">
+          <button class="faq-btn" onclick="toggleFaq(this)">
+            <span class="faq-q">Atende empresas fora de Portugal?</span>
+            <span class="faq-icon">+</span>
+          </button>
+          <p class="faq-a">Sim. Atendo clientes no Brasil, Portugal e outros países de língua portuguesa. Todas as sessões são online, o que permite flexibilidade total de localização e horário.</p>
+        </div>
+        <div class="faq-item">
+          <button class="faq-btn" onclick="toggleFaq(this)">
+            <span class="faq-q">Qual o prazo de resposta?</span>
+            <span class="faq-icon">+</span>
+          </button>
+          <p class="faq-a">Até 24 horas em dias úteis para e-mail e formulário. Para WhatsApp, geralmente mais rápido — dentro do horário comercial de Lisboa.</p>
+        </div>
+        <div class="faq-item">
+          <button class="faq-btn" onclick="toggleFaq(this)">
+            <span class="faq-q">Não sei exatamente o que preciso. Posso entrar em contato assim mesmo?</span>
+            <span class="faq-icon">+</span>
+          </button>
+          <p class="faq-a">Com certeza. A conversa inicial existe exatamente para isso — identificar junto o que faz mais sentido para o seu momento. Não precisa chegar com tudo definido.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<div class="navy-footer" aria-hidden="true"></div>
+<footer>
+  <div class="ft-wrap">
+    <div class="ft-top">
+      <div>
+        <div class="ft-brand">Prof. Paulo H. Donassolo</div>
+        <p class="ft-tag">Mentoria · Consultoria · Cursos e Formações · Conteúdo</p>
+      </div>
+      <div>
+        <div class="ft-ct">Serviços</div>
+        <ul class="ft-list">
+          <li><a href="#">Mentoria</a></li>
+          <li><a href="#">Consultoria</a></li>
+          <li><a href="#">Cursos e Formações</a></li>
+          <li><a href="#">Conteúdo</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="ft-ct">Acesso</div>
+        <ul class="ft-list">
+          <li><a href="#">Área do Aluno</a></li>
+          <li><a href="#">Cursos Udemy</a></li>
+          <li><a href="#">Livros Amazon</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="ft-ct">Institucional</div>
+        <ul class="ft-list">
+          <li><a href="#">Prof. Paulo</a></li>
+          <li><a href="#">Serviços</a></li>
+          <li><a href="#">Termos de Uso</a></li>
+          <li><a href="#">Privacidade</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="ft-bottom">
+      <div class="ft-copy">© 2025 Prof. Paulo H. Donassolo · Todos os direitos reservados</div>
+      <div class="ft-sig">Pessoas · Processos · Gestão · Resultados</div>
+    </div>
+  </div>
+</footer>
+
+<!-- WhatsApp flutuante expandido -->
+<a href="https://wa.me/351999999999" class="wa-float" title="WhatsApp">
+  <span class="wa-float-icon">💬</span>
+  <span class="wa-float-txt">Fale pelo WhatsApp</span>
+</a>
+
+<script>
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('on') })
+}, { threshold: 0.1, rootMargin: '0px 0px -30px 0px' })
+document.querySelectorAll('.reveal').forEach(el => obs.observe(el))
+
+const nav = document.getElementById('nav')
+window.addEventListener('scroll', () => nav.classList.toggle('scrolled', window.scrollY > 40))
+
+const fioNo = document.getElementById('fio-no')
+window.addEventListener('scroll', () => {
+  const pct = window.scrollY / (document.body.scrollHeight - window.innerHeight)
+  fioNo.style.top = (62 + pct * (window.innerHeight - 124)) + 'px'
+}, { passive: true })
+
+function toggleFaq(btn) {
+  const item = btn.closest('.faq-item')
+  const isOpen = item.classList.contains('open')
+  document.querySelectorAll('.faq-item.open').forEach(el => el.classList.remove('open'))
+  if (!isOpen) item.classList.add('open')
+}
+</script>
+</body>
+</html>

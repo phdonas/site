@@ -1,164 +1,128 @@
 import React, { useState, useEffect } from 'react';
-import Navbar from './components/Navbar.tsx';
-import HomePage from './pages/HomePage.tsx';
-import LoginPage from './pages/LoginPage.tsx';
-import AdminPage from './pages/AdminPage.tsx';
-import ArticlesPage from './pages/ArticlesPage.tsx';
-import ArticleDetailPage from './pages/ArticleDetailPage.tsx';
-import CourseDetailPage from './pages/CourseDetailPage.tsx';
-import ServicesPage from './pages/ServicesPage.tsx';
-import DownloadsPage from './pages/DownloadsPage.tsx';
-import ContactPage from './pages/ContactPage.tsx';
-import PillarsPage from './pages/PillarsPage.tsx';
-import TrilhasPage from './pages/TrilhasPage.tsx';
-import CoursesBooksPage from './pages/CoursesBooksPage.tsx';
-import PrivacyPage from './pages/PrivacyPage.tsx';
-import TermsPage from './pages/TermsPage.tsx';
-import NotFoundPage from './pages/NotFoundPage.tsx';
-import WhatsAppButton from './components/WhatsAppButton.tsx';
-import { SITE_CONFIG } from './config/site-config.ts';
-import { DataService } from './services/dataService.ts';
-import DynamicLPPage from './pages/DynamicLPPage.tsx';
-import AreaAlunoEmBreve from './pages/AreaAlunoEmBreve.tsx';
-import MentoriaPage from './pages/MentoriaPage.jsx';
-import EstiloNegociadorPage from './pages/EstiloNegociadorPage.tsx';
+import SiteNavbar from './components/SiteNavbar';
+import SiteFooter from './components/SiteFooter';
+import WhatsAppFloat from './components/WhatsAppFloat';
 import { SiteConfigProvider } from './contexts/SiteConfigContext';
+import { DataService } from './services/dataService';
+import FioCondutor from './components/ui/FioCondutor';
 
-const App = () => {
+import HomePage from './pages/HomePage';
+import ProfPauloPage from './pages/ProfPauloPage';
+import ServicesPage from './pages/ServicesPage';
+import MentoriaPage from './pages/MentoriaPage.tsx';
+import ConsultoriaPage from './pages/ConsultoriaPage';
+import CursosPage from './pages/CursosPage';
+import ConteudoPage from './pages/ConteudoPage';
+import ArticleDetailPage from './pages/ArticleDetailPage';
+import RecursosPage from './pages/RecursosPage';
+import FaleComigo from './pages/FaleComigo';
+import AreaAlunoPage from './pages/AreaAlunoPage';
+import EmBrevePage from './pages/EmBrevePage';
+import LoginPage from './pages/LoginPage';
+import AdminPage from './pages/AdminPage';
+import PrivacyPage from './pages/PrivacyPage';
+import TermsPage from './pages/TermsPage';
+import NotFoundPage from './pages/NotFoundPage';
+import DynamicLPPage from './pages/DynamicLPPage';
+
+const App: React.FC = () => {
   const [currentHash, setCurrentHash] = useState(window.location.hash || '#/');
 
   useEffect(() => {
-    // Warm-up data
-    DataService.getArticles(10).catch(() => { });
-    DataService.getVideos(4).catch(() => { });
+    DataService.getArticles(10).catch(() => {});
 
     const handleHashChange = () => {
       setCurrentHash(window.location.hash || '#/');
-      if (!window.location.hash.includes('#/pilares#')) {
-        window.scrollTo({ top: 0, behavior: 'instant' });
-      }
+      window.scrollTo({ top: 0, behavior: 'instant' });
     };
     window.addEventListener('hashchange', handleHashChange);
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
-  // Helper para extrair parâmetros da URL
-  const getUrlParams = (hash: string) => {
+  const parseHash = (hash: string) => {
     const [path, queryString] = hash.split('?');
     const params: Record<string, string> = {};
-
     if (queryString) {
-      queryString.split('&').forEach(param => {
-        const [key, value] = param.split('=');
-        if (key && value) {
-          params[key] = decodeURIComponent(value);
-        }
+      queryString.split('&').forEach(p => {
+        const [key, value] = p.split('=');
+        if (key && value) params[key] = decodeURIComponent(value);
       });
     }
-
     return { path, params };
   };
 
-  const renderContent = () => {
-    const { path, params } = getUrlParams(currentHash);
+  const renderPage = () => {
+    const { path, params } = parseHash(currentHash);
 
     if (path.startsWith('#/artigo/')) {
       const articleId = path.split('/artigo/')[1];
       if (articleId) return <ArticleDetailPage articleId={articleId} activePillar={params.from} />;
     }
 
-    if (path.startsWith('#/curso/')) {
-      const courseId = path.split('/curso/')[1];
-      if (courseId) return <CourseDetailPage courseId={courseId} />;
-    }
-
-    if (path.startsWith('#/lp/')) {
-      return <DynamicLPPage />;
-    }
+    if (path.startsWith('#/lp/')) return <DynamicLPPage />;
 
     switch (path) {
       case '#/':
       case '#':
       case '': return <HomePage />;
+
+      case '#/prof-paulo': return <ProfPauloPage />;
+      case '#/servicos': return <ServicesPage />;
+      case '#/mentoria': return <MentoriaPage />;
+      case '#/consultoria': return <ConsultoriaPage />;
+      case '#/cursos': return <CursosPage />;
+      case '#/conteudo': return <ConteudoPage />;
+      case '#/recursos': return <RecursosPage />;
+      case '#/fale-comigo': return <FaleComigo initialMessage={params.mensagem} />;
+      case '#/area-do-aluno': return <AreaAlunoPage />;
+      case '#/em-breve': return <EmBrevePage />;
+
       case '#/login': return <LoginPage />;
       case '#/admin': return <AdminPage />;
-      case '#/artigos': return <ArticlesPage initialPillar={params.pilar} />;
-      case '#/servicos': return <ServicesPage />;
-      case '#/ferramentas': return <DownloadsPage />;
-      case '#/contato': return <ContactPage initialMessage={params.mensagem || params.msg} />;
-      case '#/trilhas': return <TrilhasPage />;
-      case '#/livros': return <CoursesBooksPage />;
-      case '#/privacidade': return <PrivacyPage />;
+
+      case '#/terms':
       case '#/termos': return <TermsPage />;
-      case '#/area-aluno': return <AreaAlunoEmBreve />;
-      case '#/mentoria': return <MentoriaPage />;
-      case '#/ferramentas/estilo-negociador': return <EstiloNegociadorPage />;
-      default:
-        if (path.startsWith('#/pilares')) return <PillarsPage />;
-        return <NotFoundPage />;
+      case '#/privacy':
+      case '#/privacidade': return <PrivacyPage />;
+
+      /* Legacy redirects */
+      case '#/artigos':
+        window.location.replace('#/conteudo');
+        return <ConteudoPage />;
+      case '#/contato':
+        return <FaleComigo initialMessage={params.mensagem || params.msg} />;
+      case '#/ferramentas':
+      case '#/livros':
+        return <RecursosPage />;
+      case '#/area-aluno':
+        return <AreaAlunoPage />;
+
+      default: return <NotFoundPage />;
     }
   };
 
-  const isAdminRoute = currentHash.startsWith('#/admin') || currentHash.startsWith('#/login');
-  const isLpRoute = currentHash.startsWith('#/lp/');
+  const isAdmin = currentHash.startsWith('#/admin') || currentHash.startsWith('#/login');
+  const isLP = currentHash.startsWith('#/lp/');
+  const hideChromeOnPages = isAdmin || isLP;
 
   return (
     <SiteConfigProvider>
-      <div className="min-h-screen flex flex-col font-sans text-gray-900 bg-[#f5f5f7]">
-        {!isAdminRoute && !isLpRoute && <Navbar currentRoute={currentHash} />}
-        
-        <div className="flex-grow">
-          {renderContent()}
-        </div>
-        
-        {!isAdminRoute && !isLpRoute && (
+      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+        {!hideChromeOnPages && (
           <>
-            <WhatsAppButton />
-            <footer className="py-24 px-6 bg-[#f5f5f7] border-t border-gray-200">
-              <div className="max-w-6xl mx-auto">
-                <div className="grid grid-cols-2 md:grid-cols-5 gap-12 mb-20">
-                  <div className="col-span-2">
-                    <h3 className="text-xl font-bold mb-6 tracking-tighter uppercase">{SITE_CONFIG.name}</h3>
-                    <p className="text-gray-500 text-sm leading-relaxed max-w-xs">{SITE_CONFIG.footer.description}</p>
-                    <div className="mt-8">
-                      <a href="#/admin" className="text-[10px] text-gray-400 hover:text-black uppercase tracking-[0.2em] font-bold transition-colors">Acesso Administrativo</a>
-                    </div>
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-[10px] uppercase text-gray-400 mb-8 tracking-[0.2em]">Conteúdo</h4>
-                    <ul className="text-sm space-y-5 text-gray-600 font-medium">
-                      <li><a href="#/artigos" className="hover:text-blue-600 transition-colors">Artigos & Insights</a></li>
-                      <li><a href="#/ferramentas" className="hover:text-blue-600 transition-colors">Ferramentas e Materiais</a></li>
-                      <li><a href="#/livros" className="hover:text-blue-600 transition-colors">Cursos & Livros</a></li>
-                      <li><a href="#/contato" className="hover:text-blue-600 transition-colors">Fale Conosco</a></li>
-                    </ul>
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-[10px] uppercase text-gray-400 mb-8 tracking-[0.2em]">Pilares</h4>
-                    <ul className="text-sm space-y-5 text-gray-600 font-medium">
-                      <li><a href="#/pilares#prof-paulo" className="hover:text-blue-600 transition-colors">Prof. Paulo</a></li>
-                      <li><a href="#/pilares#consultoria-imobiliaria" className="hover:text-blue-600 transition-colors">Consultoria</a></li>
-                      <li><a href="#/pilares#4050oumais" className="hover:text-blue-600 transition-colors">4050oumais</a></li>
-                      <li><a href="#/pilares#academia-do-gas" className="hover:text-blue-600 transition-colors">Academia do Gás</a></li>
-                    </ul>
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-[10px] uppercase text-gray-400 mb-8 tracking-[0.2em]">Legal</h4>
-                    <ul className="text-sm space-y-5 text-gray-600 font-medium">
-                      <li><a href="#/termos" className="hover:text-blue-600 transition-colors">Termos de Uso</a></li>
-                      <li><a href="#/privacidade" className="hover:text-blue-600 transition-colors">Privacidade</a></li>
-                      <li><a href="#/area-aluno" className="hover:text-blue-600 transition-colors">Área do Aluno</a></li>
-                    </ul>
-                  </div>
-                </div>
-                <div className="pt-10 border-t border-gray-200 text-[11px] text-gray-400 flex flex-col md:flex-row justify-between items-center gap-6">
-                  <p className="font-medium">{SITE_CONFIG.footer.copyright}</p>
-                  <div className="flex items-center gap-8 font-bold uppercase tracking-[0.1em]">
-                    <span className="text-gray-300">Design with Excellence</span>
-                  </div>
-                </div>
-              </div>
-            </footer>
+            <SiteNavbar currentRoute={currentHash} />
+            <FioCondutor />
+          </>
+        )}
+
+        <div style={{ flexGrow: 1, paddingTop: hideChromeOnPages ? 0 : 62 }}>
+          {renderPage()}
+        </div>
+
+        {!hideChromeOnPages && (
+          <>
+            <SiteFooter />
+            <WhatsAppFloat />
           </>
         )}
       </div>

@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Recursos — Prof. Paulo H. Donassolo</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@400;500;600&family=Space+Mono&display=swap" rel="stylesheet">
+<style>
+:root {
+  --cream:     #F3EFE6;
+  --cream-d:   #EAE3D5;
+  --cream-dd:  #DDD4BF;
+  --white:     #FDFBF7;
+  --ink:       #17130E;
+  --ink-2:     #3A3025;
+  --ink-3:     #6B5E50;
+  --navy:      #0C1824;
+  --navy-2:    #122030;
+  --gold:      #A87828;
+  --gold-2:    #C8983C;
+  --gold-pale: #EDE0C0;
+  --gold-fio:  rgba(168,120,40,0.5);
+  --rule:      rgba(23,19,14,0.1);
+  --fd: 'Cormorant Garamond', Georgia, serif;
+  --fb: 'DM Sans', sans-serif;
+  --fm: 'Space Mono', monospace;
+  --ease: cubic-bezier(0.16,1,0.3,1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--fb);background:var(--cream);color:var(--ink);font-size:17px;line-height:1.65;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");opacity:.025}
+
+.fio{position:fixed;left:calc(5vw - 1px);top:0;bottom:0;width:1px;background:linear-gradient(to bottom,transparent 0%,var(--gold-fio) 8%,var(--gold-fio) 92%,transparent 100%);z-index:50;pointer-events:none}
+.fio-no{position:fixed;left:calc(5vw - 5px);top:50%;width:10px;height:10px;background:var(--gold);border-radius:50%;transform:translateY(-50%);z-index:51;pointer-events:none;box-shadow:0 0 12px rgba(168,120,40,.5)}
+
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .85s var(--ease),transform .85s var(--ease)}
+.reveal.on{opacity:1;transform:none}
+.d1{transition-delay:.1s}.d2{transition-delay:.2s}.d3{transition-delay:.3s}.d4{transition-delay:.4s}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;height:62px;background:rgba(243,239,230,.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--rule)}
+nav.scrolled{box-shadow:0 2px 20px rgba(23,19,14,.08)}
+.nav-in{max-width:1240px;margin:0 auto;padding:0 5vw;height:100%;display:flex;align-items:center;justify-content:space-between}
+.nav-logo{font-family:var(--fd);font-size:1.12rem;font-weight:700;color:var(--ink);text-decoration:none;line-height:1}
+.nav-links{display:flex;align-items:center;gap:2rem;list-style:none}
+.nav-links a{font-size:.8rem;font-weight:500;color:var(--ink-2);text-decoration:none;letter-spacing:.01em;position:relative;transition:color .2s}
+.nav-links a::after{content:'';position:absolute;bottom:-3px;left:0;right:0;height:1px;background:var(--gold);transform:scaleX(0);transform-origin:left;transition:transform .3s var(--ease)}
+.nav-links a:hover{color:var(--ink)}
+.nav-links a:hover::after{transform:scaleX(1)}
+.n-back{font-size:.78rem;font-weight:500;color:var(--ink-3);text-decoration:none;display:flex;align-items:center;gap:.4rem;transition:color .2s}
+.n-back:hover{color:var(--ink)}
+.n-cta{font-size:.78rem;font-weight:600;color:var(--navy) !important;border:1.5px solid var(--navy) !important;padding:.45rem 1.1rem;transition:background .2s,color .2s !important}
+.n-cta:hover{background:var(--navy) !important;color:var(--cream) !important}
+.n-cta::after{display:none !important}
+
+/* ══════════════════════
+   HERO — compacto
+══════════════════════ */
+.hero{padding-top:62px;background:var(--navy);position:relative;overflow:hidden}
+.hero-geo{position:absolute;right:-60px;top:50%;transform:translateY(-50%);width:380px;height:380px;border:1px solid rgba(168,120,40,.06);border-radius:50%;pointer-events:none}
+.hero-wrap{max-width:1240px;margin:0 auto;padding:5rem 5vw 6rem;position:relative;z-index:2}
+.hero-eyebrow{font-family:var(--fm);font-size:.78rem;letter-spacing:.2em;font-weight:700;text-transform:uppercase;color:var(--gold);display:flex;align-items:center;gap:.7rem;margin-bottom:1.5rem;opacity:0;animation:up .8s var(--ease) .2s forwards}
+.hero-eyebrow::before{content:'';display:block;width:20px;height:1px;background:var(--gold)}
+.hero-h1{font-family:var(--fd);font-size:clamp(2.4rem,4.2vw,3.8rem);font-weight:700;line-height:1.05;color:rgba(243,239,230,.95);letter-spacing:-.02em;margin-bottom:1.2rem;opacity:0;animation:up 1s var(--ease) .35s forwards;max-width:680px}
+.hero-h1 em{font-style:italic;font-weight:400;color:var(--gold)}
+.hero-sub{font-size:.95rem;color:rgba(243,239,230,.52);line-height:1.75;max-width:520px;opacity:0;animation:up 1s var(--ease) .55s forwards}
+
+/* ══════════════════════
+   RECURSOS PRINCIPAIS
+   cream — 3 cards grandes
+══════════════════════ */
+.hero-to-cream{height:100px;background:linear-gradient(to bottom,var(--navy) 0%,#1e3040 40%,var(--cream-dd) 100%)}
+
+.recursos{padding:7rem 5vw;background:var(--cream-d)}
+.rec-wrap{max-width:1240px;margin:0 auto}
+.rec-eyebrow{font-family:var(--fm);font-size:.78rem;letter-spacing:.2em;font-weight:700;text-transform:uppercase;color:var(--gold);display:flex;align-items:center;gap:.7rem;margin-bottom:1.2rem}
+.rec-eyebrow::before{content:'';display:block;width:20px;height:1px;background:var(--gold)}
+.rec-h2{font-family:var(--fd);font-size:clamp(2rem,3.2vw,3rem);font-weight:700;color:var(--ink);line-height:1.08;letter-spacing:-.01em;margin-bottom:4rem}
+.rec-h2 em{font-style:italic;font-weight:400;color:var(--ink-3)}
+
+.rec-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem}
+
+.rec-card{
+  background:var(--white);
+  border:1px solid var(--rule);
+  display:flex;flex-direction:column;
+  position:relative;overflow:hidden;
+  transition:transform .35s var(--ease),box-shadow .35s;
+  box-shadow:0 2px 8px rgba(23,19,14,.04);
+  text-decoration:none;color:inherit;
+}
+.rec-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--gold),var(--gold-2));
+  transform:scaleX(0);transform-origin:left;
+  transition:transform .4s var(--ease);
+}
+.rec-card:hover{transform:translateY(-8px);box-shadow:0 20px 48px rgba(23,19,14,.12)}
+.rec-card:hover::before{transform:scaleX(1)}
+
+/* destaque — card principal */
+.rec-card.destaque{
+  background:var(--navy);border-color:rgba(168,120,40,.2);
+  grid-row:span 1;
+}
+.rec-card.destaque::before{background:linear-gradient(90deg,var(--gold-2),var(--gold),transparent)}
+.rec-card.destaque:hover{box-shadow:0 20px 48px rgba(0,0,0,.3)}
+
+.rc-header{padding:2.5rem 2.5rem 0}
+.rc-n{font-family:var(--fd);font-size:4.5rem;font-weight:700;color:var(--gold-pale);line-height:1;margin-bottom:1.5rem;transition:color .3s}
+.rec-card:hover .rc-n{color:rgba(168,120,40,.22)}
+.rec-card.destaque .rc-n{color:rgba(168,120,40,.2)}
+.rc-label{font-family:var(--fm);font-size:.6rem;letter-spacing:.2em;font-weight:700;text-transform:uppercase;color:var(--gold);margin-bottom:.7rem}
+.rec-card.destaque .rc-label{color:var(--gold-2)}
+.rc-title{font-family:var(--fd);font-size:1.5rem;font-weight:700;color:var(--ink);line-height:1.15;margin-bottom:.6rem}
+.rec-card.destaque .rc-title{color:rgba(243,239,230,.95)}
+
+.rc-body{padding:1.2rem 2.5rem 2.5rem;flex:1;display:flex;flex-direction:column}
+.rc-desc{font-size:.86rem;color:var(--ink-3);line-height:1.7;margin-bottom:1.5rem;flex:1}
+.rec-card.destaque .rc-desc{color:rgba(243,239,230,.5)}
+
+/* itens do card */
+.rc-items{display:flex;flex-direction:column;gap:.6rem;margin-bottom:2rem}
+.rc-item{display:flex;align-items:flex-start;gap:.7rem;font-size:.82rem;color:var(--ink-2);line-height:1.5}
+.rec-card.destaque .rc-item{color:rgba(243,239,230,.6)}
+.rc-check{color:var(--gold);flex-shrink:0;font-size:.7rem;margin-top:.15rem;font-weight:700}
+.rec-card.destaque .rc-check{color:var(--gold-2)}
+
+.rc-link{
+  display:inline-flex;align-items:center;gap:.6rem;
+  font-family:var(--fm);font-size:.6rem;letter-spacing:.15em;text-transform:uppercase;
+  color:var(--ink);background:var(--gold);
+  padding:.7rem 1.4rem;
+  transition:background .2s,transform .2s;
+  font-weight:700;align-self:flex-start;
+}
+.rc-link::after{content:'↗'}
+.rc-link:hover{background:var(--gold-2);transform:translateY(-1px)}
+.rec-card.destaque .rc-link{color:var(--navy)}
+
+/* ══════════════════════
+   FERRAMENTAS GRATUITAS
+   cream claro
+══════════════════════ */
+.ferramentas{padding:7rem 5vw;background:var(--cream);position:relative}
+.ferramentas::before{content:'';position:absolute;top:0;left:5vw;right:5vw;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+.fer-wrap{max-width:1240px;margin:0 auto}
+.fer-eyebrow{font-family:var(--fm);font-size:.78rem;letter-spacing:.2em;font-weight:700;text-transform:uppercase;color:var(--gold);display:flex;align-items:center;gap:.7rem;margin-bottom:1.2rem}
+.fer-eyebrow::before{content:'';display:block;width:20px;height:1px;background:var(--gold)}
+.fer-h2{font-family:var(--fd);font-size:clamp(2rem,3.2vw,3rem);font-weight:700;color:var(--ink);line-height:1.08;letter-spacing:-.01em;margin-bottom:.8rem}
+.fer-h2 em{font-style:italic;font-weight:400;color:var(--ink-3)}
+.fer-sub{font-size:.9rem;color:var(--ink-3);line-height:1.75;max-width:580px;margin-bottom:3.5rem}
+
+.fer-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem}
+.fer-card{
+  background:var(--white);border:1px solid var(--rule);
+  padding:2rem;
+  position:relative;overflow:hidden;
+  transition:transform .3s var(--ease),box-shadow .3s,border-color .3s;
+  cursor:pointer;
+}
+.fer-card:hover{transform:translateY(-5px);box-shadow:0 14px 36px rgba(23,19,14,.09);border-color:rgba(168,120,40,.3)}
+.fer-tag{font-family:var(--fm);font-size:.52rem;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);background:var(--gold-pale);padding:.2rem .6rem;display:inline-block;margin-bottom:1rem}
+.fer-title{font-family:var(--fd);font-size:1.15rem;font-weight:700;color:var(--ink);margin-bottom:.5rem;line-height:1.2}
+.fer-desc{font-size:.82rem;color:var(--ink-3);line-height:1.6;margin-bottom:1.5rem}
+.fer-cta{
+  display:inline-flex;align-items:center;gap:.5rem;
+  font-family:var(--fm);font-size:.56rem;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--gold);border:1px solid rgba(168,120,40,.3);
+  padding:.35rem .8rem;transition:border-color .2s,background .2s,gap .2s;
+}
+.fer-cta::after{content:'→'}
+.fer-card:hover .fer-cta{border-color:var(--gold);background:var(--gold-pale);gap:.7rem}
+.fer-nota{font-family:var(--fm);font-size:.5rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);opacity:.5;margin-top:.6rem}
+
+/* aviso lead */
+.fer-lead-aviso{
+  display:flex;align-items:flex-start;gap:1rem;
+  padding:1.5rem 2rem;
+  background:var(--cream-d);
+  border:1px solid var(--rule);
+  border-left:3px solid var(--gold);
+  margin-top:2.5rem;
+}
+.fer-lead-icon{font-size:1.2rem;flex-shrink:0;margin-top:.1rem}
+.fer-lead-txt{font-size:.86rem;color:var(--ink-2);line-height:1.65}
+.fer-lead-txt strong{font-family:var(--fd);font-size:1rem;font-weight:700;color:var(--ink);display:block;margin-bottom:.2rem}
+
+/* ══════════════════════
+   PUBLICAÇÕES RÁPIDAS
+   navy
+══════════════════════ */
+.cream-to-navy{height:100px;background:linear-gradient(to bottom,var(--cream) 0%,#e0d8c8 30%,var(--navy) 100%)}
+
+.publicacoes{padding:7rem 5vw;background:var(--navy);position:relative}
+.pub-wrap{max-width:1240px;margin:0 auto}
+.pub-eyebrow{font-family:var(--fm);font-size:.78rem;letter-spacing:.2em;font-weight:700;text-transform:uppercase;color:var(--gold);display:flex;align-items:center;gap:.7rem;margin-bottom:1.2rem}
+.pub-eyebrow::before{content:'';display:block;width:20px;height:1px;background:var(--gold)}
+.pub-h2{font-family:var(--fd);font-size:clamp(1.8rem,3vw,2.8rem);font-weight:700;color:rgba(243,239,230,.95);line-height:1.1;letter-spacing:-.01em;margin-bottom:3rem}
+.pub-h2 em{font-style:italic;font-weight:400;color:var(--gold)}
+
+.pub-list{display:flex;flex-direction:column;gap:0}
+.pub-item{
+  display:grid;grid-template-columns:56px 1fr auto;
+  gap:2rem;align-items:center;
+  padding:1.8rem 0;
+  border-bottom:1px solid rgba(243,239,230,.06);
+  text-decoration:none;
+  transition:background .2s;
+  cursor:pointer;
+}
+.pub-item:last-child{border-bottom:none}
+.pub-item:hover .pub-n{color:var(--gold-2)}
+.pub-item:hover .pub-title{color:rgba(243,239,230,.98)}
+.pub-item:hover .pub-arr{opacity:1;transform:translateX(4px)}
+.pub-n{font-family:var(--fd);font-size:2rem;font-weight:700;color:rgba(168,120,40,.3);line-height:1;transition:color .3s}
+.pub-body{}
+.pub-tipo{font-family:var(--fm);font-size:.52rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);opacity:.7;margin-bottom:.3rem}
+.pub-title{font-family:var(--fd);font-size:1.2rem;font-weight:700;color:rgba(243,239,230,.85);line-height:1.2;margin-bottom:.2rem;transition:color .3s}
+.pub-desc{font-size:.8rem;color:rgba(243,239,230,.42);line-height:1.5}
+.pub-arr{font-size:1rem;color:var(--gold);opacity:0;transition:opacity .2s,transform .2s}
+
+/* ══════════════════════
+   CTA FINAL
+══════════════════════ */
+.navy-to-dark{height:60px;background:linear-gradient(to bottom,var(--navy) 0%,#081018 100%)}
+.cta-final{padding:7rem 5vw;background:#081018;text-align:center;position:relative;overflow:hidden}
+.cta-geo-1,.cta-geo-2{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);border-radius:50%;pointer-events:none}
+.cta-geo-1{width:500px;height:500px;border:1px solid rgba(168,120,40,.06)}
+.cta-geo-2{width:320px;height:320px;border:1px solid rgba(168,120,40,.1)}
+.cta-inner{position:relative;z-index:1;max-width:580px;margin:0 auto}
+.cta-eyebrow{font-family:var(--fm);font-size:.78rem;letter-spacing:.2em;font-weight:700;text-transform:uppercase;color:var(--gold);display:flex;justify-content:center;align-items:center;gap:.7rem;margin-bottom:1.8rem}
+.cta-eyebrow::before{content:'';display:block;width:20px;height:1px;background:var(--gold)}
+.cta-h2{font-family:var(--fd);font-size:clamp(2rem,3.5vw,3.2rem);font-weight:700;color:rgba(243,239,230,.95);line-height:1.05;margin-bottom:1rem;letter-spacing:-.01em}
+.cta-h2 em{font-style:italic;font-weight:400;color:rgba(243,239,230,.4)}
+.cta-sub{font-size:.9rem;color:rgba(243,239,230,.45);line-height:1.75;margin-bottom:2.5rem}
+.cta-btns{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
+.btn-primary{font-size:.84rem;font-weight:600;color:var(--ink);background:var(--gold);padding:.9rem 2.2rem;text-decoration:none;letter-spacing:.02em;transition:background .25s,transform .2s;display:inline-block}
+.btn-primary:hover{background:var(--gold-2);transform:translateY(-2px)}
+.btn-outline{font-size:.84rem;font-weight:500;color:rgba(243,239,230,.6);border:1.5px solid rgba(243,239,230,.18);padding:.88rem 1.8rem;text-decoration:none;transition:border-color .2s,color .2s}
+.btn-outline:hover{border-color:rgba(243,239,230,.5);color:rgba(243,239,230,.9)}
+
+/* FOOTER */
+footer{background:#081018;padding:4rem 5vw 2.5rem;border-top:1px solid rgba(168,120,40,.12)}
+.ft-wrap{max-width:1240px;margin:0 auto}
+.ft-top{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:3rem;padding-bottom:3rem;border-bottom:1px solid rgba(243,239,230,.06);margin-bottom:2rem}
+.ft-brand{font-family:var(--fd);font-size:1.1rem;font-weight:700;color:rgba(243,239,230,.82);margin-bottom:.6rem}
+.ft-tag{font-size:.8rem;color:rgba(243,239,230,.28);line-height:1.6;max-width:200px}
+.ft-ct{font-family:var(--fm);font-size:.55rem;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);opacity:.6;margin-bottom:1.2rem}
+.ft-list{list-style:none;display:flex;flex-direction:column;gap:.6rem}
+.ft-list a{font-size:.8rem;color:rgba(243,239,230,.32);text-decoration:none;transition:color .2s}
+.ft-list a:hover{color:rgba(243,239,230,.7)}
+.ft-bottom{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem}
+.ft-copy{font-family:var(--fm);font-size:.52rem;letter-spacing:.08em;color:rgba(243,239,230,.18)}
+.ft-sig{font-family:var(--fm);font-size:.5rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);opacity:.3}
+
+.wa{position:fixed;bottom:1.8rem;right:1.8rem;z-index:200;width:52px;height:52px;background:#25D366;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.4rem;text-decoration:none;box-shadow:0 4px 20px rgba(37,211,102,.3);transition:transform .2s}
+.wa:hover{transform:scale(1.08)}
+
+@keyframes up{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
+
+@media(max-width:960px){
+  .fio,.fio-no{display:none}
+  .rec-grid,.fer-grid{grid-template-columns:1fr 1fr}
+  .pub-item{grid-template-columns:40px 1fr auto}
+  .ft-top{grid-template-columns:1fr 1fr;gap:2.5rem}
+}
+@media(max-width:600px){
+  .nav-links{gap:1rem}
+  .rec-grid,.fer-grid{grid-template-columns:1fr}
+  .pub-item{grid-template-columns:1fr auto;gap:1rem}
+  .pub-n{display:none}
+}
+</style>
+</head>
+<body>
+
+<div class="fio" aria-hidden="true"></div>
+<div class="fio-no" id="fio-no" aria-hidden="true"></div>
+
+<!-- NAV -->
+<nav id="nav">
+  <div class="nav-in">
+    <a href="#" class="nav-logo">Prof. Paulo H. Donassolo</a>
+    <ul class="nav-links">
+      <li><a href="#" class="n-back">← Início</a></li>
+      <li><a href="#">Serviços</a></li>
+      <li><a href="#">Conteúdo</a></li>
+      <li><a href="#" class="n-cta">Fale Comigo</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-geo" aria-hidden="true"></div>
+  <div class="hero-wrap">
+    <div class="hero-eyebrow">Recursos & Acesso</div>
+    <h1 class="hero-h1">
+      Tudo num só lugar.<br>
+      <em>Acesso direto.</em>
+    </h1>
+    <p class="hero-sub">Plataforma de ensino, cursos externos, livros e ferramentas gratuitas — organizados para você encontrar o que precisa sem navegar por todo o site.</p>
+  </div>
+</section>
+
+<div class="hero-to-cream" aria-hidden="true"></div>
+
+<!-- RECURSOS PRINCIPAIS -->
+<section class="recursos">
+  <div class="rec-wrap">
+    <div class="rec-eyebrow reveal">Acesso direto</div>
+    <h2 class="rec-h2 reveal d1">Plataformas e <em>publicações</em></h2>
+    <div class="rec-grid">
+
+      <!-- ÁREA DO ALUNO — destaque -->
+      <div class="rec-card destaque reveal d1">
+        <div class="rc-header">
+          <div class="rc-n">01</div>
+          <div class="rc-label">Plataforma exclusiva</div>
+          <div class="rc-title">Área do Aluno</div>
+        </div>
+        <div class="rc-body">
+          <p class="rc-desc">Plataforma de ensino com materiais exclusivos, trilhas de aprendizado e conteúdos dos programas de mentoria e formação. Acesso com login.</p>
+          <div class="rc-items">
+            <div class="rc-item"><span class="rc-check">✓</span>Materiais dos programas de mentoria</div>
+            <div class="rc-item"><span class="rc-check">✓</span>Trilhas de aprendizado estruturadas</div>
+            <div class="rc-item"><span class="rc-check">✓</span>Ferramentas e templates exclusivos</div>
+            <div class="rc-item"><span class="rc-check">✓</span>Conteúdo atualizado continuamente</div>
+          </div>
+          <a href="#" class="rc-link">Acessar plataforma</a>
+        </div>
+      </div>
+
+      <!-- UDEMY -->
+      <div class="rec-card reveal d2">
+        <div class="rc-header">
+          <div class="rc-n">02</div>
+          <div class="rc-label">Cursos online</div>
+          <div class="rc-title">Cursos na Udemy</div>
+        </div>
+        <div class="rc-body">
+          <p class="rc-desc">Cursos de gestão comercial, vendas, negociação e liderança disponíveis na Udemy. Acesso vitalício após a compra, com certificado de conclusão.</p>
+          <div class="rc-items">
+            <div class="rc-item"><span class="rc-check">✓</span>Acesso vitalício após a compra</div>
+            <div class="rc-item"><span class="rc-check">✓</span>Certificado de conclusão</div>
+            <div class="rc-item"><span class="rc-check">✓</span>Disponível em qualquer dispositivo</div>
+            <div class="rc-item"><span class="rc-check">✓</span>Atualizações incluídas</div>
+          </div>
+          <a href="#" class="rc-link">Ver cursos na Udemy</a>
+        </div>
+      </div>
+
+      <!-- AMAZON -->
+      <div class="rec-card reveal d3">
+        <div class="rc-header">
+          <div class="rc-n">03</div>
+          <div class="rc-label">Publicações</div>
+          <div class="rc-title">Livros na Amazon</div>
+        </div>
+        <div class="rc-body">
+          <p class="rc-desc">Três livros sobre gestão comercial, vendas e negociação. Disponíveis em formato físico e digital (Kindle). Enviados para Brasil, Portugal e outros países.</p>
+          <div class="rc-items">
+            <div class="rc-item"><span class="rc-check">✓</span>Gestão Comercial para PMEs</div>
+            <div class="rc-item"><span class="rc-check">✓</span>Gestão e Operação de Vendas</div>
+            <div class="rc-item"><span class="rc-check">✓</span>Negociação Estratégica</div>
+            <div class="rc-item"><span class="rc-check">✓</span>Físico e digital (Kindle)</div>
+          </div>
+          <a href="#" class="rc-link">Ver livros na Amazon</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- FERRAMENTAS GRATUITAS -->
+<section class="ferramentas">
+  <div class="fer-wrap">
+    <div class="fer-eyebrow reveal">Gratuito</div>
+    <h2 class="fer-h2 reveal d1">Ferramentas para<br><em>usar agora</em></h2>
+    <p class="fer-sub reveal d2">Frameworks, templates e calculadoras práticas para gestores e profissionais de vendas. Acesso mediante cadastro simples — nome e e-mail.</p>
+    <div class="fer-grid">
+      <div class="fer-card reveal d1">
+        <div class="fer-tag">Framework</div>
+        <div class="fer-title">Diagnóstico Comercial Rápido</div>
+        <p class="fer-desc">20 perguntas para mapear os principais gargalos da sua área comercial e identificar as prioridades de melhoria.</p>
+        <a href="#" class="fer-cta">Acessar ferramenta</a>
+        <p class="fer-nota">Requer cadastro · PDF download</p>
+      </div>
+      <div class="fer-card reveal d2">
+        <div class="fer-tag">Template</div>
+        <div class="fer-title">Plano de Vendas Mensal</div>
+        <p class="fer-desc">Planilha estruturada para planejamento comercial mensal — metas, atividades, pipeline e acompanhamento de resultados.</p>
+        <a href="#" class="fer-cta">Acessar ferramenta</a>
+        <p class="fer-nota">Requer cadastro · Excel / Google Sheets</p>
+      </div>
+      <div class="fer-card reveal d3">
+        <div class="fer-tag">Calculadora</div>
+        <div class="fer-title">Taxa de Conversão do Funil</div>
+        <p class="fer-desc">Insira os dados do seu funil de vendas e visualize onde estão as maiores perdas e o potencial de melhoria em cada etapa.</p>
+        <a href="#" class="fer-cta">Acessar ferramenta</a>
+        <p class="fer-nota">Requer cadastro · Ferramenta online</p>
+      </div>
+      <div class="fer-card reveal d1">
+        <div class="fer-tag">Checklist</div>
+        <div class="fer-title">Reunião de Pipeline — Guia Prático</div>
+        <p class="fer-desc">Roteiro completo para conduzir reuniões de pipeline que geram ação — não apenas atualização de status.</p>
+        <a href="#" class="fer-cta">Acessar ferramenta</a>
+        <p class="fer-nota">Requer cadastro · PDF download</p>
+      </div>
+      <div class="fer-card reveal d2">
+        <div class="fer-tag">Template</div>
+        <div class="fer-title">Script de Abordagem Consultiva</div>
+        <p class="fer-desc">Estrutura de abordagem baseada em SPIN Selling para qualificação e condução de reuniões de vendas B2B.</p>
+        <a href="#" class="fer-cta">Acessar ferramenta</a>
+        <p class="fer-nota">Requer cadastro · PDF download</p>
+      </div>
+      <div class="fer-card reveal d3">
+        <div class="fer-tag">Framework</div>
+        <div class="fer-title">Mapa de Objeções</div>
+        <p class="fer-desc">As 12 objeções mais comuns em vendas B2B com respostas estruturadas e argumentos de valor para cada uma.</p>
+        <a href="#" class="fer-cta">Acessar ferramenta</a>
+        <p class="fer-nota">Requer cadastro · PDF download</p>
+      </div>
+    </div>
+
+    <div class="fer-lead-aviso reveal">
+      <span class="fer-lead-icon">💡</span>
+      <div class="fer-lead-txt">
+        <strong>Por que o cadastro?</strong>
+        O acesso às ferramentas é gratuito. O cadastro permite que eu envie atualizações quando uma ferramenta é revisada e, eventualmente, conteúdo novo relevante para o seu perfil. Sem spam — cancelamento em um clique.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TRANSIÇÃO -->
+<div class="cream-to-navy" aria-hidden="true"></div>
+
+<!-- PUBLICAÇÕES RÁPIDAS — links diretos -->
+<section class="publicacoes">
+  <div class="pub-wrap">
+    <div class="pub-eyebrow reveal">Links diretos</div>
+    <h2 class="pub-h2 reveal d1">Acesso <em>rápido</em></h2>
+    <div class="pub-list">
+      <a href="#" class="pub-item reveal d1">
+        <div class="pub-n">01</div>
+        <div class="pub-body">
+          <div class="pub-tipo">Plataforma · Acesso com login</div>
+          <div class="pub-title">Área do Aluno — plataforma de ensino</div>
+          <p class="pub-desc">Materiais exclusivos dos programas de mentoria e formação</p>
+        </div>
+        <div class="pub-arr">↗</div>
+      </a>
+      <a href="#" class="pub-item reveal d2">
+        <div class="pub-n">02</div>
+        <div class="pub-body">
+          <div class="pub-tipo">Udemy · Cursos online</div>
+          <div class="pub-title">Todos os cursos disponíveis na Udemy</div>
+          <p class="pub-desc">Gestão comercial, vendas, negociação e liderança</p>
+        </div>
+        <div class="pub-arr">↗</div>
+      </a>
+      <a href="#" class="pub-item reveal d3">
+        <div class="pub-n">03</div>
+        <div class="pub-body">
+          <div class="pub-tipo">ESPM · Pós-graduação e MBA</div>
+          <div class="pub-title">Programas de pós-graduação — ESPM</div>
+          <p class="pub-desc">Cursos de MBA e especialização onde o Prof. Paulo leciona</p>
+        </div>
+        <div class="pub-arr">↗</div>
+      </a>
+      <a href="#" class="pub-item reveal d4">
+        <div class="pub-n">04</div>
+        <div class="pub-body">
+          <div class="pub-tipo">Amazon · Livros físico e digital</div>
+          <div class="pub-title">Livros na Amazon — Gestão Comercial, Vendas e Negociação</div>
+          <p class="pub-desc">Três títulos disponíveis em formato físico e Kindle</p>
+        </div>
+        <div class="pub-arr">↗</div>
+      </a>
+      <a href="#" class="pub-item reveal d4">
+        <div class="pub-n">05</div>
+        <div class="pub-body">
+          <div class="pub-tipo">LinkedIn · Conteúdo e artigos</div>
+          <div class="pub-title">Perfil no LinkedIn — Prof. Paulo H. Donassolo</div>
+          <p class="pub-desc">Artigos, posts e conteúdo sobre gestão comercial e vendas</p>
+        </div>
+        <div class="pub-arr">↗</div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- CTA FINAL -->
+<div class="navy-to-dark" aria-hidden="true"></div>
+<section class="cta-final">
+  <div class="cta-geo-1" aria-hidden="true"></div>
+  <div class="cta-geo-2" aria-hidden="true"></div>
+  <div class="cta-inner">
+    <div class="cta-eyebrow reveal">Quer ir além?</div>
+    <h2 class="cta-h2 reveal d1">Conheça os serviços<br><em>personalizados.</em></h2>
+    <p class="cta-sub reveal d2">Mentoria, consultoria e formação in-company — para quem quer resultados com acompanhamento direto.</p>
+    <div class="cta-btns reveal d3">
+      <a href="#" class="btn-primary">Ver os Serviços</a>
+      <a href="#" class="btn-outline">Fale Comigo</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="ft-wrap">
+    <div class="ft-top">
+      <div>
+        <div class="ft-brand">Prof. Paulo H. Donassolo</div>
+        <p class="ft-tag">Mentoria · Consultoria · Cursos e Formações · Conteúdo</p>
+      </div>
+      <div>
+        <div class="ft-ct">Serviços</div>
+        <ul class="ft-list">
+          <li><a href="#">Mentoria</a></li>
+          <li><a href="#">Consultoria</a></li>
+          <li><a href="#">Cursos e Formações</a></li>
+          <li><a href="#">Conteúdo</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="ft-ct">Acesso</div>
+        <ul class="ft-list">
+          <li><a href="#">Área do Aluno</a></li>
+          <li><a href="#">Cursos Udemy</a></li>
+          <li><a href="#">Livros Amazon</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="ft-ct">Institucional</div>
+        <ul class="ft-list">
+          <li><a href="#">Prof. Paulo</a></li>
+          <li><a href="#">Fale Comigo</a></li>
+          <li><a href="#">Termos de Uso</a></li>
+          <li><a href="#">Privacidade</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="ft-bottom">
+      <div class="ft-copy">© 2025 Prof. Paulo H. Donassolo · Todos os direitos reservados</div>
+      <div class="ft-sig">Pessoas · Processos · Gestão · Resultados</div>
+    </div>
+  </div>
+</footer>
+
+<a href="https://wa.me/351999999999" class="wa" title="WhatsApp">💬</a>
+
+<script>
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('on') })
+}, { threshold: 0.1, rootMargin: '0px 0px -30px 0px' })
+document.querySelectorAll('.reveal').forEach(el => obs.observe(el))
+
+const nav = document.getElementById('nav')
+window.addEventListener('scroll', () => nav.classList.toggle('scrolled', window.scrollY > 40))
+
+const fioNo = document.getElementById('fio-no')
+window.addEventListener('scroll', () => {
+  const pct = window.scrollY / (document.body.scrollHeight - window.innerHeight)
+  fioNo.style.top = (62 + pct * (window.innerHeight - 124)) + 'px'
+}, { passive: true })
+</script>
+</body>
+</html>

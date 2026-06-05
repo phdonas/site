@@ -1,0 +1,1429 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mentoria Comercial — Prof. Paulo H. Donassolo</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@400;500;600&family=Space+Mono&display=swap" rel="stylesheet">
+<style>
+:root {
+  --cream:     #F3EFE6;
+  --cream-d:   #EAE3D5;
+  --cream-dd:  #DDD4BF;
+  --white:     #FDFBF7;
+  --ink:       #17130E;
+  --ink-2:     #3A3025;
+  --ink-3:     #6B5E50;
+  --navy:      #0C1824;
+  --navy-2:    #122030;
+  --gold:      #A87828;
+  --gold-2:    #C8983C;
+  --gold-pale: #EDE0C0;
+  --gold-fio:  rgba(168,120,40,0.5);
+  --rule:      rgba(23,19,14,0.1);
+  --rule-n:    rgba(243,239,230,0.08);
+  --fd: 'Cormorant Garamond', Georgia, serif;
+  --fb: 'DM Sans', sans-serif;
+  --fm: 'Space Mono', monospace;
+  --ease: cubic-bezier(0.16,1,0.3,1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:var(--fb);
+  background:var(--cream);
+  color:var(--ink);
+  font-size:17px;line-height:1.65;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+body::before{
+  content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity:.025;
+}
+
+/* FIO CONDUTOR */
+.fio{
+  position:fixed;left:calc(5vw - 1px);top:0;bottom:0;
+  width:1px;
+  background:linear-gradient(to bottom,transparent 0%,var(--gold-fio) 8%,var(--gold-fio) 92%,transparent 100%);
+  z-index:50;pointer-events:none;
+}
+.fio-no{
+  position:fixed;left:calc(5vw - 5px);top:50%;
+  width:10px;height:10px;background:var(--gold);border-radius:50%;
+  transform:translateY(-50%);z-index:51;pointer-events:none;
+  box-shadow:0 0 12px rgba(168,120,40,.5);
+  transition:top .1s linear;
+}
+
+/* REVEAL */
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .85s var(--ease),transform .85s var(--ease)}
+.reveal.on{opacity:1;transform:none}
+.d1{transition-delay:.1s}.d2{transition-delay:.2s}.d3{transition-delay:.3s}.d4{transition-delay:.4s}
+
+/* NAV */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  height:62px;
+  background:rgba(243,239,230,.95);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--rule);
+}
+nav.scrolled{box-shadow:0 2px 20px rgba(23,19,14,.08)}
+.nav-in{
+  max-width:1240px;margin:0 auto;padding:0 5vw;
+  height:100%;display:flex;align-items:center;justify-content:space-between;
+}
+.nav-logo{
+  font-family:var(--fd);font-size:1.12rem;font-weight:700;
+  color:var(--ink);text-decoration:none;line-height:1;
+}
+.nav-links{display:flex;align-items:center;gap:2rem;list-style:none}
+.nav-links a{
+  font-size:.8rem;font-weight:500;color:var(--ink-2);
+  text-decoration:none;letter-spacing:.01em;
+  position:relative;transition:color .2s;
+}
+.nav-links a::after{
+  content:'';position:absolute;bottom:-3px;left:0;right:0;
+  height:1px;background:var(--gold);
+  transform:scaleX(0);transform-origin:left;
+  transition:transform .3s var(--ease);
+}
+.nav-links a:hover{color:var(--ink)}
+.nav-links a:hover::after{transform:scaleX(1)}
+.n-back{
+  font-size:.78rem;font-weight:500;color:var(--ink-3);
+  text-decoration:none;display:flex;align-items:center;gap:.4rem;
+  transition:color .2s;
+}
+.n-back:hover{color:var(--ink)}
+.n-cta{
+  font-size:.78rem;font-weight:600;color:var(--navy) !important;
+  border:1.5px solid var(--navy) !important;
+  padding:.45rem 1.1rem;transition:background .2s,color .2s !important;
+}
+.n-cta:hover{background:var(--navy) !important;color:var(--cream) !important}
+.n-cta::after{display:none !important}
+
+/* ═══════════════════════
+   HERO — navy profundo
+   transição para cream
+═══════════════════════ */
+.hero{
+  padding-top:62px;
+  background:linear-gradient(to bottom,var(--navy) 0%,var(--navy) 65%,#1e3040 80%,var(--cream-dd) 100%);
+  position:relative;overflow:hidden;
+  min-height:90vh;
+  display:flex;align-items:center;
+}
+/* forma geométrica decorativa */
+.hero-geo{
+  position:absolute;right:-100px;top:50%;transform:translateY(-50%);
+  width:500px;height:500px;
+  border:1px solid rgba(168,120,40,.07);border-radius:50%;
+  pointer-events:none;
+}
+.hero-geo::before{
+  content:'';position:absolute;inset:60px;
+  border:1px solid rgba(168,120,40,.05);border-radius:50%;
+}
+.hero-wrap{
+  max-width:1240px;margin:0 auto;padding:6rem 5vw;
+  position:relative;z-index:2;
+  display:grid;grid-template-columns:3fr 2fr;
+  gap:6rem;align-items:center;
+}
+.hero-eyebrow{
+  font-family:var(--fm);font-size:.78rem;letter-spacing:.2em;font-weight:700;
+  text-transform:uppercase;color:var(--gold);
+  display:flex;align-items:center;gap:.7rem;
+  margin-bottom:1.5rem;
+  opacity:0;animation:up .8s var(--ease) .2s forwards;
+}
+.hero-eyebrow::before{content:'';display:block;width:20px;height:1px;background:var(--gold)}
+.hero-h1{
+  font-family:var(--fd);
+  font-size:clamp(2.8rem,5vw,4.6rem);
+  font-weight:700;line-height:1.05;
+  color:rgba(243,239,230,.95);
+  letter-spacing:-.02em;
+  margin-bottom:1.2rem;
+  opacity:0;animation:up 1s var(--ease) .35s forwards;
+}
+.hero-h1 em{font-style:italic;font-weight:400;color:var(--gold)}
+.hero-h1 span{color:var(--gold-2)}
+
+.hero-sub{
+  font-size:1rem;color:rgba(243,239,230,.62);
+  line-height:1.75;font-weight:400;
+  max-width:520px;margin-bottom:2.5rem;
+  opacity:0;animation:up 1s var(--ease) .55s forwards;
+}
+
+.hero-actions{
+  display:flex;gap:1rem;align-items:center;flex-wrap:wrap;
+  opacity:0;animation:up 1s var(--ease) .7s forwards;
+}
+.btn-primary{
+  font-size:.84rem;font-weight:600;color:var(--ink);
+  background:var(--gold);padding:.9rem 2.2rem;
+  text-decoration:none;letter-spacing:.02em;
+  transition:background .25s,transform .2s,box-shadow .25s;
+  display:inline-block;
+}
+.btn-primary:hover{background:var(--gold-2);transform:translateY(-2px);box-shadow:0 8px 24px rgba(168,120,40,.3)}
+.btn-ghost{
+  font-size:.84rem;font-weight:500;color:rgba(243,239,230,.6);
+  text-decoration:none;display:flex;align-items:center;gap:.4rem;
+  border:1px solid rgba(243,239,230,.15);padding:.88rem 1.5rem;
+  transition:color .2s,border-color .2s;
+}
+.btn-ghost:hover{color:rgba(243,239,230,.9);border-color:rgba(243,239,230,.35)}
+
+/* card de destaque hero direita */
+.hero-card{
+  background:rgba(255,255,255,.05);
+  border:1px solid rgba(168,120,40,.2);
+  padding:2.5rem;
+  position:relative;
+  opacity:0;animation:up 1s var(--ease) .85s forwards;
+}
+.hero-card::before{
+  content:'';
+  position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--gold),var(--gold-2),transparent);
+}
+.hc-label{
+  font-family:var(--fm);font-size:.6rem;letter-spacing:.2em;font-weight:700;
+  text-transform:uppercase;color:var(--gold);margin-bottom:1.5rem;
+}
+.hc-items{display:flex;flex-direction:column;gap:1rem}
+.hc-item{
+  display:flex;align-items:center;gap:1rem;
+  padding-bottom:1rem;
+  border-bottom:1px solid rgba(243,239,230,.06);
+}
+.hc-item:last-child{border-bottom:none;padding-bottom:0}
+.hc-num{
+  font-family:var(--fd);font-size:2.2rem;font-weight:700;
+  color:var(--gold-2);line-height:1;flex-shrink:0;width:48px;
+}
+.hc-txt strong{
+  font-family:var(--fd);font-size:1rem;font-weight:700;
+  color:rgba(243,239,230,.95);display:block;line-height:1.2;
+}
+.hc-txt span{font-size:.78rem;color:rgba(243,239,230,.55);line-height:1.4}
+
+/* ═══════════════════════
+   PROBLEMA
+   cream — fio continua
+═══════════════════════ */
+.problema{
+  padding:7rem 5vw;
+  background:linear-gradient(to bottom,var(--cream-dd) 0%,var(--cream-d) 30%,var(--cream-d) 100%);
+  position:relative;
+}
+.sec-wrap{max-width:1240px;margin:0 auto}
+.sec-eyebrow{
+  font-family:var(--fm);font-size:.78rem;letter-spacing:.2em;font-weight:700;
+  text-transform:uppercase;color:var(--gold);
+  display:flex;align-items:center;gap:.7rem;margin-bottom:1.2rem;
+}
+.sec-eyebrow::before{content:'';display:block;width:20px;height:1px;background:var(--gold)}
+.sec-h2{
+  font-family:var(--fd);font-size:clamp(2rem,3.2vw,3rem);
+  font-weight:700;color:var(--ink);
+  line-height:1.08;letter-spacing:-.01em;margin-bottom:1.5rem;
+}
+.sec-h2 em{font-style:italic;font-weight:400;color:var(--ink-3)}
+
+.prob-grid{
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:1.5px;background:var(--rule);
+  margin-bottom:3rem;
+}
+.prob-item{
+  background:var(--cream-d);
+  padding:2rem 2.2rem;
+  display:grid;grid-template-columns:40px 1fr;gap:1.2rem;
+  transition:background .3s;
+}
+.prob-item:hover{background:var(--white)}
+.prob-n{
+  font-family:var(--fd);font-size:1.8rem;font-weight:700;
+  color:var(--gold);line-height:1;padding-top:.2rem;
+  transition:color .3s;
+}
+.prob-txt{font-size:.9rem;color:var(--ink-2);line-height:1.65}
+
+/* citação de impacto */
+.prob-quote{
+  background:var(--navy);
+  padding:2.2rem 2.2rem 2.2rem 2rem;
+  border-left:3px solid var(--gold);
+  position:relative;
+}
+.prob-quote::after{
+  content:'';position:absolute;bottom:0;right:0;
+  width:48px;height:48px;
+  border-bottom:1px solid rgba(168,120,40,.2);
+  border-right:1px solid rgba(168,120,40,.2);
+}
+.prob-quote p{
+  font-family:var(--fd);font-size:1.25rem;font-weight:600;font-style:italic;
+  color:rgba(243,239,230,.9);line-height:1.55;
+}
+
+/* ═══════════════════════
+   PARA QUEM
+   cream com transição
+═══════════════════════ */
+.para-quem{
+  padding:7rem 5vw;
+  background:var(--cream);
+  position:relative;
+}
+.pq-grid{
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:5rem;align-items:start;
+}
+.pq-list{display:flex;flex-direction:column;gap:0}
+.pq-item{
+  display:flex;align-items:flex-start;gap:1rem;
+  padding:1.3rem 0;
+  border-bottom:1px solid var(--rule);
+}
+.pq-item:last-child{border-bottom:none}
+.pq-check{
+  width:22px;height:22px;flex-shrink:0;margin-top:.2rem;
+  background:var(--gold);
+  display:flex;align-items:center;justify-content:center;
+}
+.pq-check::after{content:'✓';font-size:.7rem;color:var(--white);font-weight:700}
+.pq-txt{font-size:.9rem;color:var(--ink-2);line-height:1.65}
+
+/* não é para quem */
+.nao-pq-title{
+  font-family:var(--fm);font-size:.7rem;letter-spacing:.18em;font-weight:700;
+  text-transform:uppercase;color:var(--ink-3);
+  margin-bottom:1.2rem;margin-top:2.5rem;
+  display:flex;align-items:center;gap:.6rem;
+}
+.nao-pq-title::before{content:'';display:block;width:16px;height:1px;background:var(--ink-3)}
+.nao-list{display:flex;flex-direction:column;gap:.8rem}
+.nao-item{
+  display:flex;align-items:flex-start;gap:.8rem;
+}
+.nao-dash{color:rgba(180,80,80,.7);font-weight:700;flex-shrink:0;margin-top:.1rem}
+.nao-txt{font-size:.86rem;color:var(--ink-3);line-height:1.6}
+
+/* card visual lateral */
+.pq-card{
+  background:var(--navy);
+  padding:2.5rem;
+  position:relative;
+  top:2rem;
+}
+.pq-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--gold),transparent);
+}
+.pq-card-label{
+  font-family:var(--fm);font-size:.6rem;letter-spacing:.2em;font-weight:700;
+  text-transform:uppercase;color:var(--gold);margin-bottom:1.5rem;
+}
+.pq-card-title{
+  font-family:var(--fd);font-size:1.6rem;font-weight:700;font-style:italic;
+  color:rgba(243,239,230,.9);line-height:1.2;margin-bottom:.8rem;
+}
+.pq-card-sub{
+  font-size:.84rem;color:rgba(243,239,230,.5);line-height:1.65;
+  margin-bottom:2rem;
+}
+.pq-card-stat{
+  display:flex;flex-direction:column;gap:1.2rem;
+  padding-top:1.5rem;border-top:1px solid rgba(243,239,230,.08);
+}
+.pq-stat-item{display:flex;align-items:center;gap:1rem}
+.pq-stat-n{
+  font-family:var(--fd);font-size:2.2rem;font-weight:700;
+  color:var(--gold-2);line-height:1;flex-shrink:0;width:56px;
+}
+.pq-stat-l{font-size:.8rem;color:rgba(243,239,230,.58);line-height:1.4}
+
+/* ═══════════════════════
+   COMO FUNCIONA — 4 FASES
+   navy com fases conectadas
+═══════════════════════ */
+.como-funciona{
+  padding:7rem 5vw 9rem;
+  background:linear-gradient(to bottom,var(--cream) 0%,#e0d8c8 10%,var(--navy) 25%,var(--navy) 100%);
+  position:relative;overflow:hidden;
+}
+.cf-wrap{max-width:1240px;margin:0 auto;position:relative;z-index:2}
+.cf-eyebrow{
+  font-family:var(--fm);font-size:.78rem;letter-spacing:.2em;font-weight:700;
+  text-transform:uppercase;color:var(--gold);
+  display:flex;align-items:center;gap:.7rem;margin-bottom:1rem;
+}
+.cf-eyebrow::before{content:'';display:block;width:20px;height:1px;background:var(--gold)}
+.cf-h2{
+  font-family:var(--fd);font-size:clamp(2rem,3.2vw,3rem);
+  font-weight:700;color:rgba(243,239,230,.95);
+  line-height:1.08;letter-spacing:-.01em;margin-bottom:1rem;
+}
+.cf-h2 em{font-style:italic;font-weight:400;color:var(--gold)}
+.cf-sub{
+  font-size:.9rem;color:rgba(243,239,230,.5);
+  line-height:1.7;margin-bottom:4rem;
+  max-width:500px;
+}
+
+/* fases conectadas verticalmente */
+.fases{display:flex;flex-direction:column;gap:0;position:relative}
+/* linha vertical conectora */
+.fases::before{
+  content:'';
+  position:absolute;
+  left:39px;top:40px;bottom:40px;
+  width:2px;
+  background:linear-gradient(
+    to bottom,
+    var(--gold) 0%,
+    var(--gold) 25%,
+    var(--gold-2) 50%,
+    rgba(168,120,40,.4) 75%,
+    rgba(168,120,40,.15) 100%
+  );
+  z-index:0;
+}
+
+.fase{
+  display:grid;grid-template-columns:80px 1fr;
+  gap:2.5rem;align-items:start;
+  padding:2.5rem 0;
+  border-bottom:1px solid rgba(243,239,230,.06);
+  position:relative;z-index:1;
+  transition:background .3s;
+}
+.fase:last-child{border-bottom:none}
+
+/* dot da fase */
+.fase-dot{
+  width:80px;height:80px;
+  border:2px solid var(--gold);
+  background:var(--navy-2);
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+  transition:border-color .3s,background .3s,box-shadow .3s;
+  box-shadow:
+    0 0 0 4px var(--navy),
+    0 0 0 5px rgba(168,120,40,.25);
+}
+.fase:hover .fase-dot{
+  border-color:var(--gold-2);
+  background:rgba(168,120,40,.15);
+  box-shadow:
+    0 0 0 4px var(--navy),
+    0 0 0 5px rgba(168,120,40,.55),
+    0 0 16px rgba(168,120,40,.25);
+}
+.fase-dot-n{
+  font-family:var(--fd);font-size:1.8rem;font-weight:700;
+  color:var(--gold);line-height:1;
+}
+
+.fase-body{}
+.fase-header{
+  display:flex;align-items:baseline;gap:1rem;
+  margin-bottom:.8rem;flex-wrap:wrap;
+}
+.fase-nome{
+  font-family:var(--fd);font-size:1.5rem;font-weight:700;
+  color:rgba(243,239,230,.95);line-height:1.1;
+}
+.fase-semanas{
+  font-family:var(--fm);font-size:.58rem;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--gold);font-weight:700;
+}
+.fase-desc{
+  font-size:.88rem;color:rgba(243,239,230,.65);
+  line-height:1.7;margin-bottom:1rem;
+}
+.fase-entregavel{
+  display:inline-flex;align-items:center;gap:.6rem;
+  font-family:var(--fm);font-size:.56rem;letter-spacing:.1em;
+  text-transform:uppercase;
+  color:rgba(243,239,230,.45);
+  border:1px solid rgba(243,239,230,.1);
+  padding:.3rem .8rem;
+  transition:border-color .3s,color .3s;
+}
+.fase-entregavel::before{content:'▪';color:var(--gold);font-size:.5rem}
+.fase:hover .fase-entregavel{
+  border-color:rgba(168,120,40,.4);
+  color:rgba(243,239,230,.7);
+}
+
+/* ═══════════════════════
+   INCLUSOS
+   cream claro
+═══════════════════════ */
+.inclusos{
+  padding:7rem 5vw;
+  background:linear-gradient(to bottom,var(--navy) 0%,#1e3040 8%,#3d4a3c 16%,var(--cream-d) 30%,var(--cream-d) 100%);
+  position:relative;
+}
+.inc-wrap{max-width:1240px;margin:0 auto}
+.inc-grid{
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:5rem;align-items:center;
+  margin-top:3rem;
+}
+.inc-list{display:flex;flex-direction:column;gap:0}
+.inc-item{
+  display:flex;align-items:flex-start;gap:1.2rem;
+  padding:1.4rem 0;
+  border-bottom:1px solid var(--rule);
+  transition:background .3s;
+}
+.inc-item:last-child{border-bottom:none}
+.inc-check{
+  width:24px;height:24px;flex-shrink:0;margin-top:.1rem;
+  background:var(--gold);
+  display:flex;align-items:center;justify-content:center;
+}
+.inc-check::after{content:'✓';font-size:.7rem;color:var(--white);font-weight:700}
+.inc-txt{font-size:.9rem;color:var(--ink-2);line-height:1.65}
+
+/* resumo visual */
+.inc-resumo{
+  background:var(--navy);
+  padding:2.5rem;
+  position:relative;
+}
+.inc-resumo::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--gold),var(--gold-2),transparent);
+}
+.inc-resumo-label{
+  font-family:var(--fm);font-size:.6rem;letter-spacing:.2em;font-weight:700;
+  text-transform:uppercase;color:var(--gold);margin-bottom:2rem;
+}
+.inc-resumo-stats{display:flex;flex-direction:column;gap:1.5rem}
+.inc-stat{
+  display:flex;align-items:center;gap:1.2rem;
+  padding-bottom:1.5rem;
+  border-bottom:1px solid rgba(243,239,230,.06);
+}
+.inc-stat:last-child{border-bottom:none;padding-bottom:0}
+.inc-stat-n{
+  font-family:var(--fd);font-size:2.8rem;font-weight:700;
+  color:var(--gold-2);line-height:1;flex-shrink:0;width:64px;
+}
+.inc-stat-txt strong{
+  font-family:var(--fd);font-size:1rem;font-weight:700;
+  color:rgba(243,239,230,.95);display:block;margin-bottom:.1rem;
+}
+.inc-stat-txt span{font-size:.78rem;color:rgba(243,239,230,.55);line-height:1.4}
+
+/* ═══════════════════════
+   MENTORIA CUSTOMIZADA
+   cream com destaque
+═══════════════════════ */
+.customizada{
+  padding:7rem 5vw;
+  background:var(--cream);
+  position:relative;
+  overflow:hidden;
+}
+/* faixa gold decorativa no topo */
+.customizada::before{
+  content:'';
+  position:absolute;top:0;left:5vw;right:5vw;height:1px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);
+}
+.cust-wrap{max-width:1240px;margin:0 auto}
+.cust-header{margin-bottom:3.5rem}
+.cust-intro{
+  font-size:.95rem;color:var(--ink-2);
+  line-height:1.75;max-width:620px;margin-top:1rem;
+}
+.cust-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:1.5rem;margin-bottom:3.5rem;
+}
+.cust-card{
+  background:var(--white);
+  border:1px solid var(--rule);
+  padding:2.5rem 2rem;
+  position:relative;overflow:hidden;
+  transition:transform .35s var(--ease),box-shadow .35s;
+  box-shadow:0 2px 8px rgba(23,19,14,.04);
+}
+.cust-card::before{
+  content:'';
+  position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--gold),var(--gold-2));
+  transform:scaleX(0);transform-origin:left;
+  transition:transform .4s var(--ease);
+}
+.cust-card:hover{
+  transform:translateY(-6px);
+  box-shadow:0 16px 40px rgba(23,19,14,.1);
+}
+.cust-card:hover::before{transform:scaleX(1)}
+.cust-card-num{
+  font-family:var(--fd);font-size:4rem;font-weight:700;
+  color:var(--gold-pale);line-height:1;margin-bottom:1.2rem;
+  transition:color .3s;
+}
+.cust-card:hover .cust-card-num{color:rgba(168,120,40,.25)}
+.cust-card-title{
+  font-family:var(--fd);font-size:1.3rem;font-weight:700;
+  color:var(--ink);margin-bottom:.7rem;line-height:1.2;
+}
+.cust-card-desc{
+  font-size:.86rem;color:var(--ink-3);
+  line-height:1.7;margin-bottom:1.5rem;
+}
+.cust-tags{display:flex;flex-wrap:wrap;gap:.5rem}
+.cust-tag{
+  font-family:var(--fm);font-size:.52rem;letter-spacing:.1em;
+  text-transform:uppercase;
+  color:var(--gold);background:var(--gold-pale);
+  padding:.2rem .6rem;
+}
+.cust-cta{
+  display:flex;align-items:center;gap:2.5rem;
+  padding:2.5rem;
+  background:var(--cream-d);
+  border:1px solid var(--rule);
+  flex-wrap:wrap;
+}
+.cust-cta-txt{
+  font-family:var(--fd);font-size:1.15rem;font-weight:600;font-style:italic;
+  color:var(--ink);line-height:1.4;flex:1;min-width:260px;
+}
+
+/* ═══════════════════════
+   SOBRE O MENTOR
+   cream
+═══════════════════════ */
+.mentor{
+  padding:7rem 5vw;
+  background:var(--cream);
+  position:relative;
+}
+.mentor-grid{
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:6rem;align-items:center;
+}
+.mentor-tl{display:flex;flex-direction:column;gap:0}
+.mentor-tl-item{
+  display:grid;grid-template-columns:64px 1fr;
+  gap:1.2rem;padding:1.4rem 0;
+  border-bottom:1px solid var(--rule);
+}
+.mentor-tl-item:last-child{border-bottom:none}
+.mentor-tl-year{
+  font-family:var(--fm);font-size:.7rem;letter-spacing:.06em;
+  color:var(--gold);font-weight:700;padding-top:.2rem;line-height:1.5;
+}
+.mentor-tl-txt strong{
+  font-family:var(--fd);font-size:1.25rem;font-weight:700;
+  color:var(--ink);display:block;margin-bottom:.25rem;line-height:1.15;
+}
+.mentor-tl-txt span{font-size:.9rem;color:var(--ink-2);line-height:1.6}
+
+.mentor-quote{
+  background:var(--navy);
+  padding:2rem 2rem 2rem 1.8rem;
+  border-left:3px solid var(--gold);
+  margin-top:2rem;position:relative;
+}
+.mentor-quote::after{
+  content:'';position:absolute;bottom:0;right:0;
+  width:40px;height:40px;
+  border-bottom:1px solid rgba(168,120,40,.2);
+  border-right:1px solid rgba(168,120,40,.2);
+}
+.mentor-quote p{
+  font-family:var(--fd);font-size:1.15rem;
+  font-weight:600;font-style:italic;
+  color:rgba(243,239,230,.9);line-height:1.5;margin-bottom:.7rem;
+}
+.mentor-quote cite{
+  font-family:var(--fm);font-size:.52rem;
+  letter-spacing:.14em;text-transform:uppercase;
+  color:var(--gold-2);font-style:normal;
+}
+
+/* card visual mentor */
+.mentor-card{
+  background:var(--cream-d);
+  border:1px solid var(--rule);
+  padding:2.5rem;
+  position:relative;
+}
+.mentor-card::before{
+  content:'';
+  position:absolute;top:0;left:0;right:0;height:2px;
+  background:var(--gold);
+}
+/* cantos geométricos */
+.mentor-card::after{
+  content:'';
+  position:absolute;top:12px;left:12px;
+  width:32px;height:32px;
+  border-top:2px solid var(--gold);
+  border-left:2px solid var(--gold);
+}
+.mc-title{
+  font-family:var(--fd);font-size:1.5rem;font-weight:700;
+  color:var(--ink);margin-bottom:.3rem;
+}.mc-sub{
+  font-family:var(--fm);font-size:.6rem;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--gold);
+  margin-bottom:2rem;
+}
+.mc-list{display:flex;flex-direction:column;gap:.9rem}
+.mc-item{
+  display:flex;align-items:flex-start;gap:.9rem;
+}
+.mc-dot{
+  width:6px;height:6px;background:var(--gold);
+  border-radius:50%;flex-shrink:0;margin-top:.55rem;
+}
+.mc-txt{font-size:.86rem;color:var(--ink-2);line-height:1.6}
+
+/* ═══════════════════════
+   FAQ
+   cream escuro
+═══════════════════════ */
+.faq-section{
+  padding:7rem 5vw;
+  background:var(--cream-d);
+}
+.faq-wrap{max-width:800px;margin:0 auto}
+.faq-list{display:flex;flex-direction:column;gap:0;margin-top:3rem}
+.faq-item{border-bottom:1px solid var(--rule)}
+.faq-btn{
+  width:100%;display:flex;justify-content:space-between;
+  align-items:center;gap:1.5rem;
+  padding:1.6rem 0;
+  background:none;border:none;cursor:pointer;
+  text-align:left;
+}
+.faq-q{
+  font-family:var(--fd);font-size:1.1rem;font-weight:700;
+  color:var(--ink);line-height:1.3;
+}
+.faq-icon{
+  color:var(--gold);font-size:1.5rem;flex-shrink:0;
+  font-weight:300;line-height:1;
+  transition:transform .25s var(--ease);
+  font-family:var(--fd);
+}
+.faq-item.open .faq-icon{transform:rotate(45deg)}
+.faq-a{
+  font-size:.88rem;color:var(--ink-3);line-height:1.75;
+  padding:0 0 1.6rem;max-width:680px;
+  display:none;
+}
+.faq-item.open .faq-a{display:block}
+
+/* ═══════════════════════
+   CTA FINAL
+   navy profundo
+═══════════════════════ */
+.cta-final{
+  padding:9rem 5vw;
+  background:linear-gradient(to bottom,var(--cream-d) 0%,#e0d8c8 10%,var(--navy) 28%,var(--navy) 100%);
+  text-align:center;position:relative;overflow:hidden;
+}
+.cta-geo-1,.cta-geo-2{
+  position:absolute;top:60%;left:50%;
+  transform:translate(-50%,-50%);
+  border-radius:50%;pointer-events:none;
+}
+.cta-geo-1{width:600px;height:600px;border:1px solid rgba(168,120,40,.06)}
+.cta-geo-2{width:380px;height:380px;border:1px solid rgba(168,120,40,.1)}
+.cta-inner{position:relative;z-index:1;max-width:640px;margin:0 auto}
+.cta-eyebrow{
+  font-family:var(--fm);font-size:.78rem;letter-spacing:.2em;font-weight:700;
+  text-transform:uppercase;color:var(--gold);
+  display:flex;justify-content:center;align-items:center;
+  gap:.7rem;margin-bottom:1.8rem;
+}
+.cta-eyebrow::before{content:'';display:block;width:20px;height:1px;background:var(--gold)}
+.cta-h2{
+  font-family:var(--fd);
+  font-size:clamp(2.4rem,4vw,3.8rem);
+  font-weight:700;color:rgba(243,239,230,.95);
+  line-height:1.05;margin-bottom:1.2rem;letter-spacing:-.01em;
+}
+.cta-h2 em{font-style:italic;font-weight:400;color:rgba(243,239,230,.45)}
+.cta-sub{
+  font-size:.95rem;color:rgba(243,239,230,.55);
+  line-height:1.75;margin-bottom:.8rem;
+}
+.cta-nota{
+  font-family:var(--fm);font-size:.6rem;letter-spacing:.12em;
+  text-transform:uppercase;color:rgba(243,239,230,.25);
+  margin-bottom:3rem;
+}
+.cta-btns{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
+.btn-outline{
+  font-size:.84rem;font-weight:500;
+  color:rgba(243,239,230,.65);
+  border:1.5px solid rgba(243,239,230,.2);
+  padding:.88rem 1.8rem;
+  text-decoration:none;
+  transition:border-color .2s,color .2s;
+}
+.btn-outline:hover{border-color:rgba(243,239,230,.5);color:rgba(243,239,230,.9)}
+
+/* FOOTER */
+footer{
+  background:#0a1018;padding:4rem 5vw 2.5rem;
+  border-top:1px solid rgba(168,120,40,.12);
+}
+.ft-wrap{max-width:1240px;margin:0 auto}
+.ft-top{
+  display:grid;grid-template-columns:2fr 1fr 1fr 1fr;
+  gap:3rem;padding-bottom:3rem;
+  border-bottom:1px solid rgba(243,239,230,.06);
+  margin-bottom:2rem;
+}
+.ft-brand{
+  font-family:var(--fd);font-size:1.1rem;font-weight:700;
+  color:rgba(243,239,230,.82);margin-bottom:.6rem;
+}
+.ft-tag{font-size:.8rem;color:rgba(243,239,230,.28);line-height:1.6;max-width:200px}
+.ft-ct{
+  font-family:var(--fm);font-size:.55rem;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--gold);opacity:.6;margin-bottom:1.2rem;
+}
+.ft-list{list-style:none;display:flex;flex-direction:column;gap:.6rem}
+.ft-list a{
+  font-size:.8rem;color:rgba(243,239,230,.32);text-decoration:none;
+  transition:color .2s;
+}
+.ft-list a:hover{color:rgba(243,239,230,.7)}
+.ft-bottom{
+  display:flex;justify-content:space-between;align-items:center;
+  flex-wrap:wrap;gap:1rem;
+}
+.ft-copy{font-family:var(--fm);font-size:.52rem;letter-spacing:.08em;color:rgba(243,239,230,.18)}
+.ft-sig{font-family:var(--fm);font-size:.5rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);opacity:.3}
+
+/* WA */
+.wa{
+  position:fixed;bottom:1.8rem;right:1.8rem;z-index:200;
+  width:52px;height:52px;background:#25D366;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.4rem;text-decoration:none;
+  box-shadow:0 4px 20px rgba(37,211,102,.3);
+  transition:transform .2s,box-shadow .2s;
+}
+.wa:hover{transform:scale(1.08);box-shadow:0 6px 28px rgba(37,211,102,.4)}
+
+@keyframes up{
+  from{opacity:0;transform:translateY(22px)}
+  to{opacity:1;transform:none}
+}
+
+/* RESPONSIVE */
+@media(max-width:960px){
+  .fio,.fio-no{display:none}
+  .hero-wrap{grid-template-columns:1fr;gap:3rem}
+  .hero-card{max-width:480px}
+  .prob-grid{grid-template-columns:1fr}
+  .pq-grid{grid-template-columns:1fr}
+  .pq-card{top:0}
+  .fases::before{display:none}
+  .fase{grid-template-columns:60px 1fr;gap:1.5rem}
+  .inc-grid{grid-template-columns:1fr}
+  .cust-grid{grid-template-columns:1fr}
+  .mentor-grid{grid-template-columns:1fr;gap:3rem}
+  .ft-top{grid-template-columns:1fr 1fr;gap:2.5rem}
+}
+@media(max-width:600px){
+  .nav-links{gap:1rem}
+  .hero-h1{font-size:2.6rem}
+  .fase{grid-template-columns:1fr}
+  .fase-dot{display:none}
+}
+</style>
+</head>
+<body>
+
+<div class="fio" aria-hidden="true"></div>
+<div class="fio-no" id="fio-no" aria-hidden="true"></div>
+
+<!-- NAV -->
+<nav id="nav">
+  <div class="nav-in">
+    <a href="#" class="nav-logo">Prof. Paulo H. Donassolo</a>
+    <ul class="nav-links">
+      <li><a href="#" class="n-back">← Início</a></li>
+      <li><a href="#">Serviços</a></li>
+      <li><a href="#">Conteúdo</a></li>
+      <li><a href="#" class="n-cta">Fale Comigo</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-geo" aria-hidden="true"></div>
+  <div class="hero-wrap">
+    <div>
+      <div class="hero-eyebrow">Mentoria Comercial</div>
+      <h1 class="hero-h1">
+        <span>90 dias.</span><br>
+        Diagnóstico, plano<br>
+        e <em>implementação.</em>
+      </h1>
+      <p class="hero-sub">
+        Para empreendedores, empresários e gestores comerciais que querem estruturar a área de vendas com método — e parar de depender deles mesmos para que as negociações importantes fechem.
+      </p>
+      <div class="hero-actions">
+        <a href="#" class="btn-primary">Quero conhecer o programa</a>
+        <a href="#como-funciona" class="btn-ghost">Ver como funciona</a>
+      </div>
+    </div>
+
+    <div class="hero-card reveal d2">
+      <div class="hc-label">O programa em números</div>
+      <div class="hc-items">
+        <div class="hc-item">
+          <div class="hc-num">90</div>
+          <div class="hc-txt">
+            <strong>Dias de programa</strong>
+            <span>Do diagnóstico à consolidação</span>
+          </div>
+        </div>
+        <div class="hc-item">
+          <div class="hc-num">12</div>
+          <div class="hc-txt">
+            <strong>Sessões individuais</strong>
+            <span>60 a 90 minutos cada</span>
+          </div>
+        </div>
+        <div class="hc-item">
+          <div class="hc-num">04</div>
+          <div class="hc-txt">
+            <strong>Fases estruturadas</strong>
+            <span>Diagnóstico, plano, implementação e consolidação</span>
+          </div>
+        </div>
+        <div class="hc-item">
+          <div class="hc-num">∞</div>
+          <div class="hc-txt">
+            <strong>Suporte WhatsApp</strong>
+            <span>Entre sessões, dias úteis</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROBLEMA -->
+<section class="problema">
+  <div class="sec-wrap">
+    <div class="sec-eyebrow reveal">O problema</div>
+    <h2 class="sec-h2 reveal d1">Quando a área comercial<br>não entrega o que <em>deveria</em></h2>
+    <div class="prob-grid reveal d2">
+      <div class="prob-item">
+        <div class="prob-n">01</div>
+        <p class="prob-txt">A equipe de vendas existe, mas o processo depende de você para funcionar.</p>
+      </div>
+      <div class="prob-item">
+        <div class="prob-n">02</div>
+        <p class="prob-txt">Sua empresa está crescendo e você está perdendo o controle da gestão.</p>
+      </div>
+      <div class="prob-item">
+        <div class="prob-n">03</div>
+        <p class="prob-txt">As metas são definidas, mas o caminho para atingi-las não está claro para ninguém.</p>
+      </div>
+      <div class="prob-item">
+        <div class="prob-n">04</div>
+        <p class="prob-txt">Os vendedores perdem negócios que poderiam ter fechado — e você não sabe exatamente onde está o gargalo.</p>
+      </div>
+      <div class="prob-item">
+        <div class="prob-n">05</div>
+        <p class="prob-txt">Você gerencia resultado final, não o processo que gera o resultado.</p>
+      </div>
+      <div class="prob-item" style="background:var(--white)">
+        <div class="prob-n" style="color:var(--gold-pale);opacity:.4">06</div>
+        <p class="prob-txt" style="color:var(--ink-3);font-style:italic">Se um ou mais desses pontos descreve a sua realidade, há um caminho.</p>
+      </div>
+    </div>
+    <div class="prob-quote reveal d3">
+      <p>"O problema raramente é o vendedor. Geralmente o problema está na falta de um processo de gestão, de vendas e de acompanhamento. É exatamente isso que resolvemos juntos nos 90 dias."</p>
+    </div>
+  </div>
+</section>
+
+<!-- PARA QUEM -->
+<section class="para-quem">
+  <div class="sec-wrap">
+    <div class="pq-grid">
+      <div>
+        <div class="sec-eyebrow reveal">Para quem é</div>
+        <h2 class="sec-h2 reveal d1">Você se <em>encaixa aqui?</em></h2>
+        <div class="pq-list reveal d2">
+          <div class="pq-item">
+            <div class="pq-check"></div>
+            <p class="pq-txt">Você é dono, empreendedor ou gestor comercial de uma PME de indústria ou distribuição.</p>
+          </div>
+          <div class="pq-item">
+            <div class="pq-check"></div>
+            <p class="pq-txt">Sua equipe de vendas não está atingindo o potencial que você sabe que ela tem.</p>
+          </div>
+          <div class="pq-item">
+            <div class="pq-check"></div>
+            <p class="pq-txt">Você precisa entrar nas negociações importantes para elas fecharem.</p>
+          </div>
+          <div class="pq-item">
+            <div class="pq-check"></div>
+            <p class="pq-txt">As metas existem, mas o processo para atingi-las não está claro.</p>
+          </div>
+          <div class="pq-item">
+            <div class="pq-check"></div>
+            <p class="pq-txt">Você quer crescer sem depender só de você para que as vendas aconteçam.</p>
+          </div>
+        </div>
+        <div class="nao-pq-title reveal d3">Não é para quem</div>
+        <div class="nao-list reveal d3">
+          <div class="nao-item">
+            <span class="nao-dash">—</span>
+            <p class="nao-txt">Quer receitas prontas, respostas rápidas ou soluções mágicas.</p>
+          </div>
+          <div class="nao-item">
+            <span class="nao-dash">—</span>
+            <p class="nao-txt">Busca palestra ou treinamento pontual sem acompanhamento.</p>
+          </div>
+          <div class="nao-item">
+            <span class="nao-dash">—</span>
+            <p class="nao-txt">Não está disposto a executar entre as sessões.</p>
+          </div>
+          <div class="nao-item">
+            <span class="nao-dash">—</span>
+            <p class="nao-txt">Não tem tempo para desenvolver a gestão comercial e as pessoas.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="pq-card reveal d2">
+        <div class="pq-card-label">O resultado esperado</div>
+        <div class="pq-card-title">Uma área comercial que funciona com método — sem você no centro de tudo.</div>
+        <p class="pq-card-sub">Em 90 dias você vai ter um diagnóstico real, um processo estruturado e uma equipe que sabe o que fazer sem precisar de você para cada negociação.</p>
+        <div class="pq-card-stat">
+          <div class="pq-stat-item">
+            <div class="pq-stat-n">90</div>
+            <p class="pq-stat-l">Dias de acompanhamento estruturado e personalizado</p>
+          </div>
+          <div class="pq-stat-item">
+            <div class="pq-stat-n">12</div>
+            <p class="pq-stat-l">Sessões individuais com agenda, registro e ações claras</p>
+          </div>
+          <div class="pq-stat-item">
+            <div class="pq-stat-n">4</div>
+            <p class="pq-stat-l">Entregáveis concretos ao longo do programa</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- COMO FUNCIONA -->
+<section class="como-funciona" id="como-funciona">
+  <div class="cf-wrap">
+    <div class="cf-eyebrow reveal">Como funciona</div>
+    <h2 class="cf-h2 reveal d1">90 dias. 12 sessões. <em>4 fases.</em></h2>
+    <p class="cf-sub reveal d2">Cada fase tem objetivo claro, entregável definido e ações concretas para a semana seguinte.</p>
+
+    <div class="fases">
+      <div class="fase reveal d1">
+        <div class="fase-dot"><span class="fase-dot-n">01</span></div>
+        <div class="fase-body">
+          <div class="fase-header">
+            <div class="fase-nome">Diagnóstico</div>
+            <div class="fase-semanas">Semanas 1 a 3</div>
+          </div>
+          <p class="fase-desc">Mapeamos o processo de vendas e de gestão atual, identificamos os gargalos reais e entendemos como a equipe está estruturada e gerida.</p>
+          <div class="fase-entregavel">Relatório de Diagnóstico Comercial</div>
+        </div>
+      </div>
+      <div class="fase reveal d2">
+        <div class="fase-dot"><span class="fase-dot-n">02</span></div>
+        <div class="fase-body">
+          <div class="fase-header">
+            <div class="fase-nome">Plano</div>
+            <div class="fase-semanas">Semanas 4 e 5</div>
+          </div>
+          <p class="fase-desc">Definimos as 3 prioridades de trabalho e construímos o plano de ação semana a semana — o que atacar, como e em que ordem.</p>
+          <div class="fase-entregavel">Plano de Ação estruturado</div>
+        </div>
+      </div>
+      <div class="fase reveal d3">
+        <div class="fase-dot"><span class="fase-dot-n">03</span></div>
+        <div class="fase-body">
+          <div class="fase-header">
+            <div class="fase-nome">Implementação</div>
+            <div class="fase-semanas">Semanas 5 a 10</div>
+          </div>
+          <p class="fase-desc">Executamos o plano com acompanhamento semanal. Cada sessão tem pauta definida, registro e ações claras para a semana seguinte.</p>
+          <div class="fase-entregavel">Relatório de Execução do Programa</div>
+        </div>
+      </div>
+      <div class="fase reveal d4">
+        <div class="fase-dot" style="border-color:var(--gold-2);box-shadow:0 0 0 4px var(--navy),0 0 0 5px rgba(200,152,60,.5),0 0 20px rgba(200,152,60,.2)"><span class="fase-dot-n" style="color:var(--gold-2)">04</span></div>
+        <div class="fase-body">
+          <div class="fase-header">
+            <div class="fase-nome">Consolidação</div>
+            <div class="fase-semanas">Semanas 11 e 12</div>
+          </div>
+          <p class="fase-desc">Avaliamos os resultados, documentamos o que ficou funcionando e construímos o plano de continuidade para as próximas 4 semanas sem o mentor.</p>
+          <div class="fase-entregavel">Relatório Final do Programa</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- INCLUSOS -->
+<section class="inclusos">
+  <div class="inc-wrap">
+    <div class="sec-eyebrow reveal">O que está incluído</div>
+    <h2 class="sec-h2 reveal d1">Tudo que você precisa<br>para <em>implementar de verdade</em></h2>
+    <div class="inc-grid">
+      <div class="inc-list reveal d2">
+        <div class="inc-item">
+          <div class="inc-check"></div>
+          <p class="inc-txt">12 sessões individuais semanais de 60 a 90 minutos.</p>
+        </div>
+        <div class="inc-item">
+          <div class="inc-check"></div>
+          <p class="inc-txt">Relatório de Diagnóstico Comercial completo.</p>
+        </div>
+        <div class="inc-item">
+          <div class="inc-check"></div>
+          <p class="inc-txt">Plano de Ação estruturado por semana.</p>
+        </div>
+        <div class="inc-item">
+          <div class="inc-check"></div>
+          <p class="inc-txt">Templates, ferramentas e frameworks aplicáveis imediatamente.</p>
+        </div>
+        <div class="inc-item">
+          <div class="inc-check"></div>
+          <p class="inc-txt">Suporte por WhatsApp entre sessões (dias úteis).</p>
+        </div>
+        <div class="inc-item">
+          <div class="inc-check"></div>
+          <p class="inc-txt">Relatório Final com evolução e próximos passos.</p>
+        </div>
+      </div>
+
+      <div class="inc-resumo reveal d3">
+        <div class="inc-resumo-label">O programa em resumo</div>
+        <div class="inc-resumo-stats">
+          <div class="inc-stat">
+            <div class="inc-stat-n">12</div>
+            <div class="inc-stat-txt">
+              <strong>Sessões individuais</strong>
+              <span>Uma por semana, com pauta e registro</span>
+            </div>
+          </div>
+          <div class="inc-stat">
+            <div class="inc-stat-n">90</div>
+            <div class="inc-stat-txt">
+              <strong>Dias de programa</strong>
+              <span>Do diagnóstico ao plano de continuidade</span>
+            </div>
+          </div>
+          <div class="inc-stat">
+            <div class="inc-stat-n">04</div>
+            <div class="inc-stat-txt">
+              <strong>Entregáveis concretos</strong>
+              <span>Documentos que ficam com você após o programa</span>
+            </div>
+          </div>
+          <div class="inc-stat">
+            <div class="inc-stat-n">∞</div>
+            <div class="inc-stat-txt">
+              <strong>Suporte WhatsApp</strong>
+              <span>Entre sessões, dias úteis, para o dia a dia</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MENTORIA CUSTOMIZADA -->
+<section class="customizada">
+  <div class="cust-wrap">
+    <div class="cust-header reveal">
+      <div class="sec-eyebrow">Além do programa padrão</div>
+      <h2 class="sec-h2 reveal d1">Projetos <em>customizados</em><br>e personalizados</h2>
+      <p class="cust-intro reveal d2">
+        O programa de 90 dias é o formato padrão — estruturado, testado e com resultados consistentes. Mas cada empresa tem uma realidade diferente. Quando o contexto exige, desenvolvemos projetos sob medida.
+      </p>
+    </div>
+    <div class="cust-grid reveal d2">
+      <div class="cust-card">
+        <div class="cust-card-num">01</div>
+        <div class="cust-card-title">Mentoria Individual Personalizada</div>
+        <p class="cust-card-desc">Escopo, duração e cadência definidos de acordo com o seu momento e desafio específico. Pode ser um projeto de 30 dias de foco cirúrgico ou um acompanhamento de longo prazo. O formato segue a necessidade, não o contrário.</p>
+        <div class="cust-tags">
+          <span class="cust-tag">Escopo flexível</span>
+          <span class="cust-tag">Duração customizada</span>
+          <span class="cust-tag">Cadência adaptada</span>
+        </div>
+      </div>
+      <div class="cust-card">
+        <div class="cust-card-num">02</div>
+        <div class="cust-card-title">Mentoria em Grupo</div>
+        <p class="cust-card-desc">Para equipes de gestores ou times comerciais que querem desenvolver competências juntos. Sessões em grupo com dinâmicas de aprendizado colaborativo, casos reais da equipe e plano de ação coletivo.</p>
+        <div class="cust-tags">
+          <span class="cust-tag">3 a 8 participantes</span>
+          <span class="cust-tag">Sessões em grupo</span>
+          <span class="cust-tag">Casos reais da equipe</span>
+        </div>
+      </div>
+      <div class="cust-card">
+        <div class="cust-card-num">03</div>
+        <div class="cust-card-title">Projeto Corporativo</div>
+        <p class="cust-card-desc">Para empresas que querem desenvolver toda a liderança comercial — do gestor ao diretor. Programa estruturado com múltiplos participantes, trilhas diferenciadas por nível e acompanhamento de resultados.</p>
+        <div class="cust-tags">
+          <span class="cust-tag">Multi-nível</span>
+          <span class="cust-tag">Trilhas por perfil</span>
+          <span class="cust-tag">Acompanhamento de resultados</span>
+        </div>
+      </div>
+    </div>
+    <div class="cust-cta reveal d3">
+      <p class="cust-cta-txt">Tem um desafio específico que não se encaixa no programa padrão? Vamos conversar.</p>
+      <a href="#" class="btn-primary">Falar sobre um projeto customizado</a>
+    </div>
+  </div>
+</section>
+
+<!-- SOBRE O MENTOR -->
+<section class="mentor">
+  <div class="sec-wrap">
+    <div class="mentor-grid">
+      <div>
+        <div class="sec-eyebrow reveal">Quem conduz</div>
+        <h2 class="sec-h2 reveal d1">Prof. Paulo H.<br><em>Donassolo</em></h2>
+        <div class="mentor-tl reveal d2">
+          <div class="mentor-tl-item">
+            <div class="mentor-tl-year">25+<br>anos</div>
+            <div class="mentor-tl-txt">
+              <strong>Gestor e Diretor Comercial</strong>
+              <span>Em indústrias de bens de consumo e distribuição — sempre liderando equipes comerciais</span>
+            </div>
+          </div>
+          <div class="mentor-tl-item">
+            <div class="mentor-tl-year">20+<br>anos</div>
+            <div class="mentor-tl-txt">
+              <strong>Professor de MBA e Pós-graduação</strong>
+              <span>Vendas, Negociação e Gestão Comercial — ESPM e Unisinos</span>
+            </div>
+          </div>
+          <div class="mentor-tl-item">
+            <div class="mentor-tl-year">MSc<br>+2 MBA</div>
+            <div class="mentor-tl-txt">
+              <strong>Formação acadêmica diversa</strong>
+              <span>Mestre em Administração, MBA em Marketing Estratégico e MBA em Gestão por Processos</span>
+            </div>
+          </div>
+          <div class="mentor-tl-item">
+            <div class="mentor-tl-year">IEFP<br>cert.</div>
+            <div class="mentor-tl-txt">
+              <strong>Formador certificado</strong>
+              <span>Instituto do Emprego e Formação Profissional — Portugal</span>
+            </div>
+          </div>
+        </div>
+        <div class="mentor-quote reveal d3">
+          <p>"Não ensino o que li. Ensino o que vivi, testei e continuo aprendendo."</p>
+          <cite>Prof. Paulo H. Donassolo</cite>
+        </div>
+      </div>
+
+      <div class="mentor-card reveal d2">
+        <div class="mc-title">Prof. Paulo H. Donassolo</div>
+        <div class="mc-sub">Professor · Consultor · Mentor Comercial</div>
+        <div class="mc-list">
+          <div class="mc-item">
+            <div class="mc-dot"></div>
+            <p class="mc-txt">Mais de 25 anos como Gerente e Diretor Comercial em indústrias de bens de consumo e distribuição.</p>
+          </div>
+          <div class="mc-item">
+            <div class="mc-dot"></div>
+            <p class="mc-txt">Mais de 20 anos como professor de MBA e pós-graduação em Vendas, Negociação e Gestão Comercial.</p>
+          </div>
+          <div class="mc-item">
+            <div class="mc-dot"></div>
+            <p class="mc-txt">Autor de livros sobre gestão comercial, vendas e negociação.</p>
+          </div>
+          <div class="mc-item">
+            <div class="mc-dot"></div>
+            <p class="mc-txt">Mestre em Administração de Empresas, MBA em Marketing Estratégico e MBA em Gestão por Processos.</p>
+          </div>
+          <div class="mc-item">
+            <div class="mc-dot"></div>
+            <p class="mc-txt">Formador certificado pelo IEFP — Portugal.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="faq-section">
+  <div class="faq-wrap">
+    <div class="sec-eyebrow reveal" style="justify-content:center">Perguntas frequentes</div>
+    <h2 class="sec-h2 reveal d1" style="text-align:center">Dúvidas sobre<br><em>o programa</em></h2>
+    <div class="faq-list">
+      <div class="faq-item reveal d1">
+        <button class="faq-btn" onclick="toggleFaq(this)">
+          <span class="faq-q">As sessões são presenciais ou online?</span>
+          <span class="faq-icon">+</span>
+        </button>
+        <p class="faq-a">Online, via Google Meet, Zoom ou Teams. Isso permite flexibilidade de horário e atendimento independente de localização — atendo empresas em todo o território de língua portuguesa.</p>
+      </div>
+      <div class="faq-item reveal d2">
+        <button class="faq-btn" onclick="toggleFaq(this)">
+          <span class="faq-q">O que acontece se eu precisar remarcar uma sessão?</span>
+          <span class="faq-icon">+</span>
+        </button>
+        <p class="faq-a">Sem problema. Avise com pelo menos 24 horas de antecedência e remarcamos sem custo.</p>
+      </div>
+      <div class="faq-item reveal d3">
+        <button class="faq-btn" onclick="toggleFaq(this)">
+          <span class="faq-q">Como funciona o suporte por WhatsApp?</span>
+          <span class="faq-icon">+</span>
+        </button>
+        <p class="faq-a">Disponível de segunda a sexta, das 9h às 18h (horário de Lisboa). Para dúvidas rápidas sobre o que foi discutido na sessão e situações do dia a dia. Questões mais complexas ficam para a próxima sessão.</p>
+      </div>
+      <div class="faq-item reveal d4">
+        <button class="faq-btn" onclick="toggleFaq(this)">
+          <span class="faq-q">Em quanto tempo vejo resultados?</span>
+          <span class="faq-icon">+</span>
+        </button>
+        <p class="faq-a">As primeiras mudanças de processo começam na Fase 2 — semana 5. O programa é de implementação, não de teoria, e por isso os resultados dependem também do seu trabalho entre as sessões.</p>
+      </div>
+      <div class="faq-item reveal d4">
+        <button class="faq-btn" onclick="toggleFaq(this)">
+          <span class="faq-q">Posso continuar após os 90 dias?</span>
+          <span class="faq-icon">+</span>
+        </button>
+        <p class="faq-a">Sim. Na Sessão 12 apresentamos as opções de continuidade — nova rodada de mentoria, consultoria direta ou acesso aos cursos online para a equipe.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA FINAL -->
+<section class="cta-final">
+  <div class="cta-geo-1" aria-hidden="true"></div>
+  <div class="cta-geo-2" aria-hidden="true"></div>
+  <div class="cta-inner">
+    <div class="cta-eyebrow reveal">Próximo passo</div>
+    <h2 class="cta-h2 reveal d1">Comece com uma sessão de<br><em>diagnóstico gratuita.</em></h2>
+    <p class="cta-sub reveal d2">30 minutos. Olhamos juntos onde a sua área comercial está travando e o que faz mais sentido atacar primeiro.</p>
+    <p class="cta-nota reveal d2">Sem compromisso. Sem custo.</p>
+    <div class="cta-btns reveal d3">
+      <a href="#" class="btn-primary">Agendar diagnóstico gratuito</a>
+      <a href="#" class="btn-outline">Ver os outros serviços</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="ft-wrap">
+    <div class="ft-top">
+      <div>
+        <div class="ft-brand">Prof. Paulo H. Donassolo</div>
+        <p class="ft-tag">Mentoria · Consultoria · Cursos e Formações · Conteúdo</p>
+      </div>
+      <div>
+        <div class="ft-ct">Serviços</div>
+        <ul class="ft-list">
+          <li><a href="#">Mentoria</a></li>
+          <li><a href="#">Consultoria</a></li>
+          <li><a href="#">Cursos e Formações</a></li>
+          <li><a href="#">Conteúdo</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="ft-ct">Acesso</div>
+        <ul class="ft-list">
+          <li><a href="#">Área do Aluno</a></li>
+          <li><a href="#">Cursos Udemy</a></li>
+          <li><a href="#">Livros Amazon</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="ft-ct">Institucional</div>
+        <ul class="ft-list">
+          <li><a href="#">Prof. Paulo</a></li>
+          <li><a href="#">Fale Comigo</a></li>
+          <li><a href="#">Termos de Uso</a></li>
+          <li><a href="#">Privacidade</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="ft-bottom">
+      <div class="ft-copy">© 2025 Prof. Paulo H. Donassolo · Todos os direitos reservados</div>
+      <div class="ft-sig">Pessoas · Processos · Gestão · Resultados</div>
+    </div>
+  </div>
+</footer>
+
+<a href="https://wa.me/351999999999" class="wa" title="WhatsApp">💬</a>
+
+<script>
+// Scroll reveal
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('on') })
+}, { threshold: 0.1, rootMargin: '0px 0px -30px 0px' })
+document.querySelectorAll('.reveal').forEach(el => obs.observe(el))
+
+// Nav sombra
+const nav = document.getElementById('nav')
+window.addEventListener('scroll', () => {
+  nav.classList.toggle('scrolled', window.scrollY > 40)
+})
+
+// Fio nó
+const fioNo = document.getElementById('fio-no')
+window.addEventListener('scroll', () => {
+  const pct = window.scrollY / (document.body.scrollHeight - window.innerHeight)
+  fioNo.style.top = (62 + pct * (window.innerHeight - 124)) + 'px'
+}, { passive: true })
+
+// FAQ
+function toggleFaq(btn) {
+  const item = btn.closest('.faq-item')
+  const isOpen = item.classList.contains('open')
+  document.querySelectorAll('.faq-item.open').forEach(el => el.classList.remove('open'))
+  if (!isOpen) item.classList.add('open')
+}
+</script>
+</body>
+</html>

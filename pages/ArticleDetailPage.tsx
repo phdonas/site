@@ -1,194 +1,210 @@
-
 import React, { useState, useEffect } from 'react';
 import { DataService } from '../services/dataService';
-import { Article, Pillar } from '../types';
-import { ArrowLeft, Clock, Share2, Bookmark, AlertCircle, ChevronRight } from 'lucide-react';
+import { Article } from '../types';
+import ScrollReveal from '../components/ui/ScrollReveal';
+import { NewsletterForm } from '../components/ui/NewsletterForm';
 
 interface Props {
   articleId: string;
+  activePillar?: string;
 }
 
 const ArticleDetailPage: React.FC<Props> = ({ articleId }) => {
   const [article, setArticle] = useState<Article | null>(null);
-  const [pillar, setPillar] = useState<Pillar | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    let isMounted = true;
-    
-    // Forçar scroll para o topo ao carregar um novo artigo
+    let mounted = true;
     window.scrollTo({ top: 0, behavior: 'instant' });
 
-    const loadData = async () => {
+    const load = async () => {
       setLoading(true);
       setError(null);
       try {
         const data = await DataService.getArticleById(articleId);
-        
-        if (!isMounted) return;
-        
+        if (!mounted) return;
         if (data) {
           setArticle(data);
-          const pData = await DataService.getPillarById(data.pillarIds?.[0] || 'prof-paulo');
-          if (pData) setPillar(pData);
+          document.title = data.seoTitle || `${data.title} | Prof. Paulo H. Donassolo`;
+          const metaDesc = document.querySelector('meta[name="description"]');
+          const content = data.seoDescription || data.excerpt;
+          if (metaDesc) metaDesc.setAttribute('content', content);
+          else {
+            const m = document.createElement('meta');
+            m.name = 'description'; m.content = content;
+            document.head.appendChild(m);
+          }
         } else {
-          setError("Artigo não encontrado ou erro na conexão com o WordPress.");
+          setError('Artigo não encontrado.');
         }
-      } catch (err) {
-        console.error("Erro ao carregar artigo:", err);
-        setError("Não foi possível carregar o conteúdo. Verifique sua conexão.");
+      } catch {
+        if (mounted) setError('Não foi possível carregar o artigo. Verifique sua conexão.');
       } finally {
-        if (isMounted) setLoading(false);
+        if (mounted) setLoading(false);
       }
     };
 
-    loadData();
-    return () => { isMounted = false; };
+    load();
+    return () => { mounted = false; };
   }, [articleId]);
-
-  useEffect(() => {
-    if (article) {
-      document.title = article.seoTitle || `${article.title} | PH Donassolo`;
-      
-      const metaDesc = document.querySelector('meta[name="description"]');
-      if (metaDesc) {
-        metaDesc.setAttribute("content", article.seoDescription || article.excerpt);
-      } else {
-        const meta = document.createElement('meta');
-        meta.name = "description";
-        meta.content = article.seoDescription || article.excerpt;
-        document.head.appendChild(meta);
-      }
-    }
-  }, [article]);
 
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-[#fbfbfd]">
-        <div className="w-10 h-10 border-2 border-gray-200 border-t-blue-600 rounded-full animate-spin mb-4"></div>
-        <p className="text-gray-400 text-sm font-medium tracking-tight animate-pulse">Carregando artigo...</p>
+      <div style={{ minHeight: '100vh', background: 'var(--cream)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ width: 40, height: 40, border: '2px solid var(--rule)', borderTopColor: 'var(--gold)', borderRadius: '50%', margin: '0 auto 1rem', animation: 'spin 1s linear infinite' }} />
+          <p style={{ fontFamily: 'var(--fm)', fontSize: '.5rem', letterSpacing: '.18em', color: 'var(--ink-3)', textTransform: 'uppercase' }}>
+            Carregando
+          </p>
+        </div>
+        <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
       </div>
     );
   }
 
   if (error || !article) {
     return (
-      <main className="pt-32 min-h-screen bg-white flex flex-col items-center justify-center text-center px-6">
-        <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mb-6">
-          <AlertCircle size={32} />
-        </div>
-        <h1 className="text-4xl font-bold mb-4 tracking-tight">Ops! Algo deu errado.</h1>
-        <p className="text-gray-500 mb-8 max-w-md leading-relaxed">{error || "Não conseguimos localizar este conteúdo no momento."}</p>
-        <div className="flex flex-col sm:flex-row gap-4">
-          <button onClick={() => window.location.reload()} className="bg-black text-white px-10 py-3 rounded-full font-bold hover:bg-gray-800 transition-all">Tentar Novamente</button>
-          <a href="#/artigos" className="bg-gray-100 px-10 py-3 rounded-full font-bold hover:bg-gray-200 transition-all">Explorar outros artigos</a>
+      <main style={{ minHeight: '100vh', background: 'var(--cream)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '8rem 5vw', textAlign: 'center' }}>
+        <div style={{ maxWidth: 480 }}>
+          <h1 style={{ fontFamily: 'var(--fd)', fontSize: '2rem', fontWeight: 700, color: 'var(--ink)', marginBottom: '1rem' }}>
+            Artigo não encontrado.
+          </h1>
+          <p style={{ fontSize: '.9rem', color: 'var(--ink-3)', lineHeight: 1.75, marginBottom: '2rem' }}>
+            {error || 'Não conseguimos localizar este conteúdo.'}
+          </p>
+          <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+            <button onClick={() => window.location.reload()} className="btn-navy">Tentar novamente</button>
+            <a href="#/conteudo" className="btn-ghost-ink">Ver todos os artigos →</a>
+          </div>
         </div>
       </main>
     );
   }
 
   return (
-    <main className="bg-white min-h-screen pb-32">
-      {/* Breadcrumb e Navegação Superior */}
-      <nav className="fixed top-12 left-0 right-0 z-40 apple-blur border-b border-gray-100 py-3 px-6 hidden md:block">
-        <div className="max-w-4xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-2 text-[11px] font-bold text-gray-400 uppercase tracking-widest">
-            <a href="#/artigos" className="hover:text-black transition-colors">Artigos</a>
-            <ChevronRight size={12} />
-            <span className="text-black truncate max-w-[300px]">{article.title}</span>
-          </div>
-          <div className="flex items-center gap-4">
-             <button className="text-blue-600 hover:text-blue-700 font-bold text-xs">Compartilhar</button>
-          </div>
-        </div>
-      </nav>
-
-      <header className="pt-32 px-6 max-w-4xl mx-auto">
-        <div className="flex flex-col items-center text-center mb-12">
-          <div className="flex items-center gap-3 mb-6">
-            <span 
-              className="px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-[0.2em] text-white shadow-sm"
-              style={{ backgroundColor: pillar?.accentColor || '#0066cc' }}
+    <main style={{ background: 'var(--cream)' }}>
+      {/* Header */}
+      <header style={{ paddingTop: '8rem', paddingBottom: '4rem', background: 'var(--cream)' }}>
+        <div style={{ maxWidth: 760, margin: '0 auto', padding: '0 5vw' }}>
+          <ScrollReveal>
+            <a href="#/conteudo" style={{
+              fontFamily: 'var(--fm)', fontSize: '.5rem', letterSpacing: '.14em', textTransform: 'uppercase',
+              color: 'var(--ink-3)', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '.5rem',
+              marginBottom: '2.5rem',
+            }}
+              onMouseEnter={e => (e.currentTarget.style.color = 'var(--gold)')}
+              onMouseLeave={e => (e.currentTarget.style.color = 'var(--ink-3)')}
             >
-              {article.category}
-            </span>
-          </div>
-          <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-8 leading-[1.1] text-[#1d1d1f]">
-            {article.title}
-          </h1>
-          <div className="flex flex-wrap items-center justify-center gap-6 text-sm font-medium text-gray-400">
-            <div className="flex items-center gap-2">
-              <Clock size={16} />
-              <span>{new Date(article.date).toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
-            </div>
-            <div className="flex items-center gap-2">
-               <div className="w-2 h-2 rounded-full" style={{ backgroundColor: pillar?.accentColor || '#ccc' }}></div>
-               <span>Pilar: {pillar?.title}</span>
-            </div>
-          </div>
-        </div>
+              ← Todos os artigos
+            </a>
 
-        {/* Imagem de Capa Apple-Style */}
-        <div className="aspect-[16/9] md:aspect-[21/9] rounded-[40px] overflow-hidden shadow-2xl mb-16 bg-gray-50 border border-gray-100">
-          <img 
-            src={article.imageUrl} 
-            alt={article.title} 
-            className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-[2s]" 
-          />
+            {article.category && (
+              <div className="eyebrow" style={{ marginBottom: '1.2rem' }}>{article.category}</div>
+            )}
+
+            <h1 style={{
+              fontFamily: 'var(--fd)', fontSize: 'clamp(2rem, 4vw, 3.2rem)', fontWeight: 700,
+              lineHeight: 1.15, color: 'var(--ink)', letterSpacing: '-.02em', marginBottom: '1.5rem',
+            }}>
+              {article.title}
+            </h1>
+
+            <div style={{ display: 'flex', gap: '2rem', alignItems: 'center', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '.8rem' }}>
+                <div style={{
+                  width: 36, height: 36, background: 'var(--navy)', borderRadius: '50%',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>
+                  <span style={{ fontFamily: 'var(--fm)', fontSize: '.42rem', color: 'rgba(243,239,230,.6)', letterSpacing: '.06em' }}>PHD</span>
+                </div>
+                <div>
+                  <div style={{ fontFamily: 'var(--fd)', fontSize: '.9rem', fontWeight: 700, color: 'var(--ink)' }}>
+                    Prof. Paulo H. Donassolo
+                  </div>
+                  {article.date && (
+                    <div style={{ fontFamily: 'var(--fm)', fontSize: '.48rem', letterSpacing: '.1em', color: 'var(--ink-3)' }}>
+                      {new Date(article.date).toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' })}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </ScrollReveal>
         </div>
       </header>
 
-      <article className="max-w-3xl mx-auto px-6">
-        <div className="flex items-center justify-between mb-16 py-8 border-y border-gray-100">
-          <div className="flex items-center gap-4">
-            <div className="w-10 h-10 rounded-full bg-gray-900 flex items-center justify-center font-bold text-white text-xs">PD</div>
-            <div>
-              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none mb-1">Escrito por</p>
-              <p className="text-sm font-bold text-[#1d1d1f]">Paulo Donassolo</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-4 text-gray-400">
-            <button className="p-2 hover:bg-gray-50 rounded-full transition-colors" title="Compartilhar"><Share2 size={20} /></button>
-            <button className="p-2 hover:bg-gray-50 rounded-full transition-colors" title="Salvar"><Bookmark size={20} /></button>
+      {/* Cover image */}
+      {(article.imageUrl || (article as any).coverImage) && (
+        <div style={{ maxWidth: 1240, margin: '0 auto', padding: '0 5vw', marginBottom: '4rem' }}>
+          <div style={{ aspectRatio: '16/9', overflow: 'hidden', background: 'var(--navy)' }}>
+            <img
+              src={(article as any).coverImage || article.imageUrl}
+              alt={article.title}
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            />
           </div>
         </div>
-        
-        {/* Renderização do Conteúdo WordPress */}
-        <div 
-          className="wp-content-render prose prose-lg md:prose-xl prose-slate max-w-none text-[#1d1d1f]" 
-          dangerouslySetInnerHTML={{ __html: article.content }} 
+      )}
+
+      {/* Content */}
+      <article style={{ maxWidth: 760, margin: '0 auto', padding: '0 5vw 6rem' }}>
+        <div
+          className="article-content"
+          dangerouslySetInnerHTML={{ __html: article.content }}
         />
-        
-        {/* Tags de SEO */}
+
         {article.tags && article.tags.length > 0 && (
-          <div className="mt-12 flex flex-wrap gap-2">
+          <div style={{ marginTop: '3rem', display: 'flex', gap: '.5rem', flexWrap: 'wrap' }}>
             {article.tags.map(tag => (
-              <span key={tag} className="px-3 py-1 bg-gray-100 text-gray-600 text-xs font-bold rounded-full uppercase tracking-wider">{tag}</span>
+              <span key={tag} style={{
+                fontFamily: 'var(--fm)', fontSize: '.45rem', letterSpacing: '.12em', textTransform: 'uppercase',
+                color: 'var(--ink-3)', border: '1px solid var(--rule)', padding: '.3rem .7rem',
+              }}>
+                {tag}
+              </span>
             ))}
           </div>
         )}
-        
-        {/* Rodapé do Artigo */}
-        <footer className="mt-24 border-t border-gray-100 pt-16">
-          <div className="bg-[#f5f5f7] rounded-[48px] p-10 md:p-16 text-center">
-            <h3 className="text-3xl font-bold mb-4 tracking-tight">O que vem a seguir?</h3>
-            <p className="text-gray-500 mb-10 max-w-md mx-auto font-medium">Fique por dentro das novidades, insights e novos lançamentos do Prof. Paulo diretamente no seu e-mail.</p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <a href="#/contato" className="bg-blue-600 text-white px-10 py-4 rounded-full font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/20">Quero saber mais</a>
-              <a href="#/artigos" className="bg-white text-black px-10 py-4 rounded-full font-bold hover:bg-gray-100 transition-all border border-gray-200">Ver mais artigos</a>
-            </div>
-          </div>
-        </footer>
       </article>
 
-      {/* Botão Flutuante Voltar (Mobile) */}
-      <a 
-        href="#/artigos" 
-        className="md:hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-black/80 backdrop-blur-xl text-white px-6 py-3 rounded-full font-bold flex items-center gap-2 shadow-2xl border border-white/10"
-      >
-        <ArrowLeft size={18} /> Voltar ao Blog
-      </a>
+      {/* Newsletter CTA */}
+      <section style={{ background: 'var(--navy)', padding: '6rem 0' }}>
+        <div style={{ maxWidth: 760, margin: '0 auto', padding: '0 5vw', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4rem', alignItems: 'center' }}>
+          <ScrollReveal>
+            <div className="eyebrow" style={{ color: 'rgba(243,239,230,.35)', borderColor: 'var(--gold)', marginBottom: '1rem' }}>
+              Newsletter
+            </div>
+            <h2 style={{ fontFamily: 'var(--fd)', fontSize: '1.6rem', fontWeight: 700, color: 'rgba(243,239,230,.9)', marginBottom: '1rem', lineHeight: 1.3 }}>
+              Receba o próximo artigo em primeira mão.
+            </h2>
+            <p style={{ fontSize: '.85rem', color: 'rgba(243,239,230,.4)', lineHeight: 1.7 }}>
+              Uma ideia aplicável por semana. Sem spam.
+            </p>
+          </ScrollReveal>
+          <ScrollReveal delay={2}>
+            <NewsletterForm />
+          </ScrollReveal>
+        </div>
+      </section>
+
+      {/* Back */}
+      <div style={{ textAlign: 'center', padding: '3rem 5vw', background: 'var(--cream)' }}>
+        <a href="#/conteudo" className="btn-ghost-ink">← Ver todos os artigos</a>
+      </div>
+
+      <style>{`
+        .article-content { font-size: .95rem; line-height: 1.85; color: var(--ink-2); }
+        .article-content h2 { font-family: var(--fd); font-size: 1.5rem; font-weight: 700; color: var(--ink); margin: 2.5rem 0 1rem; line-height: 1.3; }
+        .article-content h3 { font-family: var(--fd); font-size: 1.2rem; font-weight: 700; color: var(--ink); margin: 2rem 0 .8rem; }
+        .article-content p { margin-bottom: 1.4rem; }
+        .article-content ul, .article-content ol { padding-left: 1.5rem; margin-bottom: 1.4rem; }
+        .article-content li { margin-bottom: .5rem; }
+        .article-content blockquote { border-left: 3px solid var(--gold); padding-left: 1.2rem; margin: 2rem 0; font-family: var(--fd); font-style: italic; font-size: 1.1rem; color: var(--navy); }
+        .article-content a { color: var(--gold); text-decoration: underline; }
+        .article-content img { max-width: 100%; height: auto; margin: 2rem 0; }
+        .article-content strong { color: var(--ink); font-weight: 700; }
+      `}</style>
     </main>
   );
 };
