@@ -564,6 +564,14 @@ export const PAGE_DEFAULTS: Record<PageId, Record<string, any>> = {
       link_texto: 'Ver cursos na Udemy',
       link_url: '',
     },
+    card_espm: {
+      visivel: true,
+      marker: 'MBA e Pós-graduação',
+      titulo: 'Cursos na ESPM',
+      descricao: 'Disciplinas de Vendas, Negociação e Gestão Comercial em programas de MBA e pós-graduação.',
+      link_texto: 'Ver cursos na ESPM',
+      link_url: '',
+    },
     card_amazon: {
       visivel: true,
       marker: 'Publicações',

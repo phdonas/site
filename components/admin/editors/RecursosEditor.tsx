@@ -110,9 +110,40 @@ export const RecursosEditor: React.FC<Props> = ({ data, onChange, onSave }) => {
         </G2>
       </SectionBlock>
 
-      {/* Card 03 — Amazon */}
+      {/* Card 03 — ESPM */}
       <SectionBlock
-        title="Card 03 — Amazon"
+        title="Card 03 — ESPM"
+        visible={vis('card_espm')}
+        onToggle={() => s('card_espm', 'visivel', !vis('card_espm'))}
+        onSave={() => save('card_espm', data.card_espm)}
+        saving={saving === 'card_espm'}
+      >
+        <G2 mb="1rem">
+          <Field label="Marker">
+            <TI value={v('card_espm', 'marker')} onChange={val => s('card_espm', 'marker', val)} placeholder="MBA e Pós-graduação" />
+          </Field>
+          <Field label="Título">
+            <TI value={v('card_espm', 'titulo')} onChange={val => s('card_espm', 'titulo', val)} placeholder="Cursos na ESPM" />
+          </Field>
+        </G2>
+        <div style={{ marginBottom: '1rem' }}>
+          <Field label="Descrição">
+            <TA value={v('card_espm', 'descricao')} onChange={val => s('card_espm', 'descricao', val)} rows={2} />
+          </Field>
+        </div>
+        <G2 mb="0">
+          <Field label="Link — texto">
+            <TI value={v('card_espm', 'link_texto')} onChange={val => s('card_espm', 'link_texto', val)} placeholder="Ver cursos na ESPM" />
+          </Field>
+          <Field label="Link — URL">
+            <TI value={v('card_espm', 'link_url')} onChange={val => s('card_espm', 'link_url', val)} placeholder="https://espm.br/..." />
+          </Field>
+        </G2>
+      </SectionBlock>
+
+      {/* Card 04 — Amazon */}
+      <SectionBlock
+        title="Card 04 — Amazon (Livros)"
         visible={vis('card_amazon')}
         onToggle={() => s('card_amazon', 'visivel', !vis('card_amazon'))}
         onSave={() => save('card_amazon', data.card_amazon)}
