@@ -24,11 +24,13 @@ jobs:
       run: npm ci --legacy-peer-deps
 
     - name: 🚀 Build do Projeto
-      run: npm run build  # test: verificar VITE_RESEND_API_KEY
+      run: npm run build
       env:
         VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
         VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
-        VITE_RESEND_API_KEY: ${{ secrets.VITE_RESEND_API_KEY }}
+        VITE_EMAILJS_SERVICE_ID: ${{ secrets.VITE_EMAILJS_SERVICE_ID }}
+        VITE_EMAILJS_TEMPLATE_ID: ${{ secrets.VITE_EMAILJS_TEMPLATE_ID }}
+        VITE_EMAILJS_PUBLIC_KEY: ${{ secrets.VITE_EMAILJS_PUBLIC_KEY }}
 
     - name: 📂 Enviar via FTP
       uses: SamKirkland/FTP-Deploy-Action@v4.3.4

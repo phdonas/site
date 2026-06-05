@@ -31,7 +31,7 @@ const CmsLPView: React.FC<{ lp: any; slug: string }> = ({ lp, slug }) => {
         lgpd_data: serverTimestamp(),
         createdAt: serverTimestamp(),
       });
-      sendNotificationEmail({ tipo: 'lp', nome: name.trim(), email: email.trim(), slug });
+      sendNotificationEmail({ tipo: 'lp', nome: name.trim(), email: email.trim(), origem: slug });
       setSubmitted(true);
     } catch {
       alert('Erro ao enviar. Tente novamente.');
@@ -302,8 +302,7 @@ const DynamicLPPage = () => {
                 nome: name.trim(),
                 email: email.trim(),
                 whatsapp: fullWhatsapp,
-                origem: origem || 'direto',
-                slug: lp.materialId || lp.pageTitle,
+                origem: origem || lp.materialId || lp.pageTitle || 'direto',
             });
 
             console.log("Lead salvo com sucesso no Firebase!");
