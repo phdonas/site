@@ -9,16 +9,27 @@
 // - Nunca usar service_role key — apenas anon key
 // ============================================================
 
-import { createClient } from '@supabase/supabase-js'
+import { createClient, SupabaseClient } from '@supabase/supabase-js'
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+// Cliente lazy — só instanciado quando a primeira query for chamada.
+// Evita erro fatal na inicialização do bundle quando as variáveis
+// de ambiente não estão disponíveis (ex.: build sem .env configurado).
+let _client: SupabaseClient | null = null
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.error('Supabase: variáveis de ambiente não configuradas.')
+function getClient(): SupabaseClient | null {
+  if (_client) return _client
+
+  const url = import.meta.env.VITE_SUPABASE_URL
+  const key = import.meta.env.VITE_SUPABASE_ANON_KEY
+
+  if (!url || !key) {
+    console.warn('Supabase: variáveis de ambiente não configuradas. Conteúdo dinâmico indisponível.')
+    return null
+  }
+
+  _client = createClient(url, key)
+  return _client
 }
-
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
 // ============================================================
 // TIPOS — baseados no schema real do Supabase
@@ -46,37 +57,36 @@ export interface Curso {
   titulo: string
   slug: string
   descricao: string | null
-  thumb_url: string | null       // campo real no schema
-  status: string                 // 'publicado' | 'rascunho'
-  visivel_no_site: boolean       // adicionado via migration
-  tipo: string                   // 'lms' | 'udemy' | 'espm' — adicionado via migration
+  thumb_url: string | null
+  status: string
+  visivel_no_site: boolean
+  tipo: string
   is_gratis: boolean | null
   is_free: boolean | null
-  nivel: string | null           // adicionado via migration
-  categoria: string | null       // adicionado via migration
-  ordem_vitrine: number          // adicionado via migration
+  nivel: string | null
+  categoria: string | null
+  ordem_vitrine: number
   destaque_vitrine: boolean | null
   duracao_total_minutos: number | null
-  preco_vitrine_brl: number | null    // adicionado via migration
-  preco_original_brl: number | null   // adicionado via migration
-  url_checkout: string | null    // adicionado via migration
-  objetivos: string | null       // texto livre — usado como subtítulo
+  preco_vitrine_brl: number | null
+  preco_original_brl: number | null
+  url_checkout: string | null
+  objetivos: string | null
   publico_alvo: string | null
   ementa_resumida: string | null
   pre_requisitos: string | null
   video_vendas_url: string | null
   garantia_dias: number | null
   faq: Array<{ pergunta: string; resposta: string }> | null
-  o_que_aprender: string[] | null     // adicionado via migration
-  para_quem: string[] | null          // adicionado via migration
-  nao_para_quem: string[] | null      // adicionado via migration
-  inclui: string[] | null             // adicionado via migration
+  o_que_aprender: string[] | null
+  para_quem: string[] | null
+  nao_para_quem: string[] | null
+  inclui: string[] | null
   avaliacoes_count: number
   avaliacoes_media: number
   pilar_id: string | null
-  pilar?: Pilar                       // join opcional
-  modulos?: Modulo[]                  // join opcional
-  // Preço via view vw_cursos_precos_base (join opcional)
+  pilar?: Pilar
+  modulos?: Modulo[]
   menor_preco?: number | null
 }
 
@@ -86,14 +96,14 @@ export interface Ferramenta {
   slug: string
   descricao: string | null
   icone: string | null
-  status: string                 // 'ativo' | 'inativo'
-  visivel_no_site: boolean       // adicionado via migration
+  status: string
+  visivel_no_site: boolean
   url_externa: string | null
   capa_url: string | null
   label_botao: string | null
-  tipo_entrega: string           // 'html' | 'externo' | 'download' — adicionado via migration
-  url_entrega: string | null     // adicionado via migration
-  categoria: string | null       // adicionado via migration
+  tipo_entrega: string
+  url_entrega: string | null
+  categoria: string | null
   ordem_vitrine: number
 }
 
@@ -104,9 +114,9 @@ export interface Recurso {
   thumb_url: string | null
   arquivo_url: string
   tipo: string | null
-  abertura_tipo: string | null   // como abrir: 'nova_aba' | 'download' | 'iframe'
+  abertura_tipo: string | null
   status: string | null
-  visivel_no_site: boolean       // adicionado via migration
+  visivel_no_site: boolean
   destaque_vitrine: boolean | null
   objetivo: string | null
   quando_usar: string | null
@@ -120,16 +130,15 @@ export interface Recurso {
 
 export const SupabaseService = {
 
-  /**
-   * Lista todos os cursos visíveis no site
-   * SEMPRE filtra por visivel_no_site = true
-   */
   getCursos: async (filtros?: {
     tipo?: 'lms' | 'udemy' | 'espm'
     categoria?: string
     is_gratis?: boolean
   }): Promise<Curso[]> => {
-    let query = supabase
+    const client = getClient()
+    if (!client) return []
+
+    let query = client
       .from('cursos')
       .select(`
         id, titulo, slug, descricao, thumb_url, status,
@@ -143,33 +152,20 @@ export const SupabaseService = {
       .eq('status', 'publicado')
       .order('ordem_vitrine', { ascending: true })
 
-    if (filtros?.tipo) {
-      query = query.eq('tipo', filtros.tipo)
-    }
-    if (filtros?.categoria) {
-      query = query.eq('categoria', filtros.categoria)
-    }
-    if (filtros?.is_gratis !== undefined) {
-      query = query.eq('is_gratis', filtros.is_gratis)
-    }
+    if (filtros?.tipo)     query = query.eq('tipo', filtros.tipo)
+    if (filtros?.categoria) query = query.eq('categoria', filtros.categoria)
+    if (filtros?.is_gratis !== undefined) query = query.eq('is_gratis', filtros.is_gratis)
 
     const { data, error } = await query
-
-    if (error) {
-      console.error('Supabase getCursos error:', error)
-      return []
-    }
-
+    if (error) { console.error('Supabase getCursos error:', error); return [] }
     return (data as Curso[]) || []
   },
 
-  /**
-   * Busca um curso por ID para a página de venda
-   * Inclui módulos para a ementa
-   * SEMPRE verifica visivel_no_site = true
-   */
   getCursoById: async (id: string): Promise<Curso | null> => {
-    const { data, error } = await supabase
+    const client = getClient()
+    if (!client) return null
+
+    const { data, error } = await client
       .from('cursos')
       .select(`
         id, titulo, slug, descricao, thumb_url, status,
@@ -186,29 +182,22 @@ export const SupabaseService = {
       .eq('status', 'publicado')
       .single()
 
-    if (error || !data) {
-      console.error('Supabase getCursoById error:', error)
-      return null
-    }
+    if (error || !data) { console.error('Supabase getCursoById error:', error); return null }
 
-    // Buscar módulos do curso
-    const { data: modulosData } = await supabase
+    const { data: modulosData } = await client
       .from('modulos')
       .select('id, titulo, descricao, ordem')
       .eq('curso_id', id)
       .order('ordem', { ascending: true })
 
-    return {
-      ...(data as Curso),
-      modulos: (modulosData as Modulo[]) || []
-    }
+    return { ...(data as Curso), modulos: (modulosData as Modulo[]) || [] }
   },
 
-  /**
-   * Busca um curso por slug
-   */
   getCursoBySlug: async (slug: string): Promise<Curso | null> => {
-    const { data, error } = await supabase
+    const client = getClient()
+    if (!client) return null
+
+    const { data, error } = await client
       .from('cursos')
       .select(`
         id, titulo, slug, descricao, thumb_url, status,
@@ -227,54 +216,40 @@ export const SupabaseService = {
 
     if (error || !data) return null
 
-    const { data: modulosData } = await supabase
+    const { data: modulosData } = await client
       .from('modulos')
       .select('id, titulo, descricao, ordem')
       .eq('curso_id', (data as Curso).id)
       .order('ordem', { ascending: true })
 
-    return {
-      ...(data as Curso),
-      modulos: (modulosData as Modulo[]) || []
-    }
+    return { ...(data as Curso), modulos: (modulosData as Modulo[]) || [] }
   },
 
-  /**
-   * Contadores para o hero da página de cursos
-   * Conta apenas cursos visíveis no site
-   */
-  getCursosStats: async (): Promise<{
-    total: number
-    gratuitos: number
-  }> => {
-    const { count: total } = await supabase
+  getCursosStats: async (): Promise<{ total: number; gratuitos: number }> => {
+    const client = getClient()
+    if (!client) return { total: 0, gratuitos: 0 }
+
+    const { count: total } = await client
       .from('cursos')
       .select('id', { count: 'exact', head: true })
       .eq('visivel_no_site', true)
       .eq('status', 'publicado')
 
-    const { count: gratuitos } = await supabase
+    const { count: gratuitos } = await client
       .from('cursos')
       .select('id', { count: 'exact', head: true })
       .eq('visivel_no_site', true)
       .eq('status', 'publicado')
       .eq('is_gratis', true)
 
-    return {
-      total: total || 0,
-      gratuitos: gratuitos || 0
-    }
+    return { total: total || 0, gratuitos: gratuitos || 0 }
   },
 
-  /**
-   * Busca o preço de um curso via view vw_cursos_precos_base
-   * Retorna menor preço disponível nos planos
-   */
-  getCursoPreco: async (cursoId: string): Promise<{
-    menor_preco: number | null
-    tem_destaque: boolean
-  } | null> => {
-    const { data, error } = await supabase
+  getCursoPreco: async (cursoId: string): Promise<{ menor_preco: number | null; tem_destaque: boolean } | null> => {
+    const client = getClient()
+    if (!client) return null
+
+    const { data, error } = await client
       .from('vw_cursos_precos_base')
       .select('menor_preco, tem_destaque')
       .eq('curso_id', cursoId)
@@ -288,20 +263,16 @@ export const SupabaseService = {
   // PILARES
   // ============================================================
 
-  /**
-   * Lista todos os pilares (usados como filtro no conteúdo)
-   */
   getPilares: async (): Promise<Pilar[]> => {
-    const { data, error } = await supabase
+    const client = getClient()
+    if (!client) return []
+
+    const { data, error } = await client
       .from('pilares')
       .select('id, nome, slug, cor_badge, subtitulo, icone, ordem')
       .order('ordem', { ascending: true })
 
-    if (error) {
-      console.error('Supabase getPilares error:', error)
-      return []
-    }
-
+    if (error) { console.error('Supabase getPilares error:', error); return [] }
     return (data as Pilar[]) || []
   },
 
@@ -309,12 +280,11 @@ export const SupabaseService = {
   // FERRAMENTAS
   // ============================================================
 
-  /**
-   * Lista ferramentas visíveis no site
-   * SEMPRE filtra por visivel_no_site = true
-   */
   getFerramentas: async (categoria?: string): Promise<Ferramenta[]> => {
-    let query = supabase
+    const client = getClient()
+    if (!client) return []
+
+    let query = client
       .from('ferramentas_saas')
       .select(`
         id, nome, slug, descricao, icone, status,
@@ -325,26 +295,18 @@ export const SupabaseService = {
       .eq('status', 'ativo')
       .order('ordem_vitrine', { ascending: true })
 
-    if (categoria) {
-      query = query.eq('categoria', categoria)
-    }
+    if (categoria) query = query.eq('categoria', categoria)
 
     const { data, error } = await query
-
-    if (error) {
-      console.error('Supabase getFerramentas error:', error)
-      return []
-    }
-
+    if (error) { console.error('Supabase getFerramentas error:', error); return [] }
     return (data as Ferramenta[]) || []
   },
 
-  /**
-   * Busca uma ferramenta por ID (para modal de entrega pós-lead)
-   * SEMPRE verifica visivel_no_site = true
-   */
   getFerramentaById: async (id: string): Promise<Ferramenta | null> => {
-    const { data, error } = await supabase
+    const client = getClient()
+    if (!client) return null
+
+    const { data, error } = await client
       .from('ferramentas_saas')
       .select('*')
       .eq('id', id)
@@ -360,12 +322,11 @@ export const SupabaseService = {
   // RECURSOS
   // ============================================================
 
-  /**
-   * Lista recursos visíveis no site
-   * SEMPRE filtra por visivel_no_site = true
-   */
   getRecursos: async (destaque?: boolean): Promise<Recurso[]> => {
-    let query = supabase
+    const client = getClient()
+    if (!client) return []
+
+    let query = client
       .from('recursos')
       .select(`
         id, titulo, descricao, thumb_url, arquivo_url,
@@ -376,17 +337,10 @@ export const SupabaseService = {
       .eq('visivel_no_site', true)
       .eq('status', 'ativo')
 
-    if (destaque !== undefined) {
-      query = query.eq('destaque_vitrine', destaque)
-    }
+    if (destaque !== undefined) query = query.eq('destaque_vitrine', destaque)
 
     const { data, error } = await query
-
-    if (error) {
-      console.error('Supabase getRecursos error:', error)
-      return []
-    }
-
+    if (error) { console.error('Supabase getRecursos error:', error); return [] }
     return (data as Recurso[]) || []
   },
 
