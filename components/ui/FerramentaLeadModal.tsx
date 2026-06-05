@@ -42,10 +42,8 @@ export const FerramentaLeadModal: React.FC<Props> = ({ ferramenta, onClose }) =>
         a.href = url;
         a.download = '';
         a.click();
-      } else if (ferramenta.tipo_entrega === 'html') {
-        window.location.href = url;
       } else {
-        // 'externo' (default)
+        // 'externo', 'html', ou qualquer outro — sempre abre em nova aba
         window.open(url, '_blank', 'noopener,noreferrer');
       }
     } catch {

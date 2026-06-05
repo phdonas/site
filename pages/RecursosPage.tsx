@@ -194,10 +194,10 @@ const RecursosPage: React.FC = () => {
                 {recursos.map((r, i) => (
                   <ScrollReveal key={r.id} delay={((i % 2) + 1) as 1 | 2}>
                     <a
-                      href={r.arquivo_url}
-                      target={r.abertura_tipo === 'download' ? undefined : '_blank'}
+                      href={r.url_entrega || r.arquivo_url}
+                      target={r.tipo_entrega === 'download' ? undefined : '_blank'}
                       rel="noopener noreferrer"
-                      download={r.abertura_tipo === 'download' || undefined}
+                      download={r.tipo_entrega === 'download' || undefined}
                       style={{ display: 'flex', gap: '1.2rem', alignItems: 'flex-start', textDecoration: 'none', padding: '1.5rem', background: 'rgba(243,239,230,.03)', border: '1px solid rgba(243,239,230,.06)' }}
                     >
                       <div style={{ flex: 1 }}>
