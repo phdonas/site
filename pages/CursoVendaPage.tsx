@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import ScrollReveal from '../components/ui/ScrollReveal';
 import SupabaseService, { Curso } from '../services/supabaseService';
+import { CheckoutModal } from '../components/CheckoutModal';
 
 interface Props { slug: string }
 
@@ -8,6 +9,7 @@ const CursoVendaPage: React.FC<Props> = ({ slug }) => {
   const [curso, setCurso] = useState<Curso | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
 
   useEffect(() => {
     SupabaseService.getCursoBySlug(slug).then(data => {
@@ -133,13 +135,25 @@ const CursoVendaPage: React.FC<Props> = ({ slug }) => {
               </div>
 
               {curso.tipo === 'lms' ? (
-                <a
-                  href={curso.url_checkout || '#/fale-comigo'}
-                  className="btn-navy"
-                  style={{ display: 'block', textAlign: 'center', marginBottom: '1rem' }}
-                >
-                  {curso.url_checkout ? (isGratis ? 'Acessar grátis' : 'Comprar agora') : 'Em breve'}
-                </a>
+                isGratis ? (
+                  <a
+                    href="https://aluno.phdonassolo.com"
+                    target="_blank" rel="noopener noreferrer"
+                    className="btn-navy"
+                    style={{ display: 'block', textAlign: 'center', marginBottom: '1rem' }}
+                  >
+                    Acessar grátis
+                  </a>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setModalOpen(true)}
+                    className="btn-navy"
+                    style={{ display: 'block', width: '100%', textAlign: 'center', marginBottom: '1rem', cursor: 'pointer', border: 'none' }}
+                  >
+                    Comprar agora
+                  </button>
+                )
               ) : (
                 <a
                   href={curso.url_checkout || '#/cursos'}
@@ -267,6 +281,13 @@ const CursoVendaPage: React.FC<Props> = ({ slug }) => {
         </section>
       )}
 
+      <CheckoutModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        cursoId={curso.id}
+        cursoTitulo={curso.titulo}
+      />
+
       {/* CTA Final */}
       <section style={{ background: 'var(--navy)', padding: '6rem 0', textAlign: 'center', borderTop: '1px solid rgba(243,239,230,.07)' }}>
         <div style={{ maxWidth: 520, margin: '0 auto', padding: '0 5vw' }}>
@@ -284,13 +305,25 @@ const CursoVendaPage: React.FC<Props> = ({ slug }) => {
               ) : null}
             </div>
             {curso.tipo === 'lms' ? (
-              <a
-                href={curso.url_checkout || '#/fale-comigo'}
-                className="btn-primary"
-                style={{ display: 'inline-block' }}
-              >
-                {curso.url_checkout ? (isGratis ? 'Acessar grátis' : 'Comprar agora') : 'Em breve'}
-              </a>
+              isGratis ? (
+                <a
+                  href="https://aluno.phdonassolo.com"
+                  target="_blank" rel="noopener noreferrer"
+                  className="btn-primary"
+                  style={{ display: 'inline-block' }}
+                >
+                  Acessar grátis
+                </a>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setModalOpen(true)}
+                  className="btn-primary"
+                  style={{ display: 'inline-block', cursor: 'pointer', border: 'none' }}
+                >
+                  Comprar agora
+                </button>
+              )
             ) : (
               <a
                 href={curso.url_checkout || '#/cursos'}
