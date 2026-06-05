@@ -503,13 +503,13 @@ export const PAGE_DEFAULTS: Record<PageId, Record<string, any>> = {
     hero: {
       visivel: true,
       eyebrow: 'Fale Comigo',
-      subtexto: 'Preencha o formulário abaixo e retornarei em até 48 horas úteis.',
+      subtexto: 'Preencha o formulário abaixo e retornarei em até 24 horas úteis.',
       titulo_linha1: 'Vamos conversar sobre',
       titulo_destaque: 'o seu desafio.',
     },
     formulario: {
       visivel: true,
-      mensagem_sucesso: 'Mensagem enviada com sucesso! Retornarei em até 48 horas úteis.',
+      mensagem_sucesso: 'Mensagem enviada com sucesso! Retornarei em até 24 horas úteis.',
       opcoes_assunto: ['Mentoria Comercial', 'Consultoria', 'Cursos e Formações', 'Palestra / Aula', 'Parceria', 'Outro'],
     },
     contatos: {
@@ -532,7 +532,7 @@ export const PAGE_DEFAULTS: Record<PageId, Record<string, any>> = {
     faq: {
       visivel: true,
       faq: [
-        { pergunta: 'Em quanto tempo você responde?', resposta: 'Em até 48 horas úteis por e-mail. Para urgências, o WhatsApp é mais rápido.', ordem: 1 },
+        { pergunta: 'Em quanto tempo você responde?', resposta: 'Em até 24 horas úteis por e-mail. Para urgências, o WhatsApp é mais rápido.', ordem: 1 },
         { pergunta: 'A primeira conversa é gratuita?', resposta: 'Sim. A conversa de diagnóstico inicial é sempre gratuita e sem compromisso.', ordem: 2 },
         { pergunta: 'Atende empresas fora do Brasil?', resposta: 'Sim. Atendo empresas no Brasil e em Portugal. As sessões são online.', ordem: 3 },
       ],
