@@ -3,6 +3,8 @@ import SiteNavbar from './components/SiteNavbar';
 import SiteFooter from './components/SiteFooter';
 import WhatsAppFloat from './components/WhatsAppFloat';
 import { SiteConfigProvider } from './contexts/SiteConfigContext';
+import { AuthProvider } from './contexts/AuthContext';
+import ProtectedRoute from './components/ProtectedRoute';
 import { DataService } from './services/dataService';
 import FioCondutor from './components/ui/FioCondutor';
 
@@ -84,7 +86,7 @@ const App: React.FC = () => {
       case '#/em-breve': return <EmBrevePage />;
 
       case '#/login': return <LoginPage />;
-      case '#/admin': return <AdminPage />;
+      case '#/admin': return <ProtectedRoute><AdminPage /></ProtectedRoute>;
 
       case '#/terms':
       case '#/termos': return <TermsPage />;
@@ -112,6 +114,7 @@ const App: React.FC = () => {
   const hideChromeOnPages = isAdmin || isLP;
 
   return (
+    <AuthProvider>
     <SiteConfigProvider>
       <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
         {!hideChromeOnPages && (
@@ -133,6 +136,7 @@ const App: React.FC = () => {
         )}
       </div>
     </SiteConfigProvider>
+    </AuthProvider>
   );
 };
 

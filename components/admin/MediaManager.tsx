@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { collection, getDocs, doc, setDoc, deleteDoc, updateDoc, query, orderBy } from 'firebase/firestore';
+import { collection, getDocs, doc, setDoc, deleteDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../../services/firebase';
 import {
   Edit2, Trash2, Plus, Save, X, RefreshCw, FileText, Video, Clock,
@@ -7,12 +7,67 @@ import {
 } from 'lucide-react';
 import { aS } from './adminStyles';
 import { ImageUploadField } from './ImageUploadField';
+import { invalidateArticlesCache } from '../../services/dataService';
 
 type MediaTab = 'artigos' | 'videos' | 'timeline';
 
-const TEMAS = ['Vendas', 'Gestão', 'Liderança', 'Negociação', 'Carreira'];
+// Temas and pilares match exactly what ConteudoPage filters expect
+const TEMAS = ['Gestão Comercial', 'Vendas', 'Liderança', 'Negociação', 'Carreira'];
 const PILARES = ['Prof. Paulo', 'Academia do Gás', 'Sou Consultor Imobiliário', '4050 ou Mais'];
 const CTA_TIPOS = ['mentoria', 'consultoria', 'cursos', 'conteudo', 'nenhum'];
+
+const PILAR_TO_ID: Record<string, string> = {
+  'Prof. Paulo': 'prof-paulo',
+  'Academia do Gás': 'academia-do-gas',
+  '4050 ou Mais': '4050oumais',
+  'Sou Consultor Imobiliário': 'consultoria-imobiliaria',
+};
+const PILAR_FROM_ID: Record<string, string> = {
+  'prof-paulo': 'Prof. Paulo',
+  'academia-do-gas': 'Academia do Gás',
+  '4050oumais': '4050 ou Mais',
+  'consultoria-imobiliaria': 'Sou Consultor Imobiliário',
+};
+
+// Normalize any article document to the edit form schema
+const normalizeToEdit = (item: any) => ({
+  id: item.id,
+  titulo: item.titulo || item.title || '',
+  slug: item.slug || '',
+  subtitulo: item.subtitulo || item.excerpt || '',
+  conteudo: item.conteudo || item.content || '',
+  thumbnail_url: item.thumbnail_url || item.coverImage || item.imageUrl || '',
+  thumbnail_alt: item.thumbnail_alt || item.imageAlt || '',
+  tipo: item.tipo || 'artigo',
+  tema: item.tema || item.category?.split(',')[0]?.trim() || 'Gestão Comercial',
+  pilar: item.pilar || (item.pillarIds?.[0] ? PILAR_FROM_ID[item.pillarIds[0]] : 'Prof. Paulo'),
+  data_publicacao: (item.data_publicacao || item.date || new Date().toISOString()).split('T')[0],
+  publicado: item.publicado ?? (item.publishDate !== undefined ? new Date(item.publishDate) <= new Date() : true),
+  destaque: item.destaque ?? false,
+  cta_tipo: item.cta_tipo || 'nenhum',
+  ordem: item.ordem ?? 0,
+});
+
+// Save with both old (Article) and new (artigo) field names for universal compatibility
+const normalizeToSave = (editing: any) => ({
+  ...editing,
+  // CMS fields
+  titulo: editing.titulo,
+  tema: editing.tema,
+  pilar: editing.pilar,
+  thumbnail_url: editing.thumbnail_url,
+  data_publicacao: editing.data_publicacao,
+  // Legacy Article fields (needed by public pages)
+  title: editing.titulo,
+  category: editing.tema,
+  excerpt: editing.subtitulo,
+  content: editing.conteudo,
+  imageUrl: editing.thumbnail_url,
+  coverImage: editing.thumbnail_url,
+  date: editing.data_publicacao,
+  publishDate: editing.publicado ? editing.data_publicacao : '',
+  pillarIds: [PILAR_TO_ID[editing.pilar] || 'prof-paulo'],
+});
 
 function slugify(text: string) {
   return text
@@ -33,52 +88,40 @@ const ArtigosManager: React.FC = () => {
   const [isNew, setIsNew] = useState(false);
   const [search, setSearch] = useState('');
 
-  useEffect(() => { fetch(); }, []);
+  useEffect(() => { doFetch(); }, []);
 
-  const fetch = async () => {
+  const doFetch = async () => {
     setLoading(true);
     try {
-      const q = query(collection(db, 'artigos'), orderBy('data_publicacao', 'desc'));
-      const snap = await getDocs(q);
-      setItems(snap.docs.map(d => ({ id: d.id, ...d.data() })));
-    } catch {
-      try {
-        const snap = await getDocs(collection(db, 'artigos'));
-        setItems(snap.docs.map(d => ({ id: d.id, ...d.data() })));
-      } catch (e) { console.error(e); }
-    }
+      const snap = await getDocs(collection(db, 'articles'));
+      const all = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      all.sort((a: any, b: any) =>
+        new Date(b.date || b.data_publicacao || 0).getTime() -
+        new Date(a.date || a.data_publicacao || 0).getTime()
+      );
+      setItems(all);
+    } catch (e) { console.error('Erro ao carregar artigos:', e); }
     setLoading(false);
   };
 
   const startNew = () => {
     setIsNew(true);
-    setEditing({
+    setEditing(normalizeToEdit({
       id: `artigo_${Date.now()}`,
-      titulo: '',
-      slug: '',
-      subtitulo: '',
-      conteudo: '',
-      thumbnail_url: '',
-      thumbnail_alt: '',
-      tipo: 'artigo',
-      tema: 'Vendas',
-      pilar: 'Prof. Paulo',
-      data_publicacao: new Date().toISOString().split('T')[0],
       publicado: false,
       destaque: false,
-      cta_tipo: 'nenhum',
-      ordem: 0,
-    });
+    }));
   };
 
   const handleSave = async () => {
     if (!editing) return;
     setLoading(true);
     try {
-      await setDoc(doc(db, 'artigos', editing.id), editing);
+      invalidateArticlesCache();
+      await setDoc(doc(db, 'articles', editing.id), normalizeToSave(editing));
       setEditing(null);
       setIsNew(false);
-      await fetch();
+      await doFetch();
     } catch (e) { alert('Erro ao salvar artigo.'); }
     setLoading(false);
   };
@@ -86,20 +129,23 @@ const ArtigosManager: React.FC = () => {
   const handleDelete = async (id: string) => {
     if (!window.confirm('Excluir este artigo?')) return;
     setLoading(true);
-    try { await deleteDoc(doc(db, 'artigos', id)); await fetch(); } catch (e) { alert('Erro ao excluir.'); }
+    try { await deleteDoc(doc(db, 'articles', id)); await doFetch(); } catch (e) { alert('Erro ao excluir.'); }
     setLoading(false);
   };
 
   const toggleField = async (item: any, field: string) => {
+    const newVal = !item[field];
     try {
-      await updateDoc(doc(db, 'artigos', item.id), { [field]: !item[field] });
-      setItems(prev => prev.map(i => i.id === item.id ? { ...i, [field]: !i[field] } : i));
+      await updateDoc(doc(db, 'articles', item.id), { [field]: newVal });
+      setItems(prev => prev.map(i => i.id === item.id ? { ...i, [field]: newVal } : i));
     } catch (e) { alert('Erro ao atualizar.'); }
   };
 
-  const filtered = items.filter(i =>
-    !search || i.titulo?.toLowerCase().includes(search.toLowerCase())
-  );
+  const filtered = items.filter(i => {
+    if (!search) return true;
+    const title = (i.titulo || i.title || '').toLowerCase();
+    return title.includes(search.toLowerCase());
+  });
 
   const f = (field: string, val: any) => setEditing((prev: any) => {
     const next = { ...prev, [field]: val };
@@ -228,17 +274,22 @@ const ArtigosManager: React.FC = () => {
             {filtered.map(item => (
               <tr key={item.id} style={{ borderBottom: '1px solid var(--rule)' }}>
                 <td style={aS.td}>
-                  <div style={{ fontWeight: 600, color: 'var(--ink)' }}>{item.titulo || '(sem título)'}</div>
+                  <div style={{ fontWeight: 600, color: 'var(--ink)' }}>{item.titulo || item.title || '(sem título)'}</div>
                   {item.slug && <div style={{ fontFamily: 'var(--fm)', fontSize: '.44rem', letterSpacing: '.06em', color: 'var(--ink-3)', marginTop: '.2rem' }}>{item.slug}</div>}
                 </td>
-                <td style={aS.td}>{item.tema}</td>
-                <td style={aS.td}>{item.pilar}</td>
-                <td style={aS.td}>{item.data_publicacao?.split('T')[0] || '—'}</td>
+                <td style={aS.td}>{item.tema || item.category || '—'}</td>
+                <td style={aS.td}>{item.pilar || (item.pillarIds?.[0] ? PILAR_FROM_ID[item.pillarIds[0]] : '—')}</td>
+                <td style={aS.td}>{(item.data_publicacao || item.date || '').split('T')[0] || '—'}</td>
                 <td style={aS.td}>
-                  <button style={item.publicado ? aS.toggleActive : aS.toggleInactive} onClick={() => toggleField(item, 'publicado')}>
-                    {item.publicado ? <Eye size={10} /> : <EyeOff size={10} />}
-                    {item.publicado ? 'Sim' : 'Não'}
-                  </button>
+                  {(() => {
+                    const pub = item.publicado ?? (item.publishDate ? new Date(item.publishDate) <= new Date() : true);
+                    return (
+                      <button style={pub ? aS.toggleActive : aS.toggleInactive} onClick={() => toggleField(item, 'publicado')}>
+                        {pub ? <Eye size={10} /> : <EyeOff size={10} />}
+                        {pub ? 'Sim' : 'Não'}
+                      </button>
+                    );
+                  })()}
                 </td>
                 <td style={aS.td}>
                   <button style={item.destaque ? aS.toggleActive : aS.toggleInactive} onClick={() => toggleField(item, 'destaque')}>
@@ -247,7 +298,7 @@ const ArtigosManager: React.FC = () => {
                 </td>
                 <td style={aS.td}>
                   <div style={{ display: 'flex', gap: '.4rem', justifyContent: 'flex-end' }}>
-                    <button style={aS.btnGhost} onClick={() => { setEditing(item); setIsNew(false); }}><Edit2 size={13} /></button>
+                    <button style={aS.btnGhost} onClick={() => { setEditing(normalizeToEdit(item)); setIsNew(false); }}><Edit2 size={13} /></button>
                     <button style={{ ...aS.btnGhost, color: '#c0392b' }} onClick={() => handleDelete(item.id)}><Trash2 size={13} /></button>
                   </div>
                 </td>

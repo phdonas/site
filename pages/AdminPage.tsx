@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { onAuthStateChanged, signOut } from 'firebase/auth';
+import React, { useState } from 'react';
+import { signOut } from 'firebase/auth';
 import { auth } from '../services/firebase';
 import { LogOut, Layout, FileText, Users, Globe, Settings } from 'lucide-react';
 import { SiteContentEditor } from '../components/admin/SiteContentEditor';
@@ -20,37 +20,11 @@ const TABS: { id: AdminTab; label: string; icon: React.ReactNode }[] = [
 
 const AdminPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<AdminTab>('site');
-  const [isAuth, setIsAuth] = useState(false);
-  const [checking, setChecking] = useState(true);
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setIsAuth(true);
-      } else {
-        window.location.hash = '#/login';
-      }
-      setChecking(false);
-    });
-    return () => unsubscribe();
-  }, []);
 
   const handleLogout = async () => {
     await signOut(auth);
     window.location.hash = '#/login';
   };
-
-  if (checking) {
-    return (
-      <main style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--cream-d)' }}>
-        <span style={{ fontFamily: 'var(--fm)', fontSize: '.5rem', letterSpacing: '.2em', textTransform: 'uppercase', color: 'var(--ink-3)' }}>
-          Verificando autenticação...
-        </span>
-      </main>
-    );
-  }
-
-  if (!isAuth) return null;
 
   return (
     <main style={{ minHeight: '100vh', paddingTop: '7rem', paddingBottom: '5rem', background: 'var(--cream-d)' }}>
