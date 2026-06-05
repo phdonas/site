@@ -84,6 +84,13 @@ const secureFetch = async (endpoint: string) => {
 };
 
 export const DataService = {
+  async getSiteContent(pageId: string): Promise<Record<string, any>> {
+    try {
+      const snap = await getDoc(doc(db, 'site_content', pageId));
+      return snap.exists() ? snap.data() : {};
+    } catch { return {}; }
+  },
+
   async testConnection(): Promise<boolean> {
     try {
       const snap = await getDocs(collection(db, 'settings'));
