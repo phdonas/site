@@ -13,6 +13,7 @@ export async function sendNotificationEmail(payload: {
   origem?: string
   slug?: string
 }) {
+  console.log('Resend key disponível:', !!import.meta.env.VITE_RESEND_API_KEY)
   if (!RESEND_API_KEY) {
     console.warn('Resend: API key não configurada')
     return

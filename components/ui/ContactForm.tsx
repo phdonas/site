@@ -54,7 +54,7 @@ export const ContactForm: React.FC<ContactFormProps> = ({ initialMessage }) => {
           Mensagem recebida.
         </p>
         <p style={{ fontSize: '.9rem', color: 'var(--ink-3)' }}>
-          Retorno em até 48 horas úteis.
+          Retorno em até 24 horas úteis.
         </p>
       </div>
     );
@@ -62,19 +62,56 @@ export const ContactForm: React.FC<ContactFormProps> = ({ initialMessage }) => {
 
   return (
     <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
+      {/* Nome — largura total */}
+      <input
+        className="field-light w-full py-3 px-4"
+        type="text"
+        placeholder="Nome completo"
+        value={form.nome}
+        onChange={e => set('nome', e.target.value)}
+        required
+      />
+
+      {/* Email — largura total */}
+      <input
+        className="field-light w-full py-3 px-4"
+        type="email"
+        placeholder="E-mail"
+        value={form.email}
+        onChange={e => set('email', e.target.value)}
+        required
+      />
+
+      {/* WhatsApp + Assunto lado a lado */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <input className="field-light" type="text" placeholder="Nome completo" value={form.nome} onChange={e => set('nome', e.target.value)} required />
-        <input className="field-light" type="email" placeholder="E-mail" value={form.email} onChange={e => set('email', e.target.value)} required />
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <input className="field-light" type="text" placeholder="WhatsApp (opcional)" value={form.whatsapp} onChange={e => set('whatsapp', e.target.value)} />
-        <select className="field-light" value={form.assunto} onChange={e => set('assunto', e.target.value)}>
+        <input
+          className="field-light w-full py-3 px-4"
+          type="text"
+          placeholder="WhatsApp (opcional)"
+          value={form.whatsapp}
+          onChange={e => set('whatsapp', e.target.value)}
+        />
+        <select
+          className="field-light w-full py-3 px-4"
+          value={form.assunto}
+          onChange={e => set('assunto', e.target.value)}
+        >
           {ASSUNTOS.map(a => <option key={a} value={a}>{a}</option>)}
         </select>
       </div>
-      <textarea className="field-light" placeholder="Sua mensagem" rows={5} value={form.mensagem} onChange={e => set('mensagem', e.target.value)} required style={{ resize: 'vertical' }} />
 
-      <div className="flex items-start gap-3 mt-2">
+      {/* Mensagem — largura total */}
+      <textarea
+        className="field-light w-full py-3 px-4 min-h-[120px]"
+        placeholder="Sua mensagem"
+        value={form.mensagem}
+        onChange={e => set('mensagem', e.target.value)}
+        required
+        style={{ resize: 'vertical' }}
+      />
+
+      {/* LGPD — largura total */}
+      <div className="flex items-start gap-3">
         <input
           type="checkbox"
           id="lgpd-contato"
@@ -91,15 +128,18 @@ export const ContactForm: React.FC<ContactFormProps> = ({ initialMessage }) => {
         </label>
       </div>
 
+      {/* Botão — largura total */}
       <button
         type="submit"
-        className="btn-navy"
+        className="btn-navy w-full justify-center"
         disabled={status === 'loading' || !lgpdAceito}
-        style={{ alignSelf: 'flex-start' }}
       >
         {status === 'loading' ? 'Enviando...' : 'Enviar mensagem'}
       </button>
-      {status === 'err' && <p style={{ fontSize: '.8rem', color: '#e57373' }}>Erro ao enviar. Tente novamente.</p>}
+
+      {status === 'err' && (
+        <p style={{ fontSize: '.8rem', color: '#e57373' }}>Erro ao enviar. Tente novamente.</p>
+      )}
     </form>
   );
 };
