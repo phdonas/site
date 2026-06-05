@@ -88,25 +88,29 @@ const ConteudoPage: React.FC = () => {
   // ── Fetch ──────────────────────────────────────────────────────────────────
   useEffect(() => {
     let cancelled = false;
-    const timeoutId = setTimeout(() => {
-      if (!cancelled) { setLoading(false); setLoadError(true); }
-    }, 12000);
 
-    Promise.all([
-      DataService.getArticles(500), // fetch all; pagination is client-side
-      SupabaseService.getFerramentas(),
-    ])
-      .then(([arts, ferrs]) => {
+    // Articles are the primary content — show as soon as they're ready.
+    // 8s hard timeout so we never wait forever on slow connections.
+    const timeoutId = setTimeout(() => {
+      if (!cancelled && artigos.length === 0) { setLoading(false); setLoadError(true); }
+    }, 8000);
+
+    DataService.getArticles(500)
+      .then(arts => {
         if (cancelled) return;
         clearTimeout(timeoutId);
         setArtigos(arts);
-        setFerramentas(ferrs);
         setLoading(false);
         setLoadError(false);
       })
       .catch(() => {
         if (!cancelled) { clearTimeout(timeoutId); setLoading(false); setLoadError(true); }
       });
+
+    // Ferramentas load independently — never block articles display.
+    SupabaseService.getFerramentas()
+      .then(ferrs => { if (!cancelled) setFerramentas(ferrs); })
+      .catch(() => {});
 
     return () => { cancelled = true; clearTimeout(timeoutId); };
   }, []);

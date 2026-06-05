@@ -20,9 +20,30 @@ const PILAR_LABEL_TO_ID: Record<string, string> = {
 const withTimeout = <T,>(p: Promise<T>, ms: number): Promise<T | null> =>
   Promise.race([p, new Promise<null>(res => setTimeout(() => res(null), ms))]);
 
+// ── Articles cache (two layers) ────────────────────────────────────────────
+// Layer 1: in-memory (lasts until page refresh)
+// Layer 2: sessionStorage (survives navigation within the same tab session)
+const SS_ARTICLES_KEY = 'phd_arts_v5';
+const MEM_TTL  = 5 * 60 * 1000;  // 5 min in-memory
+const SS_TTL   = 15 * 60 * 1000; // 15 min sessionStorage
+
 let _articlesCache: { data: Article[]; ts: number } | null = null;
-const CACHE_TTL = 3 * 60 * 1000;
-export const invalidateArticlesCache = () => { _articlesCache = null; };
+let _articlesFetch: Promise<Article[]> | null = null; // in-flight dedup
+
+// Restore from sessionStorage on module load (instant on navigation)
+try {
+  const raw = sessionStorage.getItem(SS_ARTICLES_KEY);
+  if (raw) {
+    const parsed = JSON.parse(raw) as { data: Article[]; ts: number };
+    if (Date.now() - parsed.ts < SS_TTL) _articlesCache = parsed;
+  }
+} catch {}
+
+export const invalidateArticlesCache = () => {
+  _articlesCache = null;
+  _articlesFetch = null;
+  try { sessionStorage.removeItem(SS_ARTICLES_KEY); } catch {}
+};
 
 const CACHE_KEY_ARTICLES = 'phd_art_v41';
 const CACHE_KEY_VIDEOS = 'phd_vid_v41';
@@ -122,79 +143,85 @@ export const DataService = {
   },
 
   async getArticles(limit = 12, includeScheduled = false): Promise<Article[]> {
-    try {
-      // Serve from cache if fresh
-      if (_articlesCache && Date.now() - _articlesCache.ts < CACHE_TTL) {
-        let cached = _articlesCache.data;
-        if (!includeScheduled) {
-          const now = new Date().toISOString();
-          cached = cached.filter(a => !a.publishDate || a.publishDate <= now);
-        }
-        return cached.slice(0, limit);
-      }
-
-      // Fetch both collections in parallel with 10s timeout
-      const [snapLegacy, snapCms] = await Promise.all([
-        withTimeout(getDocs(collection(db, 'articles')), 10000),
-        withTimeout(getDocs(collection(db, 'artigos')), 10000),
-      ]);
-
-      // Legacy articles (WordPress migrated)
-      const legacyArticles: Article[] = snapLegacy
-        ? snapLegacy.docs.map(d => {
-            const data = d.data() as any;
-            const pilarId = data.pillarIds?.[0];
-            return {
-              id: d.id,
-              ...data,
-              pilar: data.pilar || (pilarId ? PILAR_ID_TO_LABEL[pilarId] : 'Prof. Paulo'),
-            } as Article;
-          })
-        : MOCK_ARTICLES;
-
-      // CMS articles (admin-created), normalize to Article schema
-      const cmsArticles: Article[] = snapCms
-        ? snapCms.docs
-            .map(d => {
-              const data = d.data() as any;
-              if (data.publicado === false) return null;
-              return {
-                id: d.id,
-                title: data.titulo || data.title || '',
-                category: data.tema || data.category || 'Gestão Comercial',
-                pilar: data.pilar || 'Prof. Paulo',
-                pillarIds: data.pillarIds || [PILAR_LABEL_TO_ID[data.pilar] || 'prof-paulo'],
-                imageUrl: data.thumbnail_url || data.imageUrl || '',
-                coverImage: data.thumbnail_url || data.coverImage || '',
-                date: data.data_publicacao || data.date || new Date().toISOString(),
-                publishDate: data.data_publicacao || data.publishDate || data.date || '',
-                excerpt: data.subtitulo || data.excerpt || '',
-                content: data.conteudo || data.content || '',
-                slug: data.slug || '',
-                ...data,
-              } as Article;
-            })
-            .filter(Boolean) as Article[]
-        : [];
-
-      // Merge: CMS first, then legacy (skip if same id already present)
-      const cmsIds = new Set(cmsArticles.map(a => a.id));
-      const merged = [
-        ...cmsArticles,
-        ...legacyArticles.filter(a => !cmsIds.has(a.id)),
-      ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-
-      _articlesCache = { data: merged, ts: Date.now() };
-
-      let result = merged;
+    const applyFilters = (data: Article[]) => {
+      let result = data;
       if (!includeScheduled) {
         const now = new Date().toISOString();
         result = result.filter(a => !a.publishDate || a.publishDate <= now);
       }
       return result.slice(0, limit);
-    } catch {
-      return MOCK_ARTICLES;
+    };
+
+    // Layer 1: in-memory cache (5 min)
+    if (_articlesCache && Date.now() - _articlesCache.ts < MEM_TTL) {
+      return applyFilters(_articlesCache.data);
     }
+
+    // Deduplicate concurrent calls — share one in-flight promise
+    if (!_articlesFetch) {
+      _articlesFetch = (async (): Promise<Article[]> => {
+        try {
+          // Fetch both collections in parallel, 5s timeout (fail fast)
+          const [snapLegacy, snapCms] = await Promise.all([
+            withTimeout(getDocs(collection(db, 'articles')), 5000),
+            withTimeout(getDocs(collection(db, 'artigos')), 5000),
+          ]);
+
+          const legacyArticles: Article[] = snapLegacy
+            ? snapLegacy.docs.map(d => {
+                const data = d.data() as any;
+                const pilarId = data.pillarIds?.[0];
+                return {
+                  id: d.id,
+                  ...data,
+                  pilar: data.pilar || (pilarId ? PILAR_ID_TO_LABEL[pilarId] : 'Prof. Paulo'),
+                } as Article;
+              })
+            : MOCK_ARTICLES;
+
+          const cmsArticles: Article[] = snapCms
+            ? snapCms.docs
+                .map(d => {
+                  const data = d.data() as any;
+                  if (data.publicado === false) return null;
+                  return {
+                    id: d.id,
+                    title: data.titulo || data.title || '',
+                    category: data.tema || data.category || 'Gestão Comercial',
+                    pilar: data.pilar || 'Prof. Paulo',
+                    pillarIds: data.pillarIds || [PILAR_LABEL_TO_ID[data.pilar] || 'prof-paulo'],
+                    imageUrl: data.thumbnail_url || data.imageUrl || '',
+                    coverImage: data.thumbnail_url || data.coverImage || '',
+                    date: data.data_publicacao || data.date || new Date().toISOString(),
+                    publishDate: data.data_publicacao || data.publishDate || data.date || '',
+                    excerpt: data.subtitulo || data.excerpt || '',
+                    content: data.conteudo || data.content || '',
+                    slug: data.slug || '',
+                    ...data,
+                  } as Article;
+                })
+                .filter(Boolean) as Article[]
+            : [];
+
+          const cmsIds = new Set(cmsArticles.map(a => a.id));
+          const merged = [
+            ...cmsArticles,
+            ...legacyArticles.filter(a => !cmsIds.has(a.id)),
+          ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+          const entry = { data: merged, ts: Date.now() };
+          _articlesCache = entry;
+          try { sessionStorage.setItem(SS_ARTICLES_KEY, JSON.stringify(entry)); } catch {}
+          return merged;
+        } catch {
+          return MOCK_ARTICLES;
+        } finally {
+          _articlesFetch = null;
+        }
+      })();
+    }
+
+    return applyFilters(await _articlesFetch);
   },
 
   async getVideos(limit = 4, includeScheduled = false): Promise<any[]> {
