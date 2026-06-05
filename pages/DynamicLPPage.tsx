@@ -1,12 +1,149 @@
 import React, { useState, useEffect } from 'react';
 import { DataService } from '../services/dataService';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, getDoc, doc, serverTimestamp, updateDoc, increment } from 'firebase/firestore';
 import { db } from '../services/firebase';
 import { Mail, CheckCircle2, ChevronRight, Lock, ShieldCheck, ArrowRight } from 'lucide-react';
+
+// ---- CMS Landing Page view (uses new landing_pages collection) ----
+
+const CmsLPView: React.FC<{ lp: any; slug: string }> = ({ lp, slug }) => {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+
+  const isForm = lp.cta_tipo === 'formulario_interno';
+  const accent = lp.cor_destaque || '#8f6e4a';
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name || !email) return;
+    setSubmitting(true);
+    try {
+      await addDoc(collection(db, 'leads'), {
+        nome: name.trim(),
+        email: email.trim(),
+        tipo: `lp_${slug}`,
+        origem: slug,
+        createdAt: serverTimestamp(),
+      });
+      setSubmitted(true);
+    } catch {
+      alert('Erro ao enviar. Tente novamente.');
+    }
+    setSubmitting(false);
+  };
+
+  return (
+    <div style={{ minHeight: '100vh', background: 'var(--cream-d)', fontFamily: 'var(--fb)' }}>
+      {/* Nav */}
+      <nav style={{ padding: '1.2rem 5vw', borderBottom: '1px solid var(--rule)', background: 'var(--cream)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <a href="#/" style={{ fontFamily: 'var(--fd)', fontSize: '1rem', fontWeight: 700, color: 'var(--ink)', textDecoration: 'none', letterSpacing: '-.01em' }}>
+          Prof. Paulo H. Donassolo
+        </a>
+        <span style={{ fontFamily: 'var(--fm)', fontSize: '.44rem', letterSpacing: '.15em', textTransform: 'uppercase', color: 'var(--ink-3)' }}>
+          phdonassolo.com
+        </span>
+      </nav>
+
+      {/* Content */}
+      <main style={{ maxWidth: 960, margin: '0 auto', padding: '4rem 5vw', display: 'grid', gridTemplateColumns: lp.imagem_url ? '1fr 1fr' : '1fr', gap: '3rem', alignItems: 'center' }}>
+        {/* Left: text */}
+        <div>
+          <div style={{ fontFamily: 'var(--fm)', fontSize: '.5rem', letterSpacing: '.2em', textTransform: 'uppercase', color: accent, marginBottom: '.8rem' }}>
+            {lp.cta_tipo === 'mentoria' ? 'Mentoria Comercial' : lp.cta_tipo === 'consultoria' ? 'Consultoria' : 'Oferta especial'}
+          </div>
+          <h1 style={{ fontFamily: 'var(--fd)', fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: 700, color: 'var(--ink)', lineHeight: 1.1, letterSpacing: '-.02em', marginBottom: '1rem' }}>
+            {lp.titulo}
+          </h1>
+          {lp.subtitulo && (
+            <p style={{ fontFamily: 'var(--fd)', fontSize: '1.2rem', fontStyle: 'italic', color: 'var(--ink-2)', marginBottom: '1.2rem' }}>
+              {lp.subtitulo}
+            </p>
+          )}
+          {lp.descricao && (
+            <p style={{ fontSize: '.92rem', color: 'var(--ink-3)', lineHeight: 1.8, marginBottom: '2rem', maxWidth: 500 }}>
+              {lp.descricao}
+            </p>
+          )}
+
+          {!isForm && (
+            <a
+              href={lp.cta_link}
+              target={lp.cta_tipo === 'hotmart' ? '_blank' : '_self'}
+              rel="noopener noreferrer"
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: '.5rem',
+                fontFamily: 'var(--fm)', fontSize: '.55rem', letterSpacing: '.15em', textTransform: 'uppercase',
+                background: 'var(--navy)', color: 'var(--cream)', border: 'none',
+                padding: '1rem 2rem', textDecoration: 'none', cursor: 'pointer',
+              }}
+            >
+              {lp.cta_texto || 'Acessar'} <ArrowRight size={14} />
+            </a>
+          )}
+        </div>
+
+        {/* Right: image or form */}
+        <div>
+          {lp.imagem_url && !isForm && (
+            <img src={lp.imagem_url} alt={lp.titulo} style={{ width: '100%', display: 'block', border: '1px solid var(--rule)' }} />
+          )}
+
+          {isForm && (
+            <div style={{ background: 'var(--cream)', border: '1px solid var(--rule)', padding: '2rem' }}>
+              {!submitted ? (
+                <>
+                  <div style={{ fontFamily: 'var(--fd)', fontSize: '1.3rem', fontWeight: 700, color: 'var(--ink)', marginBottom: '.6rem' }}>
+                    {lp.cta_texto || 'Quero participar'}
+                  </div>
+                  <form onSubmit={handleSubmit}>
+                    <div style={{ marginBottom: '.8rem' }}>
+                      <label style={{ fontFamily: 'var(--fm)', fontSize: '.48rem', letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--ink-3)', display: 'block', marginBottom: '.4rem' }}>Nome completo</label>
+                      <input required style={{ width: '100%', padding: '.65rem .9rem', background: 'var(--cream-d)', border: '1px solid var(--rule)', fontFamily: 'var(--fb)', fontSize: '.85rem', color: 'var(--ink)', outline: 'none', boxSizing: 'border-box' as const }} value={name} onChange={e => setName(e.target.value)} placeholder="Seu nome" />
+                    </div>
+                    <div style={{ marginBottom: '1.2rem' }}>
+                      <label style={{ fontFamily: 'var(--fm)', fontSize: '.48rem', letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--ink-3)', display: 'block', marginBottom: '.4rem' }}>Email</label>
+                      <input required type="email" style={{ width: '100%', padding: '.65rem .9rem', background: 'var(--cream-d)', border: '1px solid var(--rule)', fontFamily: 'var(--fb)', fontSize: '.85rem', color: 'var(--ink)', outline: 'none', boxSizing: 'border-box' as const }} value={email} onChange={e => setEmail(e.target.value)} placeholder="seu@email.com" />
+                    </div>
+                    <button
+                      type="submit"
+                      disabled={submitting}
+                      style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '.5rem', fontFamily: 'var(--fm)', fontSize: '.52rem', letterSpacing: '.12em', textTransform: 'uppercase', background: 'var(--navy)', color: 'var(--cream)', border: 'none', padding: '1rem', cursor: submitting ? 'not-allowed' : 'pointer', opacity: submitting ? .6 : 1 }}
+                    >
+                      {submitting ? 'Enviando...' : <>{lp.cta_texto || 'Confirmar inscrição'} <ArrowRight size={13} /></>}
+                    </button>
+                  </form>
+                </>
+              ) : (
+                <div style={{ textAlign: 'center', padding: '1.5rem 0' }}>
+                  <CheckCircle2 size={40} style={{ color: 'var(--gold)', marginBottom: '.8rem' }} />
+                  <div style={{ fontFamily: 'var(--fd)', fontSize: '1.2rem', fontWeight: 700, color: 'var(--ink)', marginBottom: '.6rem' }}>Recebemos seu contato!</div>
+                  <p style={{ fontFamily: 'var(--fb)', fontSize: '.82rem', color: 'var(--ink-3)', lineHeight: 1.7 }}>
+                    {lp.meta_description || 'Em breve entraremos em contato.'}
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </main>
+
+      {/* Footer */}
+      <footer style={{ borderTop: '1px solid var(--rule)', padding: '1.5rem 5vw', textAlign: 'center', background: 'var(--cream)' }}>
+        <p style={{ fontFamily: 'var(--fm)', fontSize: '.44rem', letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--ink-3)' }}>
+          © {new Date().getFullYear()} Prof. Paulo H. Donassolo · Todos os direitos reservados
+        </p>
+      </footer>
+    </div>
+  );
+};
 
 const DynamicLPPage = () => {
     const [lp, setLp] = useState<any>(null);
     const [loading, setLoading] = useState(true);
+    const [isCmsLp, setIsCmsLp] = useState(false);
+    const [cmsSlug, setCmsSlug] = useState('');
     const [email, setEmail] = useState('');
     const [name, setName] = useState('');
     const [ddi, setDdi] = useState('+55');
@@ -17,11 +154,10 @@ const DynamicLPPage = () => {
     const [startTime] = useState(Date.now());
 
     useEffect(() => {
-        const handleLocationChange = () => {
+        const handleLocationChange = async () => {
             const getUrlParam = (name: string) => {
                 const searchParams = new URLSearchParams(window.location.search);
                 if (searchParams.has(name)) return searchParams.get(name);
-                
                 const hashParts = window.location.hash.split('?');
                 if (hashParts.length > 1) {
                     const hashParams = new URLSearchParams(hashParts[1]);
@@ -31,24 +167,48 @@ const DynamicLPPage = () => {
             };
 
             const src = getUrlParam('src') || getUrlParam('utm_source') || getUrlParam('source');
-            if (src) {
-                setOrigem(src);
-            }
+            if (src) setOrigem(src);
 
             const fullPath = window.location.hash.split('/lp/')[1];
             const slugFromHash = fullPath ? fullPath.split('?')[0] : null;
 
-            if (slugFromHash) {
-                DataService.getLPBySlug(slugFromHash).then(data => {
-                    if (data) {
-                        setLp(data);
-                        document.title = data.pageTitle || 'Material Gratuito';
+            if (!slugFromHash) { setLoading(false); return; }
+
+            // 1. Try new CMS landing_pages collection first
+            try {
+                const snap = await getDoc(doc(db, 'landing_pages', slugFromHash));
+                if (snap.exists()) {
+                    const data = snap.data();
+                    // Check expiration
+                    if (data.data_expiracao && new Date(data.data_expiracao) < new Date()) {
+                        window.location.hash = '#/';
+                        return;
                     }
+                    // Check published
+                    if (!data.publicada) {
+                        window.location.hash = '#/';
+                        return;
+                    }
+                    // Increment access counter (fire-and-forget)
+                    updateDoc(doc(db, 'landing_pages', slugFromHash), { acessos: increment(1) }).catch(() => {});
+                    document.title = data.meta_title || data.titulo || 'Landing Page';
+                    setLp(data);
+                    setIsCmsLp(true);
+                    setCmsSlug(slugFromHash);
                     setLoading(false);
-                });
-            } else {
+                    return;
+                }
+            } catch { /* ignore, fall through to legacy */ }
+
+            // 2. Fall back to legacy resource-based LP
+            DataService.getLPBySlug(slugFromHash).then(data => {
+                if (data) {
+                    setLp(data);
+                    setIsCmsLp(false);
+                    document.title = data.pageTitle || 'Material Gratuito';
+                }
                 setLoading(false);
-            }
+            });
         };
 
         handleLocationChange();
@@ -150,6 +310,9 @@ const DynamicLPPage = () => {
             <a href="#/" className="text-blue-600 font-bold hover:underline">Voltar para a Home</a>
         </div>
     );
+
+    // CMS-managed landing page
+    if (isCmsLp) return <CmsLPView lp={lp} slug={cmsSlug} />;
 
     return (
         <div className="min-h-screen selection:bg-blue-100 selection:text-blue-900" style={{ backgroundColor: lp.bgColor, color: lp.textColor, fontFamily: lp.fontFamily || 'Inter, sans-serif' }}>
