@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import ScrollReveal from '../components/ui/ScrollReveal';
 import FerramentaLeadModal from '../components/ui/FerramentaLeadModal';
 import { DataService } from '../services/dataService';
-import SupabaseService, { Ferramenta } from '../services/supabaseService';
+import SupabaseService, { Recurso } from '../services/supabaseService';
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
@@ -74,7 +74,7 @@ const SkeletonCard: React.FC = () => (
 
 const ConteudoPage: React.FC = () => {
   const [artigos, setArtigos]           = useState<any[]>([]);
-  const [ferramentas, setFerramentas]   = useState<Ferramenta[]>([]);
+  const [ferramentas, setFerramentas]   = useState<Recurso[]>([]);
   const [loading, setLoading]           = useState(true);
   const [loadError, setLoadError]       = useState(false);
   const [tipo, setTipo]                 = useState<FiltroTipo>('Todos');
@@ -82,7 +82,7 @@ const ConteudoPage: React.FC = () => {
   const [pilar, setPilar]               = useState<string | null>(null); // null = "Todos"
   const [page, setPage]                 = useState(1);
   const [loadingMore, setLoadingMore]   = useState(false);
-  const [ferramentaAtiva, setFerramentaAtiva] = useState<Ferramenta | null>(null);
+  const [ferramentaAtiva, setFerramentaAtiva] = useState<Recurso | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   // ── Fetch ──────────────────────────────────────────────────────────────────
@@ -107,8 +107,8 @@ const ConteudoPage: React.FC = () => {
         if (!cancelled) { clearTimeout(timeoutId); setLoading(false); setLoadError(true); }
       });
 
-    // Ferramentas load independently — never block articles display.
-    SupabaseService.getFerramentas()
+    // Recursos load independently — never block articles display.
+    SupabaseService.getRecursos()
       .then(ferrs => { if (!cancelled) setFerramentas(ferrs); })
       .catch(() => {});
 
@@ -258,9 +258,9 @@ const ConteudoPage: React.FC = () => {
                           className="card-hover"
                         >
                           <div style={{ background: 'var(--navy)', aspectRatio: '16/9', marginBottom: '1.2rem', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', position: 'relative' }}>
-                            {f.capa_url
-                              ? <img src={f.capa_url} alt={f.nome} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                              : <span style={{ fontFamily: 'var(--fm)', fontSize: '.5rem', letterSpacing: '.2em', textTransform: 'uppercase', color: 'rgba(243,239,230,.15)' }}>{f.icone || 'Ferramenta'}</span>
+                            {f.thumb_url
+                              ? <img src={f.thumb_url} alt={f.titulo} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                              : <span style={{ fontFamily: 'var(--fm)', fontSize: '.5rem', letterSpacing: '.2em', textTransform: 'uppercase', color: 'rgba(243,239,230,.15)' }}>Recurso</span>
                             }
                             <div style={{ position: 'absolute', top: '.6rem', right: '.6rem', fontFamily: 'var(--fm)', fontSize: '.44rem', letterSpacing: '.14em', textTransform: 'uppercase', color: '#fff', background: 'var(--gold)', padding: '.2rem .5rem' }}>
                               Grátis
@@ -269,14 +269,14 @@ const ConteudoPage: React.FC = () => {
                           <div style={{ fontFamily: 'var(--fm)', fontSize: '.48rem', letterSpacing: '.16em', textTransform: 'uppercase', color: 'var(--gold)', opacity: .7, marginBottom: '.6rem' }}>
                             {f.categoria || 'Ferramenta'}
                           </div>
-                          <h3 style={{ fontFamily: 'var(--fd)', fontSize: '1.1rem', fontWeight: 700, color: 'var(--ink)', lineHeight: 1.3, marginBottom: '.5rem' }}>{f.nome}</h3>
+                          <h3 style={{ fontFamily: 'var(--fd)', fontSize: '1.1rem', fontWeight: 700, color: 'var(--ink)', lineHeight: 1.3, marginBottom: '.5rem' }}>{f.titulo}</h3>
                           {f.descricao && (
                             <p style={{ fontSize: '.82rem', color: 'var(--ink-3)', lineHeight: 1.6 }}>
                               {f.descricao.substring(0, 100)}{f.descricao.length > 100 ? '…' : ''}
                             </p>
                           )}
                           <div style={{ marginTop: '1rem', fontFamily: 'var(--fm)', fontSize: '.5rem', letterSpacing: '.1em', color: 'var(--gold)' }}>
-                            {f.label_botao || 'Acessar →'}
+                            Acessar →
                           </div>
                         </button>
                       </ScrollReveal>

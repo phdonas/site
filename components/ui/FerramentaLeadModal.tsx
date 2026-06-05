@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../services/firebase';
 import { Modal } from './Modal';
-import { Ferramenta } from '../../services/supabaseService';
+import { Recurso } from '../../services/supabaseService';
 
 interface Props {
-  ferramenta: Ferramenta | null;
+  ferramenta: Recurso | null;
   onClose: () => void;
 }
 
@@ -27,14 +27,14 @@ export const FerramentaLeadModal: React.FC<Props> = ({ ferramenta, onClose }) =>
       await addDoc(collection(db, 'leads'), {
         nome: nome.trim(),
         email: email.trim(),
-        tipo: 'ferramenta',
-        ferramenta: ferramenta.nome,
+        tipo: 'recurso',
+        recurso: ferramenta.titulo,
         data: serverTimestamp(),
       });
 
       onClose();
 
-      const url = ferramenta.url_entrega || ferramenta.url_externa;
+      const url = ferramenta.url_entrega || ferramenta.arquivo_url;
       if (!url) return;
 
       if (ferramenta.tipo_entrega === 'download') {
@@ -68,7 +68,7 @@ export const FerramentaLeadModal: React.FC<Props> = ({ ferramenta, onClose }) =>
           Acesso gratuito
         </div>
         <h2 style={{ fontFamily: 'var(--fd)', fontSize: '1.4rem', fontWeight: 700, color: 'var(--ink)', lineHeight: 1.2 }}>
-          {ferramenta?.nome}
+          {ferramenta?.titulo}
         </h2>
         {ferramenta?.descricao && (
           <p style={{ fontSize: '.82rem', color: 'var(--ink-3)', lineHeight: 1.6, marginTop: '.6rem' }}>

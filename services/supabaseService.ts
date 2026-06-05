@@ -122,6 +122,9 @@ export interface Recurso {
   quando_usar: string | null
   como_usar: string | null
   resultados_esperados: string | null
+  url_entrega: string | null
+  tipo_entrega: string | null
+  categoria: string | null
 }
 
 // ============================================================
@@ -331,11 +334,12 @@ export const SupabaseService = {
       .select(`
         id, titulo, descricao, thumb_url, arquivo_url,
         tipo, abertura_tipo, status, visivel_no_site,
-        destaque_vitrine, objetivo, quando_usar, como_usar,
-        resultados_esperados
+        destaque_vitrine, objetivo, quando_usar, url_entrega,
+        tipo_entrega, categoria
       `)
       .eq('visivel_no_site', true)
       .eq('status', 'ativo')
+      .order('ordem_vitrine', { ascending: true })
 
     if (destaque !== undefined) query = query.eq('destaque_vitrine', destaque)
 
