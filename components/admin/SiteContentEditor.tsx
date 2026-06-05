@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '../../services/firebase';
-import { Save, Eye, EyeOff, ExternalLink, ChevronDown, ChevronRight } from 'lucide-react';
+import { Save, Eye, EyeOff, ExternalLink, ChevronDown, ChevronRight, RefreshCw, AlertTriangle } from 'lucide-react';
 import { aS } from './adminStyles';
 import { Field, TI, TA, Toggle, SectionBlock, G2, G3, SubCard } from './adminEditorHelpers';
 import { ImageUploadField } from './ImageUploadField';
+import { PAGE_DEFAULTS, seedPage, type PageId as SeedPageId } from '../../scripts/seedFirestore';
 import { MentoriaEditor } from './editors/MentoriaEditor';
 import { ConsultoriaEditor } from './editors/ConsultoriaEditor';
 import { ProfPauloEditor } from './editors/ProfPauloEditor';
@@ -239,10 +240,19 @@ const HomeEditor: React.FC<{
 
 // ---- Main orchestrator ----
 
+function isPageEmpty(data: any): boolean {
+  if (!data || Object.keys(data).length === 0) return true;
+  // Consider empty if all string values in hero section are blank
+  const hero = data.hero || data.conteudo || {};
+  const vals = Object.values(hero).filter((v): v is string => typeof v === 'string' && v !== 'visivel');
+  return vals.length === 0 || vals.every(v => v === '');
+}
+
 export const SiteContentEditor: React.FC = () => {
   const [activePage, setActivePage] = useState<PageId>('home');
   const [pageData, setPageData] = useState<any>({});
   const [loading, setLoading] = useState(false);
+  const [seeding, setSeeding] = useState(false);
 
   const loadPage = useCallback(async (pageId: PageId) => {
     setLoading(true);
@@ -273,7 +283,22 @@ export const SiteContentEditor: React.FC = () => {
     await setDoc(doc(db, 'site_content', activePage), sectionData, { merge: true });
   };
 
+  const handleSeedPage = async (overwrite = false) => {
+    setSeeding(true);
+    try {
+      await seedPage(db, activePage as SeedPageId, { overwrite });
+      await loadPage(activePage);
+    } catch (e) { console.error(e); }
+    setSeeding(false);
+  };
+
+  const handleRestoreDefaults = () => {
+    const defaults = PAGE_DEFAULTS[activePage as SeedPageId];
+    if (defaults) setPageData({ ...defaults });
+  };
+
   const activePageMeta = PAGES.find(p => p.id === activePage)!;
+  const empty = isPageEmpty(pageData);
 
   const renderEditor = () => {
     const props = { data: pageData, onChange: handleChange, onSave: handleSaveSection };
@@ -319,22 +344,64 @@ export const SiteContentEditor: React.FC = () => {
 
       {/* Editor panel */}
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '.8rem' }}>
           <div>
             <div style={aS.eyebrow}>Editando</div>
             <h2 style={{ fontFamily: 'var(--fd)', fontSize: '1.6rem', fontWeight: 700, color: 'var(--ink)', marginTop: '.2rem' }}>
               {activePageMeta.label}
             </h2>
           </div>
-          <a
-            href={activePageMeta.hash}
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{ ...aS.btnSecondary, textDecoration: 'none', fontSize: '.5rem' }}
-          >
-            <ExternalLink size={11} /> Pré-visualizar
-          </a>
+          <div style={{ display: 'flex', gap: '.6rem', flexWrap: 'wrap' }}>
+            <button
+              type="button"
+              onClick={handleRestoreDefaults}
+              style={{ ...aS.btnSecondary, fontSize: '.5rem' }}
+              title="Carrega os valores padrão nos campos sem salvar no Firestore"
+            >
+              <RefreshCw size={11} /> Restaurar padrões
+            </button>
+            <a
+              href={activePageMeta.hash}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ ...aS.btnSecondary, textDecoration: 'none', fontSize: '.5rem' }}
+            >
+              <ExternalLink size={11} /> Pré-visualizar
+            </a>
+          </div>
         </div>
+
+        {/* Empty state warning banner */}
+        {!loading && empty && (
+          <div style={{
+            background: 'rgba(180,83,9,.06)',
+            border: '1px solid rgba(180,83,9,.3)',
+            padding: '1.2rem 1.4rem',
+            marginBottom: '1.5rem',
+            display: 'flex',
+            gap: '1rem',
+            alignItems: 'flex-start',
+          }}>
+            <AlertTriangle size={18} style={{ color: '#b45309', flexShrink: 0, marginTop: '.1rem' }} />
+            <div style={{ flex: 1 }}>
+              <div style={{ fontFamily: 'var(--fb)', fontSize: '.85rem', fontWeight: 600, color: '#92400e', marginBottom: '.3rem' }}>
+                Os campos estão vazios
+              </div>
+              <p style={{ fontFamily: 'var(--fb)', fontSize: '.8rem', color: '#b45309', lineHeight: 1.6, marginBottom: '.8rem' }}>
+                O banco de dados ainda não tem conteúdo para esta página. Clique em{' '}
+                <strong>"Carregar conteúdo atual"</strong> para preencher os campos com o conteúdo atual do site antes de editar — assim você não perde o texto existente.
+              </p>
+              <button
+                type="button"
+                onClick={() => handleSeedPage(false)}
+                disabled={seeding}
+                style={{ ...aS.btnPrimary, fontSize: '.75rem', opacity: seeding ? .6 : 1, cursor: seeding ? 'default' : 'pointer' }}
+              >
+                {seeding ? <><RefreshCw size={11} /> Carregando...</> : 'Carregar conteúdo atual'}
+              </button>
+            </div>
+          </div>
+        )}
 
         {loading ? (
           <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--ink-3)', fontFamily: 'var(--fm)', fontSize: '.5rem', letterSpacing: '.1em', textTransform: 'uppercase' }}>
