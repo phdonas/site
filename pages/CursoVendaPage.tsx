@@ -281,7 +281,7 @@ const CursoVendaPage: React.FC<Props> = ({ slug }) => {
 
           {/* ─── Card de compra (direita) ──────────────────────────── */}
           <ScrollReveal delay={2}>
-            <div style={{ background: 'var(--cream)', padding: '2rem', position: 'sticky', top: '5rem' }}>
+            <div id="card-compra" style={{ background: 'var(--cream)', padding: '2rem', position: 'sticky', top: '5rem' }}>
 
               {/* Thumb no card apenas se não há vídeo à esquerda */}
               {!ytId && curso.thumb_url && (
@@ -648,9 +648,14 @@ const CursoVendaPage: React.FC<Props> = ({ slug }) => {
                   Acessar gratuitamente →
                 </a>
               ) : (
-                <a href={`#/curso/${slug}`} className="btn-primary" style={{ display: 'inline-block' }}>
+                <button
+                  type="button"
+                  onClick={() => document.getElementById('card-compra')?.scrollIntoView({ behavior: 'smooth' })}
+                  className="btn-primary"
+                  style={{ display: 'inline-block', cursor: 'pointer', border: 'none' }}
+                >
                   Garantir minha vaga →
-                </a>
+                </button>
               )
             ) : (
               <a href={curso.url_checkout || '#/cursos'} target="_blank" rel="noopener noreferrer" className="btn-primary" style={{ display: 'inline-block' }}>
