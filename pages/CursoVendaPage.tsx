@@ -58,14 +58,6 @@ const CursoVendaPage: React.FC<Props> = ({ slug }) => {
         <div className="sec-wrap" style={{ display: 'grid', gridTemplateColumns: '1fr 360px', gap: '4rem', alignItems: 'start' }}>
           {/* Esquerda */}
           <ScrollReveal>
-            {curso.pilar && (
-              <div style={{
-                fontFamily: 'var(--fm)', fontSize: '.5rem', letterSpacing: '.18em', textTransform: 'uppercase',
-                color: 'var(--gold)', marginBottom: '1rem',
-              }}>
-                {curso.pilar.nome}
-              </div>
-            )}
             <h1 style={{
               fontFamily: 'var(--fd)', fontSize: 'clamp(2rem, 3.5vw, 3rem)', fontWeight: 700,
               lineHeight: 1.12, color: 'rgba(243,239,230,.9)', letterSpacing: '-.02em', marginBottom: '1.2rem',

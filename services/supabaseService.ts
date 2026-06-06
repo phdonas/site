@@ -85,7 +85,6 @@ export interface Curso {
   avaliacoes_count: number
   avaliacoes_media: number
   pilar_id: string | null
-  pilar?: Pilar
   modulos?: Modulo[]
   menor_preco?: number | null
 }
@@ -148,8 +147,7 @@ export const SupabaseService = {
         visivel_no_site, tipo, is_gratis, is_free, nivel, categoria,
         ordem_vitrine, destaque_vitrine, duracao_total_minutos,
         preco_vitrine_brl, preco_original_brl, url_checkout,
-        objetivos, avaliacoes_count, avaliacoes_media, pilar_id,
-        pilar:pilares (id, nome, slug, cor_badge)
+        objetivos, avaliacoes_count, avaliacoes_media, pilar_id
       `)
       .eq('visivel_no_site', true)
       .eq('status', 'publicado')
@@ -177,8 +175,7 @@ export const SupabaseService = {
         url_checkout, objetivos, publico_alvo, ementa_resumida,
         pre_requisitos, video_vendas_url, garantia_dias, faq,
         o_que_aprender, para_quem, nao_para_quem, inclui,
-        avaliacoes_count, avaliacoes_media, pilar_id,
-        pilar:pilares (id, nome, slug, cor_badge)
+        avaliacoes_count, avaliacoes_media, pilar_id
       `)
       .eq('id', id)
       .eq('visivel_no_site', true)
@@ -209,8 +206,7 @@ export const SupabaseService = {
         url_checkout, objetivos, publico_alvo, ementa_resumida,
         pre_requisitos, video_vendas_url, garantia_dias, faq,
         o_que_aprender, para_quem, nao_para_quem, inclui,
-        avaliacoes_count, avaliacoes_media, pilar_id,
-        pilar:pilares (id, nome, slug, cor_badge)
+        avaliacoes_count, avaliacoes_media, pilar_id
       `)
       .eq('slug', slug)
       .eq('visivel_no_site', true)
