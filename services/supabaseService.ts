@@ -126,6 +126,14 @@ export interface Recurso {
   categoria: string | null
 }
 
+export interface PlanoCurso {
+  plano_id: string
+  valor_venda: number
+  valor_venda_eur: number | null
+  stripe_price_id_eur: string | null
+  planos: { id: string; nome: string } | null
+}
+
 // ============================================================
 // CURSOS
 // ============================================================
@@ -320,6 +328,25 @@ export const SupabaseService = {
   // ============================================================
   // RECURSOS
   // ============================================================
+
+  getPlanosCurso: async (cursoId: string): Promise<PlanoCurso[]> => {
+    const client = getClient()
+    if (!client) return []
+
+    const { data, error } = await client
+      .from('planos_cursos')
+      .select(`
+        plano_id,
+        valor_venda,
+        valor_venda_eur,
+        stripe_price_id_eur,
+        planos (id, nome)
+      `)
+      .eq('curso_id', cursoId)
+
+    if (error) { console.error('Supabase getPlanosCurso error:', error); return [] }
+    return (data as PlanoCurso[]) || []
+  },
 
   getRecursos: async (destaque?: boolean): Promise<Recurso[]> => {
     const client = getClient()
