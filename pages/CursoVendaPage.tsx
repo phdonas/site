@@ -34,15 +34,14 @@ function FormattedText({ text }: { text: string | null | undefined }) {
   );
 }
 
-async function detectarMoeda(): Promise<'BRL' | 'EUR' | 'USD'> {
+async function detectarMoeda(): Promise<'BRL' | 'EUR'> {
   try {
     const res = await fetch('https://ipapi.co/json/');
     const d = await res.json();
     if (d.country_code === 'BR') return 'BRL';
-    if (['PT', 'ES', 'FR', 'DE', 'IT', 'NL', 'BE', 'AT', 'IE'].includes(d.country_code)) return 'EUR';
-    return 'USD';
+    return 'EUR';
   } catch {
-    return 'USD';
+    return 'EUR';
   }
 }
 
@@ -54,7 +53,7 @@ const CursoVendaPage: React.FC<Props> = ({ slug }) => {
   const [planos, setPlanos] = useState<PlanoCurso[]>([]);
   const [planoIdx, setPlanoIdx] = useState(0);
 
-  const [moeda, setMoeda] = useState<'BRL' | 'EUR' | 'USD'>('USD');
+  const [moeda, setMoeda] = useState<'BRL' | 'EUR'>('EUR');
 
   const [email, setEmail] = useState('');
 
@@ -122,7 +121,7 @@ const CursoVendaPage: React.FC<Props> = ({ slug }) => {
       await iniciarCheckout({
         cursoId: curso.id,
         emailFinal: email.trim(),
-        moeda: moeda === 'USD' ? 'EUR' : moeda,
+        moeda,
         planoId: planoAtual?.plano_id,
         cupomCodigo: cupomAplicado || undefined,
       });
@@ -171,8 +170,7 @@ const CursoVendaPage: React.FC<Props> = ({ slug }) => {
       ? (planoAtual.valor_venda_eur ?? Math.round(planoAtual.valor_venda / 6))
       : null;
     if (moeda === 'BRL') return planoAtual ? planoAtual.valor_venda : curso.preco_vitrine_brl;
-    if (moeda === 'EUR') return eur;
-    return eur !== null ? Math.round(eur * 1.1) : null; // USD ≈ EUR × 1.1
+    return eur;
   };
 
   const precoBase = getPrecoBase();
@@ -190,9 +188,7 @@ const CursoVendaPage: React.FC<Props> = ({ slug }) => {
   const fmt = (val: number | null) => {
     if (val === null) return '—';
     const s = val.toFixed(2).replace('.', ',');
-    if (moeda === 'BRL') return `R$ ${s}`;
-    if (moeda === 'EUR') return `€ ${s}`;
-    return `US$ ${s}`;
+    return moeda === 'BRL' ? `R$ ${s}` : `€ ${s}`;
   };
 
 
@@ -203,7 +199,7 @@ const CursoVendaPage: React.FC<Props> = ({ slug }) => {
     background: 'white', outline: 'none', boxSizing: 'border-box',
   };
 
-  const moedaBtnStyle = (m: 'BRL' | 'EUR' | 'USD'): React.CSSProperties => ({
+  const moedaBtnStyle = (m: 'BRL' | 'EUR'): React.CSSProperties => ({
     flex: 1, padding: '.5rem .6rem',
     border: `1.5px solid ${moeda === m ? 'var(--navy)' : 'var(--rule)'}`,
     background: moeda === m ? 'var(--navy)' : 'transparent',
@@ -318,7 +314,7 @@ const CursoVendaPage: React.FC<Props> = ({ slug }) => {
                         )}
                       </span>
                       <span style={{ fontFamily: 'var(--fm)', fontSize: '1rem', whiteSpace: 'nowrap', marginLeft: '1rem' }}>
-                        R$ {p.valor_venda.toFixed(2).replace('.', ',')}
+                        {fmt(moeda === 'BRL' ? p.valor_venda : (p.valor_venda_eur ?? Math.round(p.valor_venda / 6)))}
                       </span>
                     </button>
                   ))}
@@ -328,13 +324,10 @@ const CursoVendaPage: React.FC<Props> = ({ slug }) => {
               {/* Seletor de moeda */}
               <div style={{ display: 'flex', gap: '.4rem', marginBottom: '1.2rem' }}>
                 <button type="button" onClick={() => setMoeda('BRL')} style={moedaBtnStyle('BRL')}>
-                  🇧🇷 BRL
+                  🇧🇷 BRL · Reais
                 </button>
                 <button type="button" onClick={() => setMoeda('EUR')} style={moedaBtnStyle('EUR')}>
-                  🇵🇹 EUR
-                </button>
-                <button type="button" onClick={() => setMoeda('USD')} style={moedaBtnStyle('USD')}>
-                  🌐 USD
+                  🇵🇹 EUR · Euros
                 </button>
               </div>
 
