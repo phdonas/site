@@ -155,7 +155,7 @@ Exemplo de div de transição:
 
 ### 3.2 Navegação principal
 ```
-Nav: Prof. Paulo | Serviços | Conteúdo | [Fale Comigo] | [Área do Aluno]
+Nav: Prof. Paulo | Serviços | Cursos | Conteúdo | [Fale Comigo] | [Área do Aluno]
 ```
 - "Fale Comigo" — botão com borda navy
 - "Área do Aluno" — botão com borda gold, `font-mono`. **Comportamento condicional:**

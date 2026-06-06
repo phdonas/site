@@ -21,6 +21,26 @@ const SiteNavbar: React.FC<Props> = ({ currentRoute }) => {
   const lmsUrl = (SITE_CONFIG as any).lms?.url ?? '#/area-do-aluno';
   const alunoHref = lmsLiberado ? lmsUrl : '#/area-do-aluno';
 
+  // Um link é "ativo" quando a rota atual corresponde ao seu path.
+  // Cursos: ativo em /cursos E em /curso/:slug (página individual).
+  const isActive = (href: string): boolean => {
+    const path = href.replace(/^#/, ''); // "#/cursos" → "/cursos"
+    if (path === '/cursos') {
+      return currentRoute === '/cursos' || currentRoute.startsWith('/curso/');
+    }
+    return currentRoute === path || currentRoute.startsWith(path + '/');
+  };
+
+  const linkClass = (href: string) =>
+    `nav-link${isActive(href) ? ' nav-link--active' : ''}`;
+
+  const desktopLinks = [
+    { href: '#/prof-paulo', label: 'Prof. Paulo' },
+    { href: '#/servicos',   label: 'Serviços' },
+    { href: '#/cursos',     label: 'Cursos' },
+    { href: '#/conteudo',   label: 'Conteúdo' },
+  ];
+
   return (
     <nav className={`site-nav ${scrolled ? 'scrolled' : ''}`}>
       <div className="nav-in">
@@ -30,10 +50,12 @@ const SiteNavbar: React.FC<Props> = ({ currentRoute }) => {
 
         {/* Desktop links */}
         <ul className="nav-links hidden md:flex">
-          <li><a href="#/prof-paulo" className="nav-link">Prof. Paulo</a></li>
-          <li><a href="#/servicos" className="nav-link">Serviços</a></li>
-          <li><a href="#/conteudo" className="nav-link">Conteúdo</a></li>
-          <li><a href="#/fale-comigo" className="nav-link nav-cta">Fale Comigo</a></li>
+          {desktopLinks.map(item => (
+            <li key={item.href}>
+              <a href={item.href} className={linkClass(item.href)}>{item.label}</a>
+            </li>
+          ))}
+          <li><a href="#/fale-comigo" className={`${linkClass('#/fale-comigo')} nav-cta`}>Fale Comigo</a></li>
           <li>
             <a
               href={alunoHref}
@@ -80,12 +102,13 @@ const SiteNavbar: React.FC<Props> = ({ currentRoute }) => {
           <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
             {[
               { href: '#/prof-paulo', label: 'Prof. Paulo' },
-              { href: '#/servicos', label: 'Serviços' },
-              { href: '#/conteudo', label: 'Conteúdo' },
+              { href: '#/servicos',   label: 'Serviços' },
+              { href: '#/cursos',     label: 'Cursos' },
+              { href: '#/conteudo',   label: 'Conteúdo' },
               { href: '#/fale-comigo', label: 'Fale Comigo' },
             ].map(item => (
               <li key={item.href}>
-                <a href={item.href} className="nav-link" style={{ fontSize: '.95rem' }}>
+                <a href={item.href} className={linkClass(item.href)} style={{ fontSize: '.95rem' }}>
                   {item.label}
                 </a>
               </li>

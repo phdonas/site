@@ -193,6 +193,8 @@ body::before {
 }
 .nav-link:hover { color: var(--ink); }
 .nav-link:hover::after { transform: scaleX(1); }
+.nav-link--active { color: var(--ink) !important; }
+.nav-link--active::after { transform: scaleX(1) !important; }
 
 .nav-cta {
   font-size: 0.78rem !important;
