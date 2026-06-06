@@ -132,6 +132,8 @@ export interface PlanoCurso {
   valor_venda_eur: number | null
   stripe_price_id_eur: string | null
   planos: { id: string; nome: string } | null
+  is_featured: boolean | null
+  ativo: boolean | null
 }
 
 // ============================================================
@@ -340,9 +342,13 @@ export const SupabaseService = {
         valor_venda,
         valor_venda_eur,
         stripe_price_id_eur,
+        is_featured,
+        ativo,
         planos (id, nome)
       `)
       .eq('curso_id', cursoId)
+      .neq('ativo', false)
+      .order('valor_venda', { ascending: true })
 
     if (error) { console.error('Supabase getPlanosCurso error:', error); return [] }
     return (data as PlanoCurso[]) || []
