@@ -22,9 +22,13 @@ export const ImageUploadField: React.FC<Props> = ({
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [sizeWarn, setSizeWarn] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [uploadedUrl, setUploadedUrl] = useState<string | null>(null);
 
   const handleFile = (file: File) => {
     setSizeWarn('');
+    setError(null);
+    setUploadedUrl(null);
     if (maxSizeKb && file.size > maxSizeKb * 1024) {
       setSizeWarn(`Arquivo tem ${Math.round(file.size / 1024)}kb — recomendado máx ${maxSizeKb}kb. Upload prosseguirá mesmo assim.`);
     }
@@ -40,10 +44,16 @@ export const ImageUploadField: React.FC<Props> = ({
     task.on(
       'state_changed',
       snap => setProgress(Math.round((snap.bytesTransferred / snap.totalBytes) * 100)),
-      () => setUploading(false),
+      (err) => {
+        console.error('Firebase Storage upload error:', err.code, err.message);
+        setUploading(false);
+        setProgress(0);
+        setError(`Erro ao fazer upload: ${err.code} — ${err.message}`);
+      },
       async () => {
         const url = await getDownloadURL(task.snapshot.ref);
         onChange(url);
+        setUploadedUrl(url);
         setUploading(false);
         setProgress(0);
       }
@@ -90,9 +100,19 @@ export const ImageUploadField: React.FC<Props> = ({
           ⚠ {sizeWarn}
         </div>
       )}
-      {value && (
+      {error && (
+        <div style={{ fontFamily: 'var(--fb)', fontSize: '.75rem', color: '#dc2626', marginTop: '.25rem', wordBreak: 'break-all' }}>
+          ✕ {error}
+        </div>
+      )}
+      {uploadedUrl && (
+        <div style={{ fontFamily: 'var(--fb)', fontSize: '.75rem', color: '#16a34a', marginTop: '.25rem' }}>
+          ✓ Upload concluído
+        </div>
+      )}
+      {(uploadedUrl || value) && (
         <img
-          src={value}
+          src={uploadedUrl ?? value}
           alt="preview"
           style={{ marginTop: '.6rem', maxWidth: '100%', maxHeight: 160, objectFit: 'contain', border: '1px solid var(--rule)' }}
           onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
