@@ -149,7 +149,7 @@ export const SupabaseService = {
         ordem_vitrine, destaque_vitrine, duracao_total_minutos,
         preco_vitrine_brl, preco_original_brl, url_checkout,
         objetivos, avaliacoes_count, avaliacoes_media, pilar_id,
-        pilares (id, nome, slug, cor_badge)
+        pilar:pilares (id, nome, slug, cor_badge)
       `)
       .eq('visivel_no_site', true)
       .eq('status', 'publicado')
@@ -178,12 +178,12 @@ export const SupabaseService = {
         pre_requisitos, video_vendas_url, garantia_dias, faq,
         o_que_aprender, para_quem, nao_para_quem, inclui,
         avaliacoes_count, avaliacoes_media, pilar_id,
-        pilares (id, nome, slug, cor_badge)
+        pilar:pilares (id, nome, slug, cor_badge)
       `)
       .eq('id', id)
       .eq('visivel_no_site', true)
       .eq('status', 'publicado')
-      .single()
+      .maybeSingle()
 
     if (error || !data) { console.error('Supabase getCursoById error:', error); return null }
 
@@ -210,14 +210,14 @@ export const SupabaseService = {
         pre_requisitos, video_vendas_url, garantia_dias, faq,
         o_que_aprender, para_quem, nao_para_quem, inclui,
         avaliacoes_count, avaliacoes_media, pilar_id,
-        pilares (id, nome, slug, cor_badge)
+        pilar:pilares (id, nome, slug, cor_badge)
       `)
       .eq('slug', slug)
       .eq('visivel_no_site', true)
       .eq('status', 'publicado')
-      .single()
+      .maybeSingle()
 
-    if (error || !data) return null
+    if (error || !data) { console.error('Supabase getCursoBySlug error:', error); return null }
 
     const { data: modulosData } = await client
       .from('modulos')
