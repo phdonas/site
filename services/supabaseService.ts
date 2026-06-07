@@ -163,7 +163,7 @@ export const SupabaseService = {
       .eq('status', 'publicado')
       .order('ordem_vitrine', { ascending: true })
 
-    if (filtros?.tipo)     query = query.eq('tipo', filtros.tipo)
+    if (filtros?.tipo)     query = query.ilike('tipo', filtros.tipo)
     if (filtros?.categoria) query = query.eq('categoria', filtros.categoria)
     if (filtros?.is_gratis !== undefined) query = query.eq('is_gratis', filtros.is_gratis)
 
