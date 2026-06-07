@@ -359,7 +359,7 @@ const CursoVendaPage: React.FC<Props> = ({ slug }) => {
               )}
 
               {/* Campo de e-mail */}
-              {!isGratis && curso.tipo === 'lms' && (
+              {!isGratis && curso.tipo?.toLowerCase() === 'lms' && (
                 <div style={{ marginBottom: '1rem' }}>
                   <label style={{ fontFamily: 'var(--fm)', fontSize: '.9rem', letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--ink-3)', display: 'block', marginBottom: '.4rem' }}>
                     E-mail para acesso ao curso
@@ -375,7 +375,7 @@ const CursoVendaPage: React.FC<Props> = ({ slug }) => {
               )}
 
               {/* Botão principal */}
-              {curso.tipo === 'lms' ? (
+              {curso.tipo?.toLowerCase() === 'lms' ? (
                 isGratis ? (
                   <a
                     href="https://aluno.phdonassolo.com/login"
@@ -407,7 +407,7 @@ const CursoVendaPage: React.FC<Props> = ({ slug }) => {
                   className="btn-navy"
                   style={{ display: 'block', textAlign: 'center', marginBottom: '1rem', fontSize: '1.2rem' }}
                 >
-                  Ver na {curso.tipo === 'udemy' ? 'Udemy' : 'ESPM'} ↗
+                  Ver na {curso.tipo?.toLowerCase() === 'udemy' ? 'Udemy' : 'ESPM'} ↗
                 </a>
               )}
 
@@ -418,7 +418,7 @@ const CursoVendaPage: React.FC<Props> = ({ slug }) => {
               )}
 
               {/* Cupom */}
-              {!isGratis && curso.tipo === 'lms' && (
+              {!isGratis && curso.tipo?.toLowerCase() === 'lms' && (
                 <div style={{ marginBottom: '1rem' }}>
                   {!cupomAplicado ? (
                     <>
@@ -632,7 +632,7 @@ const CursoVendaPage: React.FC<Props> = ({ slug }) => {
                 </span>
               ) : null}
             </div>
-            {curso.tipo === 'lms' ? (
+            {curso.tipo?.toLowerCase() === 'lms' ? (
               isGratis ? (
                 <a href="https://aluno.phdonassolo.com/login" target="_blank" rel="noopener noreferrer" className="btn-primary" style={{ display: 'inline-block' }}>
                   Acessar gratuitamente →
@@ -649,7 +649,7 @@ const CursoVendaPage: React.FC<Props> = ({ slug }) => {
               )
             ) : (
               <a href={curso.url_checkout || '#/cursos'} target="_blank" rel="noopener noreferrer" className="btn-primary" style={{ display: 'inline-block' }}>
-                Ver na {curso.tipo === 'udemy' ? 'Udemy' : 'ESPM'} ↗
+                Ver na {curso.tipo?.toLowerCase() === 'udemy' ? 'Udemy' : 'ESPM'} ↗
               </a>
             )}
           </ScrollReveal>

@@ -34,7 +34,7 @@ const CursoCard: React.FC<{ curso: Curso; delay: 1 | 2 | 3 }> = ({ curso, delay 
             fontFamily: 'var(--fm)', fontSize: '.45rem', letterSpacing: '.18em', textTransform: 'uppercase',
             color: 'var(--gold)', background: 'rgba(12,24,36,.85)', padding: '.2rem .6rem',
           }}>
-            {tipoLabel[curso.tipo] ?? curso.tipo}
+            {tipoLabel[curso.tipo?.toLowerCase()] ?? curso.tipo}
           </div>
           {isGratis && (
             <div style={{
@@ -334,7 +334,7 @@ const CursosPage: React.FC = () => {
               )}
 
               {showESPM && cursosESPM.length > 0 && (
-                <Section eyebrow="Pós-graduação e MBA · ESPM">
+                <Section eyebrow="Meus Cursos na ESPM">
                   {cursosESPM.map((c, i) => <CursoExternoCard key={c.id} curso={c} delay={((i % 3) + 1) as 1 | 2 | 3} />)}
                 </Section>
               )}
