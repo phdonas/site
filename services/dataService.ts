@@ -375,9 +375,12 @@ export const DataService = {
 
   async getGlobalSettings(): Promise<any> {
     try {
-      const snap = await getDoc(doc(db, 'settings', 'global'));
+      // Mesmo documento que o admin (SettingsManager) lê e grava — settings/global
+      // ficava sem leitor real, deixando o botão de WhatsApp preso ao fallback estático.
+      const snap = await getDoc(doc(db, 'site_config', 'config'));
       if (snap.exists()) {
-        return snap.data();
+        const data = snap.data();
+        return { ...data, whatsapp: data.numero_whatsapp || data.whatsapp };
       }
     } catch (e) {
       console.warn("Usando configurações locais (Firestore indisponível ou vazio para settings)");
