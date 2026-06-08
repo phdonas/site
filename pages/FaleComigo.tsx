@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import ScrollReveal from '../components/ui/ScrollReveal';
+import SEOHead from '../components/ui/SEOHead';
 import { ContactForm } from '../components/ui/ContactForm';
 import WhatsAppFloat from '../components/WhatsAppFloat';
 import { useSiteContent } from '../hooks/useSiteContent';
@@ -19,6 +20,11 @@ const FaleComigo: React.FC<Props> = ({ initialMessage }) => {
 
   return (
     <main>
+      <SEOHead
+        title="Fale Comigo — Prof. Paulo H. Donassolo"
+        description="Entre em contato para discutir mentoria, consultoria ou formações para a sua equipe comercial."
+        url="https://www.phdonassolo.com/#/fale-comigo"
+      />
       {/* Hero */}
       {visible('hero') && (
         <section style={{ background: 'var(--cream)', paddingTop: '8rem', paddingBottom: '4rem' }}>

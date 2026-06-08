@@ -1,5 +1,6 @@
 import React from 'react';
 import ScrollReveal from '../components/ui/ScrollReveal';
+import SEOHead from '../components/ui/SEOHead';
 import FAQAccordion from '../components/ui/FAQAccordion';
 import { useSiteContent } from '../hooks/useSiteContent';
 
@@ -30,6 +31,11 @@ const ConsultoriaPage: React.FC = () => {
 
   return (
     <main>
+      <SEOHead
+        title="Consultoria Comercial — Prof. Paulo H. Donassolo"
+        description="Diagnóstico, estruturação e ativação do processo comercial da sua empresa. Da estratégia à execução em campo."
+        url="https://www.phdonassolo.com/#/consultoria"
+      />
       {/* Hero */}
       {visible('hero') && (
         <section style={{ background: 'var(--cream)', paddingTop: '8rem', paddingBottom: '6rem' }}>

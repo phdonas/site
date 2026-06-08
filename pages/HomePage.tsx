@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import ScrollReveal from '../components/ui/ScrollReveal';
+import SEOHead from '../components/ui/SEOHead';
 import { NewsletterForm } from '../components/ui/NewsletterForm';
 import { DataService } from '../services/dataService';
 import { useSiteContent } from '../hooks/useSiteContent';
@@ -48,6 +49,11 @@ const HomePage: React.FC = () => {
 
   return (
     <main>
+      <SEOHead
+        title="Prof. Paulo H. Donassolo — Mentoria, Consultoria e Cursos Comerciais"
+        description="Mais de 25 anos de gestão comercial. Mentoria individual, consultoria empresarial e cursos para gestores e equipes de vendas."
+        url="https://www.phdonassolo.com/#/"
+      />
       {/* ── Hero ────────────────────────────────────────────────────────── */}
       {visible('hero') && (
         <section style={{ background: 'var(--cream)', paddingTop: '8rem', paddingBottom: '6rem', overflow: 'hidden' }}>

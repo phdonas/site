@@ -1,5 +1,6 @@
 import React from 'react';
 import ScrollReveal from '../components/ui/ScrollReveal';
+import SEOHead from '../components/ui/SEOHead';
 import FAQAccordion from '../components/ui/FAQAccordion';
 import { useSiteContent } from '../hooks/useSiteContent';
 
@@ -41,6 +42,11 @@ const MentoriaPage: React.FC = () => {
 
   return (
     <main>
+      <SEOHead
+        title="Mentoria Comercial — Prof. Paulo H. Donassolo"
+        description="Programa de 90 dias com acompanhamento individual para gestores e líderes comerciais. Diagnóstico, plano e implementação."
+        url="https://www.phdonassolo.com/#/mentoria"
+      />
       {/* Hero */}
       {visible('hero') && (
         <section style={{ background: 'var(--cream)', paddingTop: '8rem', paddingBottom: '6rem' }}>

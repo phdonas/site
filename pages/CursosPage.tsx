@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import ScrollReveal from '../components/ui/ScrollReveal';
+import SEOHead from '../components/ui/SEOHead';
 import SupabaseService, { Curso } from '../services/supabaseService';
 import { getCursosExternos, CursoExterno } from '../services/cursosExternosService';
 
@@ -252,6 +253,11 @@ const CursosPage: React.FC = () => {
 
   return (
     <main>
+      <SEOHead
+        title="Cursos de Gestão Comercial e Vendas — Prof. Paulo H. Donassolo"
+        description="Cursos online de gestão comercial, vendas, negociação e liderança. Plataforma própria, Udemy e ESPM."
+        url="https://www.phdonassolo.com/#/cursos"
+      />
       {/* Hero */}
       <section style={{ background: 'var(--navy)', paddingTop: '8rem', paddingBottom: '5rem' }}>
         <div className="sec-wrap">

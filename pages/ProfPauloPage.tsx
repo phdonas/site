@@ -1,5 +1,6 @@
 import React from 'react';
 import ScrollReveal from '../components/ui/ScrollReveal';
+import SEOHead from '../components/ui/SEOHead';
 import { useSiteContent } from '../hooks/useSiteContent';
 
 const ProfPauloPage: React.FC = () => {
@@ -36,6 +37,11 @@ const ProfPauloPage: React.FC = () => {
 
   return (
     <main>
+      <SEOHead
+        title="Quem é o Prof. Paulo H. Donassolo"
+        description="25 anos como Diretor Comercial, 20 anos como professor de MBA. Autor de 3 livros sobre gestão comercial e vendas."
+        url="https://www.phdonassolo.com/#/prof-paulo"
+      />
       {/* Hero */}
       {visible('hero') && (
         <section style={{ background: 'var(--cream)', paddingTop: '8rem', paddingBottom: '6rem' }}>

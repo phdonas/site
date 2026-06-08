@@ -1,5 +1,6 @@
 import React from 'react';
 import ScrollReveal from '../components/ui/ScrollReveal';
+import SEOHead from '../components/ui/SEOHead';
 import { useSiteContent } from '../hooks/useSiteContent';
 
 const ServicesPage: React.FC = () => {
@@ -16,6 +17,11 @@ const ServicesPage: React.FC = () => {
 
   return (
     <main>
+      <SEOHead
+        title="Serviços — Mentoria, Consultoria e Cursos Comerciais"
+        description="Conheça os formatos de trabalho: mentoria individual, consultoria empresarial, cursos online e formações in-company."
+        url="https://www.phdonassolo.com/#/servicos"
+      />
       {/* Hero */}
       {visible('hero') && (
         <section style={{ background: 'var(--cream)', paddingTop: '8rem', paddingBottom: '5rem' }}>

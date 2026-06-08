@@ -62,7 +62,7 @@ export const FerramentaLeadModal: React.FC<Props> = ({ ferramenta, onClose }) =>
       recurso: ferramenta.titulo,
     }).catch(e => console.warn('Email falhou (não bloqueante):', e));
 
-    onClose();
+    resetAndClose();
   };
 
   const resetAndClose = () => {
@@ -70,6 +70,7 @@ export const FerramentaLeadModal: React.FC<Props> = ({ ferramenta, onClose }) =>
     setEmail('');
     setLgpdAceito(false);
     setErro('');
+    setEnviando(false);
     onClose();
   };
 

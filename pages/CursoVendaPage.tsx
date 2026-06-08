@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import ScrollReveal from '../components/ui/ScrollReveal';
+import SEOHead from '../components/ui/SEOHead';
 import SupabaseService, { Curso, PlanoCurso } from '../services/supabaseService';
 import { iniciarCheckout } from '../services/checkoutService';
 
@@ -213,6 +214,12 @@ const CursoVendaPage: React.FC<Props> = ({ slug }) => {
 
   return (
     <main>
+      <SEOHead
+        title={curso.titulo}
+        description={curso.descricao || undefined}
+        image={curso.thumb_url || undefined}
+        url={`https://www.phdonassolo.com/#/curso/${curso.slug}`}
+      />
 
       {/* ═══ HERO ═══════════════════════════════════════════════════════ */}
       <section style={{ background: 'var(--navy)', paddingTop: '7rem', paddingBottom: '5rem' }}>

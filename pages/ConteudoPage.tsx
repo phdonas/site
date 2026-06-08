@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import ScrollReveal from '../components/ui/ScrollReveal';
+import SEOHead from '../components/ui/SEOHead';
 import FerramentaLeadModal from '../components/ui/FerramentaLeadModal';
 import { DataService } from '../services/dataService';
 import SupabaseService, { Recurso } from '../services/supabaseService';
@@ -141,6 +142,11 @@ const ConteudoPage: React.FC = () => {
   // ─────────────────────────────────────────────────────────────────────────
   return (
     <main>
+      <SEOHead
+        title="Artigos e Vídeos sobre Gestão Comercial — Prof. Paulo H. Donassolo"
+        description="Artigos, vídeos e ferramentas gratuitas sobre gestão comercial, vendas, negociação e liderança para gestores e equipes."
+        url="https://www.phdonassolo.com/#/conteudo"
+      />
       <style>{`
         @keyframes skeleton-pulse {
           0%, 100% { opacity: 1; }
