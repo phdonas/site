@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { SITE_CONFIG } from '../config/site-config';
+import { useSiteConfig } from '../contexts/SiteConfigContext';
 
 interface Props {
   currentRoute: string;
@@ -17,8 +17,9 @@ const SiteNavbar: React.FC<Props> = ({ currentRoute }) => {
 
   useEffect(() => setMenuOpen(false), [currentRoute]);
 
-  const lmsLiberado = (SITE_CONFIG as any).lms?.liberado ?? false;
-  const lmsUrl = (SITE_CONFIG as any).lms?.url ?? '#/area-do-aluno';
+  const { config, loading } = useSiteConfig();
+  const lmsLiberado = !loading && (config as any).lms_liberado === true;
+  const lmsUrl = (config as any).url_lms ?? '#/area-do-aluno';
   const alunoHref = lmsLiberado ? lmsUrl : '#/area-do-aluno';
 
   // Um link é "ativo" quando a rota atual corresponde ao seu path.

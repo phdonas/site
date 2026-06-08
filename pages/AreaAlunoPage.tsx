@@ -1,14 +1,15 @@
 import React from 'react';
 import ScrollReveal from '../components/ui/ScrollReveal';
 import { NewsletterForm } from '../components/ui/NewsletterForm';
-import { SITE_CONFIG } from '../config/site-config';
+import { useSiteConfig } from '../contexts/SiteConfigContext';
 
 const AreaAlunoPage: React.FC = () => {
-  const lms = (SITE_CONFIG as any).lms;
-  const liberado = lms?.liberado ?? false;
+  const { config, loading } = useSiteConfig();
+  const liberado = !loading && (config as any).lms_liberado === true;
+  const lmsUrl = (config as any).url_lms;
 
-  if (liberado && lms?.url) {
-    window.location.href = lms.url;
+  if (liberado && lmsUrl) {
+    window.location.href = lmsUrl;
     return null;
   }
 
