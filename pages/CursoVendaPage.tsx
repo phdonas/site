@@ -56,7 +56,7 @@ const CursoVendaPage: React.FC<Props> = ({ slug }) => {
   const [planos, setPlanos] = useState<PlanoCurso[]>([]);
   const [planoIdx, setPlanoIdx] = useState(0);
 
-  const [moeda, setMoeda] = useState<'BRL' | 'EUR'>('EUR');
+  const [moeda, setMoeda] = useState<'BRL' | 'EUR'>('BRL');
 
   const [email, setEmail] = useState('');
 
