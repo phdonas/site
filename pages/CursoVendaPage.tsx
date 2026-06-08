@@ -34,11 +34,14 @@ function FormattedText({ text }: { text: string | null | undefined }) {
   );
 }
 
+const PAISES_EUR = ['PT', 'ES', 'FR', 'DE', 'IT', 'NL', 'BE', 'AT', 'IE', 'GB'];
+
 async function detectarMoeda(): Promise<'BRL' | 'EUR'> {
   try {
     const res = await fetch('https://ipapi.co/json/');
     const d = await res.json();
     if (d.country_code === 'BR') return 'BRL';
+    if (PAISES_EUR.includes(d.country_code)) return 'EUR';
     return 'EUR';
   } catch {
     return 'EUR';
@@ -324,10 +327,10 @@ const CursoVendaPage: React.FC<Props> = ({ slug }) => {
               {/* Seletor de moeda */}
               <div style={{ display: 'flex', gap: '.4rem', marginBottom: '1.2rem' }}>
                 <button type="button" onClick={() => setMoeda('BRL')} style={moedaBtnStyle('BRL')}>
-                  🇧🇷 BRL · Reais
+                  🇧🇷 BRL · Pix, cartão, boleto
                 </button>
                 <button type="button" onClick={() => setMoeda('EUR')} style={moedaBtnStyle('EUR')}>
-                  🇵🇹 EUR · Euros
+                  🇵🇹 EUR · Stripe
                 </button>
               </div>
 
@@ -355,6 +358,21 @@ const CursoVendaPage: React.FC<Props> = ({ slug }) => {
               ) : (
                 <div style={{ fontFamily: 'var(--fm)', fontSize: '1rem', color: 'var(--ink-3)', marginBottom: '1.2rem' }}>
                   Entre em contato para informações de valores.
+                </div>
+              )}
+
+              {/* Métodos de pagamento — BRL via Mercado Pago */}
+              {!isGratis && moeda === 'BRL' && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '.3rem', marginBottom: '1.2rem' }}>
+                  <span style={{ fontFamily: 'var(--fm)', fontSize: '.9rem', color: 'var(--ink-3)', letterSpacing: '.02em' }}>
+                    💳 Cartão de crédito em até 6x sem juros
+                  </span>
+                  <span style={{ fontFamily: 'var(--fm)', fontSize: '.9rem', color: 'var(--ink-3)', letterSpacing: '.02em' }}>
+                    ⚡ Pix — aprovação instantânea
+                  </span>
+                  <span style={{ fontFamily: 'var(--fm)', fontSize: '.9rem', color: 'var(--ink-3)', letterSpacing: '.02em' }}>
+                    📄 Boleto bancário
+                  </span>
                 </div>
               )}
 
@@ -489,10 +507,15 @@ const CursoVendaPage: React.FC<Props> = ({ slug }) => {
 
               {/* Informações de segurança */}
               <div style={{ borderTop: '1px solid var(--rule)', paddingTop: '1rem', marginBottom: '1rem' }}>
-                {([
-                  '🔒 Pagamento seguro via Stripe',
+                {(moeda === 'BRL' ? [
+                  '🔒 Pagamento seguro via Mercado Pago',
+                  'Pix, cartão de crédito em até 6x sem juros ou boleto',
                   'Não armazenamos dados do seu cartão',
-                  'Criptografia SSL em todas as transações',
+                  curso.garantia_dias ? `✓ Garantia de ${curso.garantia_dias} dias` : null,
+                ] : [
+                  '🔒 Pagamento seguro via Stripe',
+                  'Cartão de crédito internacional',
+                  'Não armazenamos dados do seu cartão',
                   curso.garantia_dias ? `✓ Garantia de ${curso.garantia_dias} dias` : null,
                 ] as (string | null)[]).filter(Boolean).map((item, i) => (
                   <div key={i} style={{ fontFamily: 'var(--fm)', fontSize: '.9rem', color: 'var(--ink-3)', letterSpacing: '.02em', marginBottom: '.3rem' }}>
