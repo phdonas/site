@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { collection, getDocs, doc, setDoc, deleteDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../../services/firebase';
+import { SupabaseService } from '../../services/supabaseService';
 import { Plus, Edit2, Trash2, Save, X, RefreshCw, Eye, EyeOff, ExternalLink } from 'lucide-react';
 import { aS } from './adminStyles';
 import { ImageUploadField } from './ImageUploadField';
@@ -11,16 +12,20 @@ function validateSlug(slug: string): string | null {
   return null;
 }
 
-const CTA_TIPOS = ['hotmart', 'whatsapp', 'formulario_interno'];
+const CTA_TIPOS = ['hotmart', 'whatsapp', 'formulario_interno', 'entrega_material'];
 
 export const LandingPagesManager: React.FC = () => {
   const [items, setItems] = useState<any[]>([]);
+  const [recursosList, setRecursosList] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [editing, setEditing] = useState<any | null>(null);
   const [isNew, setIsNew] = useState(false);
   const [slugError, setSlugError] = useState<string | null>(null);
 
-  useEffect(() => { fetch(); }, []);
+  useEffect(() => { 
+    fetch(); 
+    SupabaseService.getRecursos().then(res => setRecursosList(res));
+  }, []);
 
   const fetch = async () => {
     setLoading(true);
@@ -43,6 +48,8 @@ export const LandingPagesManager: React.FC = () => {
       cta_texto: '',
       cta_link: '',
       cta_tipo: 'hotmart',
+      recurso_id: '',
+      recurso_url_entrega: '',
       imagem_url: '',
       cor_destaque: '#8f6e4a',
       publicada: false,
@@ -158,9 +165,32 @@ export const LandingPagesManager: React.FC = () => {
             </div>
             <div>
               <label style={aS.label}>CTA — link</label>
-              <input style={aS.input} value={editing.cta_link} onChange={e => f('cta_link', e.target.value)} placeholder="https://..." />
+              <input style={aS.input} value={editing.cta_link} onChange={e => f('cta_link', e.target.value)} placeholder="https://..." disabled={editing.cta_tipo === 'entrega_material'} />
             </div>
           </div>
+
+          {editing.cta_tipo === 'entrega_material' && (
+            <div style={{ background: 'rgba(30,58,138,.06)', border: '1px solid rgba(30,58,138,.18)', padding: '1.2rem', marginBottom: '1rem' }}>
+              <label style={aS.label}>Material a entregar (Supabase/LMS)</label>
+              <select 
+                style={{ ...aS.select, marginBottom: '.8rem' }}
+                value={editing.recurso_id || ''}
+                onChange={e => {
+                  const sel = recursosList.find(r => r.id === e.target.value);
+                  setEditing((prev: any) => ({ ...prev, recurso_id: sel?.id || '', recurso_url_entrega: sel?.url_entrega || '' }));
+                }}
+              >
+                <option value="">-- Selecione o material --</option>
+                {recursosList.map(r => (
+                  <option key={r.id} value={r.id}>{r.titulo} {r.tipo ? `(${r.tipo})` : ''}</option>
+                ))}
+              </select>
+              <p style={{ fontFamily: 'var(--fb)', fontSize: '.75rem', color: 'var(--ink-3)', lineHeight: 1.6 }}>
+                ℹ️ Estes materiais vêm do LMS (tabela <strong>recursos</strong>). Para criar novos ou editar os PDFs/Links, 
+                acesse o painel do LMS em <strong>/admin/recursos</strong>. Aqui você apenas escolhe qual deles será entregue por esta Landing Page.
+              </p>
+            </div>
+          )}
 
           <div style={{ ...aS.grid2, marginBottom: '1rem' }}>
             <div>

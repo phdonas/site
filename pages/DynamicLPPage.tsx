@@ -14,7 +14,7 @@ const CmsLPView: React.FC<{ lp: any; slug: string }> = ({ lp, slug }) => {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
-  const isForm = lp.cta_tipo === 'formulario_interno';
+  const isForm = lp.cta_tipo === 'formulario_interno' || lp.cta_tipo === 'entrega_material';
   const accent = lp.cor_destaque || '#8f6e4a';
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -27,12 +27,19 @@ const CmsLPView: React.FC<{ lp: any; slug: string }> = ({ lp, slug }) => {
         email: email.trim(),
         tipo: `lp_${slug}`,
         origem: slug,
+        materialId: lp.recurso_id || null,
         lgpd_aceito: true,
         lgpd_data: serverTimestamp(),
         createdAt: serverTimestamp(),
       });
       sendNotificationEmail({ tipo: 'lp', nome: name.trim(), email: email.trim(), origem: slug });
       setSubmitted(true);
+      
+      if (lp.cta_tipo === 'entrega_material' && lp.recurso_url_entrega) {
+        setTimeout(() => {
+          window.location.href = lp.recurso_url_entrega;
+        }, 2000);
+      }
     } catch {
       alert('Erro ao enviar. Tente novamente.');
     }
@@ -133,7 +140,9 @@ const CmsLPView: React.FC<{ lp: any; slug: string }> = ({ lp, slug }) => {
                   <CheckCircle2 size={40} style={{ color: 'var(--gold)', marginBottom: '.8rem' }} />
                   <div style={{ fontFamily: 'var(--fd)', fontSize: '1.2rem', fontWeight: 700, color: 'var(--ink)', marginBottom: '.6rem' }}>Recebemos seu contato!</div>
                   <p style={{ fontFamily: 'var(--fb)', fontSize: '.82rem', color: 'var(--ink-3)', lineHeight: 1.7 }}>
-                    {lp.meta_description || 'Em breve entraremos em contato.'}
+                    {lp.cta_tipo === 'entrega_material' && lp.recurso_url_entrega
+                      ? 'Redirecionando para o material...'
+                      : (lp.meta_description || 'Em breve entraremos em contato.')}
                   </p>
                 </div>
               )}
