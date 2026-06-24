@@ -38,26 +38,30 @@ const CmsLPView: React.FC<{ lp: any; slug: string }> = ({ lp, slug }) => {
       if (lp.cta_tipo === 'entrega_material' && lp.recurso_url_entrega) {
         setTimeout(async () => {
           try {
-            if (lp.recurso_url_entrega.includes('supabase.co')) {
-              const urlObj = new URL(lp.recurso_url_entrega);
-              const safeName = lp.titulo ? lp.titulo.toLowerCase().replace(/[^a-z0-9]+/g, '-') : 'material';
-              urlObj.searchParams.set('download', `${safeName}.pdf`);
-              window.location.href = urlObj.toString();
-              return;
-            }
-            
+            // Usa o fetch para baixar o arquivo como Blob, o que permite renomear o arquivo localmente
             const response = await fetch(lp.recurso_url_entrega);
+            if (!response.ok) throw new Error('Falha no download');
+            
             const blob = await response.blob();
             const blobUrl = window.URL.createObjectURL(blob);
+            
             const a = document.createElement('a');
             a.href = blobUrl;
             const safeName = lp.titulo ? lp.titulo.toLowerCase().replace(/[^a-z0-9]+/g, '-') : 'material';
-            a.download = `${safeName}.pdf`;
+            
+            // Tenta adivinhar a extensão do arquivo original
+            let ext = '.pdf';
+            if (lp.recurso_url_entrega.toLowerCase().endsWith('.xlsx')) ext = '.xlsx';
+            if (lp.recurso_url_entrega.toLowerCase().endsWith('.docx')) ext = '.docx';
+            if (lp.recurso_url_entrega.toLowerCase().endsWith('.zip')) ext = '.zip';
+            
+            a.download = `${safeName}${ext}`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
             window.URL.revokeObjectURL(blobUrl);
           } catch (e) {
+            // Fallback: se houver bloqueio de CORS ou outro erro, abre a aba normal (que baixará com o nome numérico)
             window.location.href = lp.recurso_url_entrega;
           }
         }, 2000);
