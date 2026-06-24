@@ -1,6 +1,8 @@
 
 export type PillarId = 'prof-paulo' | 'consultoria-imobiliaria' | '4050oumais' | 'academia-do-gas';
 
+declare module 'mammoth';
+
 export interface Article {
   id: string;
   title: string;

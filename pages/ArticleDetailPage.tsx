@@ -151,7 +151,7 @@ const ArticleDetailPage: React.FC<Props> = ({ articleId }) => {
       <article style={{ maxWidth: 760, margin: '0 auto', padding: '0 5vw 6rem' }}>
         <div
           className="article-content"
-          dangerouslySetInnerHTML={{ __html: article.content }}
+          dangerouslySetInnerHTML={{ __html: (article.content || '').replace(/&nbsp;/g, ' ') }}
         />
 
         {article.tags && article.tags.length > 0 && (
@@ -193,18 +193,6 @@ const ArticleDetailPage: React.FC<Props> = ({ articleId }) => {
         <a href="#/conteudo" className="btn-ghost-ink">← Ver todos os artigos</a>
       </div>
 
-      <style>{`
-        .article-content { font-size: .95rem; line-height: 1.85; color: var(--ink-2); }
-        .article-content h2 { font-family: var(--fd); font-size: 1.5rem; font-weight: 700; color: var(--ink); margin: 2.5rem 0 1rem; line-height: 1.3; }
-        .article-content h3 { font-family: var(--fd); font-size: 1.2rem; font-weight: 700; color: var(--ink); margin: 2rem 0 .8rem; }
-        .article-content p { margin-bottom: 1.4rem; }
-        .article-content ul, .article-content ol { padding-left: 1.5rem; margin-bottom: 1.4rem; }
-        .article-content li { margin-bottom: .5rem; }
-        .article-content blockquote { border-left: 3px solid var(--gold); padding-left: 1.2rem; margin: 2rem 0; font-family: var(--fd); font-style: italic; font-size: 1.1rem; color: var(--navy); }
-        .article-content a { color: var(--gold); text-decoration: underline; }
-        .article-content img { max-width: 100%; height: auto; margin: 2rem 0; }
-        .article-content strong { color: var(--ink); font-weight: 700; }
-      `}</style>
     </main>
   );
 };

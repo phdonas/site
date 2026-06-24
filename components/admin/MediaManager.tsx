@@ -1,4 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import ReactQuill from 'react-quill-new';
+import 'react-quill-new/dist/quill.snow.css';
+import * as mammoth from 'mammoth';
+import { marked } from 'marked';
 import { collection, getDocs, doc, setDoc, deleteDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../../services/firebase';
 import {
@@ -87,6 +91,41 @@ const ArtigosManager: React.FC = () => {
   const [editing, setEditing] = useState<any | null>(null);
   const [isNew, setIsNew] = useState(false);
   const [search, setSearch] = useState('');
+  const [showPreview, setShowPreview] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const mdInputRef = useRef<HTMLInputElement>(null);
+
+  const handleMarkdownImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !editing) return;
+    setLoading(true);
+    try {
+      const text = await file.text();
+      const html = await marked.parse(text);
+      setEditing((prev: any) => ({ ...prev, conteudo: (prev.conteudo || '') + html }));
+    } catch (err) {
+      alert('Erro ao importar arquivo Markdown.');
+      console.error(err);
+    }
+    setLoading(false);
+    if (mdInputRef.current) mdInputRef.current.value = '';
+  };
+
+  const handleWordImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !editing) return;
+    setLoading(true);
+    try {
+      const arrayBuffer = await file.arrayBuffer();
+      const result = await mammoth.convertToHtml({ arrayBuffer });
+      setEditing((prev: any) => ({ ...prev, conteudo: (prev.conteudo || '') + result.value }));
+    } catch (err) {
+      alert('Erro ao importar arquivo do Word.');
+      console.error(err);
+    }
+    setLoading(false);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
 
   useEffect(() => { doFetch(); }, []);
 
@@ -250,12 +289,90 @@ const ArtigosManager: React.FC = () => {
             <input style={aS.input} value={editing.thumbnail_alt || ''} onChange={e => f('thumbnail_alt', e.target.value)} />
           </div>
           <div style={{ marginBottom: '1rem' }}>
-            <label style={aS.label}>Conteúdo</label>
-            <textarea style={{ ...aS.textarea, minHeight: 200 }} value={editing.conteudo || ''} onChange={e => f('conteudo', e.target.value)} placeholder="Conteúdo do artigo..." />
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '.5rem' }}>
+              <label style={{ ...aS.label, marginBottom: 0 }}>Conteúdo</label>
+              <div style={{ display: 'flex', gap: '.5rem' }}>
+                <button 
+                  type="button"
+                  style={aS.btnSecondary} 
+                  onClick={() => mdInputRef.current?.click()}
+                  disabled={loading}
+                >
+                  Importar .md
+                </button>
+                <input 
+                  type="file" 
+                  accept=".md,.markdown" 
+                  ref={mdInputRef} 
+                  onChange={handleMarkdownImport} 
+                  style={{ display: 'none' }} 
+                />
+                <button 
+                  type="button"
+                  style={aS.btnSecondary} 
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={loading}
+                >
+                  Importar do Word (.docx)
+                </button>
+                <input 
+                  type="file" 
+                  accept=".docx" 
+                  ref={fileInputRef} 
+                  onChange={handleWordImport} 
+                  style={{ display: 'none' }} 
+                />
+              </div>
+            </div>
+            <ReactQuill 
+              theme="snow" 
+              value={editing.conteudo || ''} 
+              onChange={val => f('conteudo', val)} 
+              style={{ background: '#fff' }}
+              modules={{
+                toolbar: [
+                  [{ 'font': [] }, { 'size': [] }],
+                  [{ 'header': [2, 3, 4, false] }],
+                  ['bold', 'italic', 'underline', 'strike'],
+                  [{ 'color': [] }, { 'background': [] }],
+                  [{ 'list': 'ordered'}, { 'list': 'bullet' }, { 'indent': '-1'}, { 'indent': '+1' }],
+                  [{ 'align': [] }],
+                  ['link', 'image', 'video', 'blockquote', 'table'],
+                  ['clean']
+                ],
+                table: true
+              }}
+            />
           </div>
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '.6rem' }}>
             <button style={aS.btnSecondary} onClick={() => { setEditing(null); setIsNew(false); }}>Cancelar</button>
+            <button style={aS.btnSecondary} onClick={() => setShowPreview(true)}><Eye size={13} /> Pré-visualizar</button>
             <button style={aS.btnPrimary} onClick={handleSave}><Save size={13} /> Salvar Artigo</button>
+          </div>
+        </div>
+      )}
+
+      {/* Preview Modal */}
+      {showPreview && editing && (
+        <div className="modal-overlay" style={{ zIndex: 9999 }}>
+          <div style={{ background: 'var(--cream)', width: '100%', maxWidth: 860, height: '90vh', display: 'flex', flexDirection: 'column', borderRadius: '4px', overflow: 'hidden' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem', borderBottom: '1px solid var(--rule)', background: 'var(--white)' }}>
+              <span style={{ fontFamily: 'var(--fd)', fontSize: '1.2rem', fontWeight: 700, color: 'var(--ink)' }}>Pré-visualização do Artigo</span>
+              <button style={aS.btnSecondary} onClick={() => setShowPreview(false)}><X size={14} /> Voltar à Edição</button>
+            </div>
+            <div style={{ padding: '3rem 5vw 6rem', overflowY: 'auto', flex: 1 }}>
+              <div style={{ maxWidth: 760, margin: '0 auto' }}>
+                <h1 style={{ fontFamily: 'var(--fd)', fontSize: 'clamp(2rem, 4vw, 3.2rem)', fontWeight: 700, lineHeight: 1.15, color: 'var(--ink)', letterSpacing: '-.02em', marginBottom: '1.5rem' }}>
+                  {editing.titulo || 'Sem Título'}
+                </h1>
+                {editing.thumbnail_url && (
+                  <div style={{ aspectRatio: '16/9', overflow: 'hidden', background: 'var(--navy)', marginBottom: '2rem' }}>
+                    <img src={editing.thumbnail_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  </div>
+                )}
+                <div className="article-content" dangerouslySetInnerHTML={{ __html: (editing.conteudo || '').replace(/&nbsp;/g, ' ') }} />
+              </div>
+            </div>
           </div>
         </div>
       )}
