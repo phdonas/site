@@ -399,12 +399,12 @@ const CursosPage: React.FC = () => {
           <ScrollReveal>
             <div className="eyebrow" style={{ justifyContent: 'center', marginBottom: '1.2rem' }}>Plataforma de Cursos</div>
             <h2 style={{ fontFamily: 'var(--fd)', fontSize: 'clamp(1.6rem, 3vw, 2.2rem)', fontWeight: 700, color: 'var(--ink)', letterSpacing: '-.02em', marginBottom: '1rem' }}>
-              Área do Aluno — Em breve
+              PHD Academy — Área do Aluno
             </h2>
             <p style={{ fontSize: '.9rem', color: 'var(--ink-3)', lineHeight: 1.75, maxWidth: 420, margin: '0 auto 2.5rem' }}>
-              Uma plataforma dedicada com todos os materiais, aulas gravadas e ferramentas exclusivas. Cadastre-se para ser avisado.
+              Uma plataforma dedicada com todos os seus cursos, aulas gravadas, materiais de apoio e ferramentas exclusivas.
             </p>
-            <a href="#/area-do-aluno" className="btn-ghost-ink">Quero ser avisado →</a>
+            <a href="https://aluno.phdonassolo.com/login" target="_blank" rel="noopener noreferrer" className="btn-ghost-ink">Acessar a plataforma →</a>
           </ScrollReveal>
         </div>
       </section>
