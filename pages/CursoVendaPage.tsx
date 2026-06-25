@@ -241,7 +241,7 @@ const CursoVendaPage: React.FC<Props> = ({ slug }) => {
             </h1>
 
             {curso.objetivos && (
-              <div style={{ fontSize: '1.5rem', color: 'rgba(243,239,230,.55)', lineHeight: 1.75, maxWidth: 560, marginBottom: '2rem' }}>
+              <div className="rich-text-dark" style={{ fontSize: '1.5rem', color: 'rgba(243,239,230,.55)', lineHeight: 1.75, maxWidth: 560, marginBottom: '2rem' }}>
                 <FormattedText text={curso.objetivos} />
               </div>
             )}

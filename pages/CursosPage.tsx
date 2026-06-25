@@ -11,7 +11,7 @@ type FiltroTipo = typeof TIPOS[number];
 
 // ── Card LMS (Supabase) ───────────────────────────────────────────────────────
 
-const tipoLabel: Record<string, string> = { lms: 'Plataforma Própria', udemy: 'Udemy', espm: 'ESPM' };
+const tipoLabel: Record<string, string> = { lms: 'PHD Academy', udemy: 'Udemy', espm: 'ESPM' };
 
 const CursoCard: React.FC<{ curso: Curso; delay: 1 | 2 | 3 }> = ({ curso, delay }) => {
   const href = `#/curso/${curso.slug}`;
@@ -66,11 +66,14 @@ const CursoCard: React.FC<{ curso: Curso; delay: 1 | 2 | 3 }> = ({ curso, delay 
             {curso.titulo}
           </h3>
 
-          {curso.objetivos && (
-            <p style={{ fontSize: '.8rem', color: 'rgba(243,239,230,.35)', lineHeight: 1.6, flexGrow: 1 }}>
-              {curso.objetivos.substring(0, 120)}{curso.objetivos.length > 120 ? '…' : ''}
-            </p>
-          )}
+          {curso.objetivos && (() => {
+            const limpo = curso.objetivos.replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&');
+            return (
+              <p style={{ fontSize: '.8rem', color: 'rgba(243,239,230,.35)', lineHeight: 1.6, flexGrow: 1, wordBreak: 'break-word' }}>
+                {limpo.substring(0, 120)}{limpo.length > 120 ? '…' : ''}
+              </p>
+            );
+          })()}
 
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 'auto', paddingTop: '.8rem', borderTop: '1px solid rgba(243,239,230,.06)' }}>
             <div>
@@ -328,7 +331,7 @@ const CursosPage: React.FC = () => {
           ) : (
             <>
               {showLMS && cursosLMS.length > 0 && (
-                <Section eyebrow="Plataforma própria · phdonassolo.com">
+                <Section eyebrow="PHD Academy · phdonassolo.com">
                   {cursosLMS.map((c, i) => <CursoCard key={c.id} curso={c} delay={((i % 3) + 1) as 1 | 2 | 3} />)}
                 </Section>
               )}

@@ -696,3 +696,14 @@ body::before {
 .article-content a { color: var(--gold); text-decoration: underline; }
 .article-content img { max-width: 100%; height: auto; margin: 2rem 0; }
 .article-content strong { color: var(--ink); font-weight: 700; }
+
+/* ── RICH TEXT DARK (For course details) ── */
+.rich-text-dark p { margin-bottom: 1.2rem; white-space: normal; word-break: normal; overflow-wrap: break-word; }
+.rich-text-dark p:empty { min-height: 1.5em; }
+.rich-text-dark p:last-child { margin-bottom: 0; }
+.rich-text-dark ul, .rich-text-dark ol { padding-left: 1.5rem; margin-bottom: 1.2rem; white-space: normal; overflow-wrap: break-word; list-style-position: outside; }
+.rich-text-dark ul { list-style-type: disc; }
+.rich-text-dark ol { list-style-type: decimal; }
+.rich-text-dark li { margin-bottom: .4rem; }
+.rich-text-dark strong, .rich-text-dark b { color: rgba(243,239,230,1); font-weight: 700; }
+.rich-text-dark a { color: var(--gold); text-decoration: underline; }
