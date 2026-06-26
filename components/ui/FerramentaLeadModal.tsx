@@ -43,7 +43,13 @@ export const FerramentaLeadModal: React.FC<Props> = ({ ferramenta, onClose }) =>
       return;
     }
 
-    const url = ferramenta.url_entrega || ferramenta.arquivo_url;
+    let url = ferramenta.url_entrega || ferramenta.arquivo_url;
+    
+    // Usa o proxy da area-do-aluno para evitar download forçado no Supabase
+    if (url && url.includes('supabase.co/storage/v1/object/public/')) {
+      url = `https://aluno.phdonassolo.com/api/proxy/${url.split('/object/public/')[1]}`;
+    }
+
     if (url) {
       if (ferramenta.tipo_entrega === 'download') {
         const a = document.createElement('a');
